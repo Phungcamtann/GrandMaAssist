@@ -12,6 +12,7 @@
 - Dương Hoàng Sâm
 - Phạm Thiên Long
 - Nguyễn Duy Thành Tài
+  
 Ứng dụng tập trung giải quyết ba vấn đề:
 
 - Người lớn tuổi khó tìm được công việc phù hợp về địa điểm, thời gian và yêu cầu công việc.
