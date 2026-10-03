@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">GrandMaAssist</string>
+    <string name="logo_title">GMA</string>
+    <string name="logo_subtitle">ImageView</string>
+    <string name="app_title">GrandMa Assist</string>
+    <string name="login_subtitle">Tìm việc phù hợp với thời gian và khu vực của bạn</string>
+    <string name="btn_login_google">Đăng nhập bằng Google</string>
+    <string name="login_disclaimer">Khi đăng nhập, bạn đồng ý sử dụng tài khoản Google để tiếp tục.</string>
+    <string name="btn_view_jobs">Xem việc làm</string>
 </resources>
