@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">GrandMaAssist</string>
+
+    <string name="app_name">TimViecApp</string>
+
+    <string-array name="danh_muc_array">
+        <item>Chăm sóc</item>
+        <item>Giúp việc</item>
+        <item>Phụ bếp</item>
+        <item>Trông trẻ</item>
+    </string-array>
+
+    <string-array name="khu_vuc_array">
+        <item>Bình Thạnh</item>
+        <item>Phú Nhuận</item>
+        <item>TP. Thủ Đức</item>
+        <item>Quận 1</item>
+        <item>Quận 3</item>
+    </string-array>
+
 </resources>
