@@ -1,0 +1,13 @@
+digraph architecture {graph [fontname="Arial", bgcolor="transparent", pad="0.2", nodesep="0.4", ranksep="0.65", splines=polyline]; node [fontname="Arial", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f2f8f4", color="#8caf9a", margin="0.15,0.12"]; edge [fontname="Arial", fontsize=10, color="#668071", arrowsize=0.7]; rankdir=LR;
+ app[label="Android Java
+XML + ViewModel",fillcolor="#185b3e",fontcolor=white]; repo[label="Repository"];
+ local[label="SQLite
+Tin công khai đã tải",shape=cylinder]; auth[label="Firebase Authentication
+OTP / Google"];
+ commands[label="Dịch vụ nghiệp vụ tin cậy
+Quyền · Version · Transaction"];
+ db[label="Cloud Firestore
+Dữ liệu + lịch sử",shape=cylinder]; sim[label="Bộ mô phỏng thanh toán
+Không có tiền thật",fillcolor="#fff4da",color="#c9a14b"];
+ tts[label="TTS / âm thanh cục bộ"]; app->repo;app->tts; repo->local;repo->auth;repo->commands;
+ repo->db[label="Đọc theo Rules"];commands->db[label="Ghi trạng thái / tiền"];commands->sim; }

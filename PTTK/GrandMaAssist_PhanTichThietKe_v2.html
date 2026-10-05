@@ -1,0 +1,3242 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GrandMa Assist — Phân tích và thiết kế 2.0</title><style>
+:root{--green:#185b3e;--ink:#20302a;--muted:#607168;--line:#d8e4db;--wash:#f1f7f2}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:#f7f9f6;font:16px/1.72 "Segoe UI",Arial,sans-serif}
+aside{position:fixed;inset:0 auto 0 0;width:260px;overflow:auto;background:#163e2c;color:white;padding:28px 22px}
+.brand{font-weight:750;font-size:23px;line-height:1.25;margin-bottom:8px}.version{font-size:12px;letter-spacing:.07em;color:#bfd7c7;margin-bottom:22px}
+nav a{display:block;color:#e4eee7;font-size:13px;line-height:1.5;text-decoration:none;padding:7px 0;border-bottom:1px solid #ffffff15}nav a:hover{color:white;text-decoration:underline}
+main{margin-left:260px;padding:38px 48px 80px;max-width:1520px}.toolbar{display:flex;align-items:center;gap:16px;margin-bottom:26px;flex-wrap:wrap;font-size:13px}.toolbar a{color:var(--green)}button{background:var(--green);color:white;border:0;padding:10px 18px;border-radius:8px;font:inherit;cursor:pointer}
+article{background:white;padding:42px 48px;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 40px #163e2c06}
+h1{font-size:38px;letter-spacing:.04em;color:var(--green);line-height:1.2;margin:0 0 12px}h2{font-size:25px;line-height:1.4;color:var(--green);margin:42px 0 20px;padding-top:12px;border-top:2px solid var(--line);scroll-margin-top:24px}h3{font-size:20px;line-height:1.45;margin:29px 0 14px}h4{font-size:17px;margin:24px 0 8px}p{margin:13px 0}li{margin:6px 0}a{color:#17643f;overflow-wrap:anywhere}
+blockquote{border-left:5px solid #61936f;margin:26px 0;padding:12px 20px;background:var(--wash);border-radius:0 8px 8px 0}blockquote p{margin:6px 0}
+.table-wrap{overflow-x:auto;margin:19px 0}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55}th{background:var(--green);color:white;text-align:left}td,th{padding:11px 13px;border:1px solid var(--line);vertical-align:top}td{min-width:85px;overflow-wrap:anywhere}tr:nth-child(even) td{background:#f6f9f6}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eff4f0;border:1px solid var(--line);border-radius:8px;padding:17px;font-size:13px;line-height:1.6}code{font-family:Consolas,monospace}p code,td code{background:var(--wash);padding:2px 4px}
+figure{margin:24px 0;border:1px solid var(--line);border-radius:10px;padding:18px;background:#fbfdfb}.figure-scroll{overflow-x:auto}figure svg{width:100%;height:auto;display:block}figcaption{font-size:13px;color:var(--muted);text-align:center;padding-top:12px}.source{margin:10px 0;color:var(--muted);font-size:13px}.source summary{cursor:pointer;padding:10px 0}.ref{font-size:12px}footer{color:var(--muted);font-size:13px;padding-top:24px}
+@media(max-width:1000px){aside{position:static;width:auto;max-height:300px}main{margin:0;padding:22px}article{padding:25px}nav{columns:2}h1{font-size:30px}}
+@media(max-width:600px){nav{columns:1}main{padding:12px}article{padding:20px 15px}h2{font-size:22px}.toolbar{font-size:12px}}
+@media print{body{background:white;font-size:10pt}aside,.toolbar,.source{display:none}main{margin:0;padding:0;max-width:none}article{padding:0;border:0;box-shadow:none}h1{font-size:28pt}h2{font-size:17pt;break-after:avoid}h3,h4{break-after:avoid}table{font-size:8.5pt}th,td{padding:6px}thead{display:table-header-group}tr{break-inside:avoid}figure{break-inside:avoid}a{color:inherit}.table-wrap{overflow:visible}pre{font-size:8pt}@page{size:A4;margin:17mm}}
+</style></head><body><aside><div class="brand">GrandMa Assist</div><div class="version">THIẾT KẾ HỆ THỐNG · V2.0</div><nav><a href="#section-2">Bản phân tích và thiết kế hệ thống — phiên bản hợp nhất 2.0</a><a href="#section-3">1. Tóm tắt hệ thống và quyết định đã chốt</a><a href="#section-4">2. Bài toán, mục tiêu và đối tượng</a><a href="#section-8">3. Thuật ngữ và ranh giới hệ thống</a><a href="#section-9">4. Tác nhân và phân quyền nghiệp vụ</a><a href="#section-12">5. Yêu cầu chức năng và sơ đồ phân rã</a><a href="#section-15">6. Thiết kế trải nghiệm cho người lớn tuổi</a><a href="#section-20">7. Yêu cầu responsive và ngoại tuyến</a><a href="#section-23">8. Danh sách Use Case và hướng dẫn vẽ</a><a href="#section-38">9. Quy tắc nghiệp vụ thống nhất</a><a href="#section-39">10. Mô hình trạng thái</a><a href="#section-43">11. Chính sách tiền công, phí và duy trì hệ thống</a><a href="#section-47">12. Mô hình lớp nghiệp vụ và từ điển dữ liệu</a><a href="#section-56">13. Thiết kế Firestore và SQLite</a><a href="#section-60">14. Kiến trúc và trách nhiệm xử lý</a><a href="#section-66">15. Ma trận quyền và bảo vệ dữ liệu</a><a href="#section-67">16. Danh sách màn hình và điều hướng</a><a href="#section-68">17. Sequence và activity bổ trợ</a><a href="#section-71">18. Tiêu chí nghiệm thu và kiểm thử</a><a href="#section-72">19. Truy vết yêu cầu — chức năng — lớp — kiểm thử</a><a href="#section-73">20. Phạm vi còn mở và nguyên tắc thay đổi</a><a href="#section-74">21. Nguồn tham khảo chính thức</a><a href="#section-75">Phụ lục A. Cách sử dụng bộ tài liệu</a></nav></aside><main><div class="toolbar"><button onclick="window.print()">In tài liệu</button><a href="GrandMaAssist_PhanTichThietKe_v2.md">Bản Markdown</a><a href="diagrams/use-cases-full.puml">Nguồn use case đầy đủ</a><span>04/10/2026 · Không có tiền thật</span></div><article><h1 id="section-1">GRANDMA ASSIST</h1><h2 id="section-2">Bản phân tích và thiết kế hệ thống — phiên bản hợp nhất 2.0</h2><p><strong>Ngày cập nhật:</strong> 04/10/2026<br><strong>Loại tài liệu:</strong> Đặc tả phân tích và thiết kế cho đồ án phát triển ứng dụng mobile.<br><strong>Phạm vi:</strong> Android Java · Firebase · người nghỉ hưu · tìm việc có hướng dẫn · OTP thật · thanh toán mô phỏng theo ca.<br><strong>Trạng thái:</strong> Hợp nhất các quyết định đã được nhóm thống nhất; những tham số vận hành bổ sung được đánh dấu là đề xuất. Không bao gồm kế hoạch theo tuần, mã ứng dụng hay kết quả khảo sát/kiểm thử đã thực hiện.</p>
+<blockquote>
+<p>Điểm phân biệt bắt buộc: OTP thật xác minh khả năng sử dụng số điện thoại, không tự chứng minh danh tính theo căn cước. Xét duyệt danh tính bằng hồ sơ mẫu và mọi khoản tiền trong đồ án đều là mô phỏng.</p>
+</blockquote>
+<h2 id="section-3">1. Tóm tắt hệ thống và quyết định đã chốt</h2><p>GrandMa Assist kết nối người nghỉ hưu muốn làm việc bán thời gian với cá nhân, gia đình và doanh nghiệp nhỏ cần thuê người làm. Hệ thống hướng dẫn người tìm việc lựa chọn từng bước, hỗ trợ chữ lớn và giọng đọc; quản lý từ tin tuyển dụng đến đơn ứng tuyển, thỏa thuận từng ca, kết quả làm việc và phân bổ tiền mô phỏng.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Nội dung</th>
+<th>Quyết định của bản thiết kế</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Nền tảng</td>
+<td>Android Studio; ứng dụng Android viết bằng Java, giao diện XML Views</td>
+</tr>
+<tr>
+<td>SDK dự kiến</td>
+<td>minSdk 29; compileSdk 36; targetSdk 36; chốt phiên bản thư viện tương thích khi triển khai</td>
+</tr>
+<tr>
+<td>Backend và dữ liệu</td>
+<td>Firebase Authentication, Cloud Firestore; lớp xử lý tin cậy cho nghiệp vụ nhạy cảm</td>
+</tr>
+<tr>
+<td>Đăng nhập</td>
+<td>Số điện thoại và Google; liên kết phương thức về cùng UID khi người dùng sử dụng cả hai</td>
+</tr>
+<tr>
+<td>Xác minh số điện thoại</td>
+<td>Firebase OTP SMS thật khi nghiệm thu; số kiểm thử trong phát triển</td>
+</tr>
+<tr>
+<td>Danh tính</td>
+<td>Quy trình admin xét duyệt hồ sơ mẫu, gắn nhãn mô phỏng; không tuyên bố đối chiếu dữ liệu nhà nước</td>
+</tr>
+<tr>
+<td>Tìm việc</td>
+<td>Hướng dẫn từng bước; gợi ý theo quy tắc và giải thích lý do phù hợp</td>
+</tr>
+<tr>
+<td>Giao diện</td>
+<td>Chữ lớn, ít lựa chọn chính, xanh lá đậm làm màu nhấn; chữ và nền phải đủ tương phản</td>
+</tr>
+<tr>
+<td>Âm thanh</td>
+<td>Hướng dẫn bằng giọng đọc, có bật/tắt, dừng và nghe lại; không điều khiển bằng giọng nói</td>
+</tr>
+<tr>
+<td>Thiết bị</td>
+<td>Điện thoại và tablet, màn hình dọc/ngang, vùng ứng dụng thay đổi kích thước</td>
+</tr>
+<tr>
+<td>Ngoại tuyến</td>
+<td>SQLite lưu nội dung việc đã xem và lựa chọn tìm việc; không quyết toán tiền hay xác minh khi offline</td>
+</tr>
+<tr>
+<td>Đơn vị giao dịch</td>
+<td>Mỗi ca/buổi có thời gian, nhiệm vụ, địa điểm và tiền công riêng</td>
+</tr>
+<tr>
+<td>Thanh toán</td>
+<td>Mô phỏng cấp tiền trước ca, giữ tiền, chi trả và hoàn tiền</td>
+</tr>
+<tr>
+<td>Phí duy trì</td>
+<td>Người thuê trả thêm 10% trên tiền công được công nhận; người làm không bị trừ phí nền tảng</td>
+</tr>
+<tr>
+<td>Quản trị</td>
+<td>Trong cùng ứng dụng: duyệt tin, hồ sơ mẫu, báo cáo, tranh chấp và thống kê phí</td>
+</tr>
+<tr>
+<td>Ngoài phạm vi</td>
+<td>Chat, tiền thật, eKYC/VNeID thật, AI, GPS tính khoảng cách, quảng cáo, gói hội viên, đánh giá sao</td>
+</tr>
+</tbody></table></div>
+<p><strong>Điều kiện cần xác nhận với giảng viên:</strong> OTP thật đáp ứng xác minh số điện thoại. Nếu tiêu chí “chính chủ” yêu cầu đối chiếu danh tính thật thì quy trình hồ sơ mẫu chưa đáp ứng tiêu chí đó; cần đổi phương thức xác minh. Đây là giới hạn của phạm vi hiện tại, không phải kết quả xác minh đã đạt.</p>
+<h2 id="section-4">2. Bài toán, mục tiêu và đối tượng</h2><h3 id="section-5">2.1. Vấn đề cần giải quyết</h3><ul>
+<li>Quá nhiều bộ lọc, biểu mẫu và thông tin có thể gây khó khăn cho người ít quen công nghệ.</li>
+<li>Người tìm việc cần biết công việc có phù hợp khu vực, thời gian và khả năng thực hiện của mình hay không.</li>
+<li>Người thuê cần thông tin ứng viên và cách ghi nhận thỏa thuận rõ ràng.</li>
+<li>Việc chỉ trao đổi số điện thoại không tạo được lịch sử ca làm, kết quả hoặc căn cứ phân bổ tiền.</li>
+<li>Hệ thống cần mô hình thu phí và theo dõi chi phí để giải thích khả năng duy trì.</li>
+</ul>
+<h3 id="section-6">2.2. Mục tiêu</h3><ol>
+<li>Người dùng có thể tìm được danh sách việc phù hợp qua một chuỗi câu hỏi ngắn.</li>
+<li>Mỗi thao tác chính có chỉ dẫn rõ, dùng được khi tăng cỡ chữ hoặc xoay thiết bị.</li>
+<li>Tin tuyển dụng được kiểm duyệt; số liên hệ được xác minh; trạng thái xác minh không gây hiểu lầm.</li>
+<li>Hai bên xác nhận cùng một phiên bản thỏa thuận trước khi ca được cấp tiền.</li>
+<li>Mỗi khoản tiền mô phỏng có lịch sử, không bị ghi nhận hai lần và có thể đối chiếu tổng phân bổ.</li>
+<li>Xem lại nội dung đã tải khi mất mạng.</li>
+</ol>
+<h3 id="section-7">2.3. Đối tượng và giới hạn</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Đối tượng</th>
+<th>Nhu cầu thiết kế</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Người tìm việc khoảng 55–65+ tuổi</td>
+<td>Hạn chế gõ dài; chữ dễ đọc; lựa chọn từng bước; công việc phù hợp và tiền công dễ hiểu</td>
+</tr>
+<tr>
+<td>Cá nhân/gia đình tuyển dụng</td>
+<td>Đăng tin, chọn ứng viên, lập thỏa thuận và theo dõi từng ca</td>
+</tr>
+<tr>
+<td>Doanh nghiệp nhỏ</td>
+<td>Tương tự người thuê cá nhân; thông tin đơn vị tự khai báo, chưa xác minh tư cách đại diện doanh nghiệp</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td>Hàng đợi việc cần xử lý, lý do quyết định, lịch sử nghiệp vụ</td>
+</tr>
+</tbody></table></div>
+<p>Độ tuổi là định hướng thiết kế, không tự đặt thành điều kiện cấm đăng ký. Không mặc định mọi người lớn tuổi đều ít kỹ năng công nghệ: luôn có đường truy cập nhanh cho người đã quen. Các giả định trải nghiệm cần được kiểm chứng bằng khảo sát và thử nghiệm, không ghi trong báo cáo như dữ liệu nghiên cứu đã thu thập.</p>
+<h2 id="section-8">3. Thuật ngữ và ranh giới hệ thống</h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Thuật ngữ</th>
+<th>Định nghĩa</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tin tuyển dụng — JobPost</td>
+<td>Nhu cầu tìm người làm; có thể nhận nhiều đơn</td>
+</tr>
+<tr>
+<td>Đơn ứng tuyển — Application</td>
+<td>Đề nghị của một người tìm việc đối với một tin</td>
+</tr>
+<tr>
+<td>Đơn được chấp nhận</td>
+<td>Hai bên được kết nối; chưa có nghĩa đã chốt ca hoặc đã trả tiền</td>
+</tr>
+<tr>
+<td>Ca làm — WorkSession</td>
+<td>Một lần thực hiện cụ thể; chỉ có một người làm và một người thuê</td>
+</tr>
+<tr>
+<td>Thỏa thuận — AgreementSnapshot</td>
+<td>Phiên bản nhiệm vụ, địa điểm, lịch, tiền công và chính sách đã xác nhận cho một ca</td>
+</tr>
+<tr>
+<td>Cấp tiền — Funding</td>
+<td>Ghi nhận thanh toán mô phỏng đủ tiền công cộng phí dự kiến</td>
+</tr>
+<tr>
+<td>Giữ tiền — Held amount</td>
+<td>Phần tiền mô phỏng chưa được phân bổ; chưa là doanh thu</td>
+</tr>
+<tr>
+<td>Quyết toán — Settlement</td>
+<td>Chốt phần trả người làm, phí nền tảng và hoàn người thuê</td>
+</tr>
+<tr>
+<td>Báo cáo tin — Report</td>
+<td>Phản ánh nội dung tin, không phải tranh chấp tiền của ca</td>
+</tr>
+<tr>
+<td>Tranh chấp — Dispute</td>
+<td>Bất đồng về một ca làm, hủy ca hoặc phân bổ tiền</td>
+</tr>
+<tr>
+<td>Xác minh điện thoại</td>
+<td>Xác nhận nhận được OTP hoặc cơ chế xác minh hợp lệ của Firebase cho số liên hệ</td>
+</tr>
+<tr>
+<td>Xét duyệt danh tính mô phỏng</td>
+<td>Admin xử lý hồ sơ mẫu để minh họa quy trình; không chứng minh danh tính thật</td>
+</tr>
+</tbody></table></div>
+<p><strong>Hệ thống ngoài:</strong> Firebase Authentication và nhà cung cấp Google hỗ trợ đăng nhập; Android TTS cung cấp giọng đọc; trình quay số hỗ trợ gọi điện. Cổng thanh toán và nhà cung cấp eKYC thật không nằm trong bản đầu.</p>
+<h2 id="section-9">4. Tác nhân và phân quyền nghiệp vụ</h2><h3 id="section-10">4.1. Tác nhân</h3><ul>
+<li><strong>Khách:</strong> xem việc, sử dụng luồng gợi ý, xem dữ liệu công khai.</li>
+<li><strong>Người tìm việc — SEEKER:</strong> quản lý hồ sơ, ứng tuyển, xác nhận ca, báo hoàn thành, xem tiền công và gửi tranh chấp.</li>
+<li><strong>Người thuê — EMPLOYER:</strong> đăng tin, chọn ứng viên, đề xuất ca, cấp tiền mô phỏng, xác nhận kết quả.</li>
+<li><strong>Admin — ADMIN:</strong> kiểm duyệt và xử lý nghiệp vụ được giao; không tự động có quyền sửa mọi dữ liệu.</li>
+<li><strong>Dịch vụ hệ thống:</strong> xác minh thông tin tin cậy, xử lý giao dịch, thời hạn và ghi lịch sử; không phải tài khoản người dùng.</li>
+</ul>
+<p>Mỗi tài khoản thông thường có một vai trò cố định trong bản đầu. Admin được cấp riêng; người dùng không thể tự chọn admin.</p>
+<h3 id="section-11">4.2. Quyền theo mức xác minh</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mức</th>
+<th>Người tìm việc</th>
+<th>Người thuê</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Khách</td>
+<td>Xem việc và trả lời câu hỏi tìm việc</td>
+<td>Xem nội dung công khai</td>
+</tr>
+<tr>
+<td>Đăng nhập, chưa xác minh số liên hệ</td>
+<td>Điền hồ sơ, lưu lựa chọn tìm việc</td>
+<td>Điền hồ sơ, soạn nháp cục bộ</td>
+</tr>
+<tr>
+<td>Số điện thoại đã xác minh, hồ sơ đủ</td>
+<td>Lưu việc, ứng tuyển, rút đơn, báo cáo tin</td>
+<td>Gửi tin duyệt, xử lý đơn</td>
+</tr>
+<tr>
+<td>Hồ sơ danh tính mẫu được duyệt</td>
+<td>Xác nhận thỏa thuận và tham gia ca mô phỏng</td>
+<td>Lập/xác nhận ca và cấp tiền mô phỏng</td>
+</tr>
+</tbody></table></div>
+<p>Giới hạn quyền giao dịch mới không được che lịch sử, chặn báo vấn đề hoặc làm mất khoản tiền đang chờ xử lý. Đổi thông tin quan trọng có thể yêu cầu xác minh lại, nhưng ca và số tiền đang tồn tại phải tiếp tục có đường xử lý hỗ trợ.</p>
+<h2 id="section-12">5. Yêu cầu chức năng và sơ đồ phân rã</h2><h3 id="section-13">5.1. Danh sách chức năng</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mã</th>
+<th>Nhóm</th>
+<th>Yêu cầu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>F01</td>
+<td>Tài khoản</td>
+<td>Đăng nhập bằng số điện thoại/Google, đăng xuất</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>Tài khoản</td>
+<td>Xác minh số liên hệ bằng OTP thật; liên kết phương thức đăng nhập</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>Tài khoản</td>
+<td>Chọn vai trò lần đầu, cập nhật hồ sơ theo vai trò</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>Danh tính</td>
+<td>Gửi hồ sơ mẫu, xem tiến độ, bổ sung và gửi lại</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>Danh tính</td>
+<td>Admin duyệt/từ chối/yêu cầu bổ sung, lưu lý do</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>Tìm việc</td>
+<td>Hỏi từng bước về loại việc, khu vực, thời gian và yêu cầu muốn tránh</td>
+</tr>
+<tr>
+<td>F07</td>
+<td>Tìm việc</td>
+<td>Lưu/sửa lựa chọn, gợi ý theo quy tắc, giải thích lý do phù hợp</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>Tìm việc</td>
+<td>Xem tất cả, lọc, phân trang, xem chi tiết</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>Tìm việc</td>
+<td>Lưu/bỏ lưu việc quan tâm</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Ứng tuyển</td>
+<td>Gửi đơn với snapshot hồ sơ và tin, không gửi trùng</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Ứng tuyển</td>
+<td>Xem trạng thái, rút đơn đang chờ</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Tuyển dụng</td>
+<td>Tạo/sửa/đóng tin và gửi kiểm duyệt</td>
+</tr>
+<tr>
+<td>F13</td>
+<td>Tuyển dụng</td>
+<td>Xem ứng viên, chấp nhận/từ chối đơn</td>
+</tr>
+<tr>
+<td>F14</td>
+<td>Kiểm duyệt</td>
+<td>Duyệt/từ chối/ẩn tin, có lý do theo quy tắc</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>Báo cáo</td>
+<td>Gửi, xem và xử lý báo cáo tin</td>
+</tr>
+<tr>
+<td>F16</td>
+<td>Ca làm</td>
+<td>Đề xuất thỏa thuận, xem trước, sửa trước khi khóa</td>
+</tr>
+<tr>
+<td>F17</td>
+<td>Ca làm</td>
+<td>Hai bên xác nhận cùng phiên bản thỏa thuận</td>
+</tr>
+<tr>
+<td>F18</td>
+<td>Ca làm</td>
+<td>Ghi nhận bắt đầu, báo hoàn thành và xác nhận kết quả</td>
+</tr>
+<tr>
+<td>F19</td>
+<td>Ca làm</td>
+<td>Yêu cầu hủy, đồng ý hủy hoặc chuyển tranh chấp</td>
+</tr>
+<tr>
+<td>F20</td>
+<td>Thanh toán</td>
+<td>Tính phí 10% từ người thuê và hiển thị tổng trước xác nhận</td>
+</tr>
+<tr>
+<td>F21</td>
+<td>Thanh toán</td>
+<td>Cấp/giữ tiền mô phỏng; theo dõi kết quả giao dịch</td>
+</tr>
+<tr>
+<td>F22</td>
+<td>Thanh toán</td>
+<td>Chi trả, hoàn tiền, ghi nhận phí và lịch sử mô phỏng</td>
+</tr>
+<tr>
+<td>F23</td>
+<td>Tranh chấp</td>
+<td>Gửi vấn đề, cung cấp giải trình, admin chốt phân bổ</td>
+</tr>
+<tr>
+<td>F24</td>
+<td>Liên hệ</td>
+<td>Mở trình quay số từ thông tin được phép xem</td>
+</tr>
+<tr>
+<td>F25</td>
+<td>Tiếp cận</td>
+<td>Giọng đọc theo yêu cầu, bật/tắt, dừng, nghe lại</td>
+</tr>
+<tr>
+<td>F26</td>
+<td>Ngoại tuyến</td>
+<td>Lưu/xem lại tin đã tải; lưu câu trả lời hướng dẫn</td>
+</tr>
+<tr>
+<td>F27</td>
+<td>Quản trị</td>
+<td>Hàng đợi quá hạn, hồ sơ, báo cáo, tranh chấp</td>
+</tr>
+<tr>
+<td>F28</td>
+<td>Thống kê</td>
+<td>Tổng tiền cấp, tiền đang giữ, đã chi/hoàn, doanh thu phí mô phỏng</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-14">5.2. Sơ đồ phân rã chức năng</h3><figure data-diagram="functions"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: functions Pages: 1 -->
+<svg width="354pt" height="623pt"
+ viewBox="0.00 0.00 354.00 623.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 608.88)">
+<title>functions</title>
+<!-- app -->
+<g id="node1" class="node">
+<title>app</title>
+<path fill="#185b3e" stroke="#8caf9a" d="M94.96,-315.24C94.96,-315.24 12,-315.24 12,-315.24 6,-315.24 0,-309.24 0,-303.24 0,-303.24 0,-291.24 0,-291.24 0,-285.24 6,-279.24 12,-279.24 12,-279.24 94.96,-279.24 94.96,-279.24 100.96,-279.24 106.96,-285.24 106.96,-291.24 106.96,-291.24 106.96,-303.24 106.96,-303.24 106.96,-309.24 100.96,-315.24 94.96,-315.24"/>
+<text xml:space="preserve" text-anchor="middle" x="53.48" y="-293.64" font-family="Arial" font-size="12.00" fill="white">GrandMa Assist</text>
+</g>
+<!-- account -->
+<g id="node2" class="node">
+<title>account</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M304.95,-594.48C304.95,-594.48 173.97,-594.48 173.97,-594.48 167.97,-594.48 161.97,-588.48 161.97,-582.48 161.97,-582.48 161.97,-546 161.97,-546 161.97,-540 167.97,-534 173.97,-534 173.97,-534 304.95,-534 304.95,-534 310.95,-534 316.95,-540 316.95,-546 316.95,-546 316.95,-582.48 316.95,-582.48 316.95,-588.48 310.95,-594.48 304.95,-594.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-575.04" font-family="Arial" font-size="12.00">Tài khoản và xác minh</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-560.64" font-family="Arial" font-size="12.00">Đăng nhập · OTP thật</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-546.24" font-family="Arial" font-size="12.00">Hồ sơ · Danh tính mẫu</text>
+</g>
+<!-- app&#45;&gt;account -->
+<g id="edge1" class="edge">
+<title>app&#45;&gt;account</title>
+<path fill="none" stroke="#668071" d="M62.62,-315.49C86.38,-368.75 153.96,-520.24 153.96,-520.24 153.96,-520.24 161.63,-524.23 172.34,-529.81"/>
+<polygon fill="#668071" stroke="#668071" points="171.09,-531.92 178.43,-532.98 173.35,-527.58 171.09,-531.92"/>
+</g>
+<!-- search -->
+<g id="node3" class="node">
+<title>search</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M305.61,-505.48C305.61,-505.48 173.31,-505.48 173.31,-505.48 167.31,-505.48 161.31,-499.48 161.31,-493.48 161.31,-493.48 161.31,-457 161.31,-457 161.31,-451 167.31,-445 173.31,-445 173.31,-445 305.61,-445 305.61,-445 311.61,-445 317.61,-451 317.61,-457 317.61,-457 317.61,-493.48 317.61,-493.48 317.61,-499.48 311.61,-505.48 305.61,-505.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-486.04" font-family="Arial" font-size="12.00">Tìm việc có hướng dẫn</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-471.64" font-family="Arial" font-size="12.00">4 câu hỏi · Lựa chọn</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-457.24" font-family="Arial" font-size="12.00">Gợi ý · Lý do phù hợp</text>
+</g>
+<!-- app&#45;&gt;search -->
+<g id="edge2" class="edge">
+<title>app&#45;&gt;search</title>
+<path fill="none" stroke="#668071" d="M68.1,-315.59C95.35,-352.29 153.96,-431.24 153.96,-431.24 153.96,-431.24 161.63,-435.23 172.34,-440.81"/>
+<polygon fill="#668071" stroke="#668071" points="171.09,-442.92 178.43,-443.98 173.35,-438.58 171.09,-442.92"/>
+</g>
+<!-- recruitment -->
+<g id="node4" class="node">
+<title>recruitment</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M300.29,-416.48C300.29,-416.48 178.63,-416.48 178.63,-416.48 172.63,-416.48 166.63,-410.48 166.63,-404.48 166.63,-404.48 166.63,-368 166.63,-368 166.63,-362 172.63,-356 178.63,-356 178.63,-356 300.29,-356 300.29,-356 306.29,-356 312.29,-362 312.29,-368 312.29,-368 312.29,-404.48 312.29,-404.48 312.29,-410.48 306.29,-416.48 300.29,-416.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-397.04" font-family="Arial" font-size="12.00">Tin và ứng tuyển</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-382.64" font-family="Arial" font-size="12.00">Đăng · Duyệt · Lọc</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-368.24" font-family="Arial" font-size="12.00">Gửi đơn · Chấp nhận</text>
+</g>
+<!-- app&#45;&gt;recruitment -->
+<g id="edge3" class="edge">
+<title>app&#45;&gt;recruitment</title>
+<path fill="none" stroke="#668071" d="M92.6,-315.68C114.25,-326.15 142.05,-339.6 167.56,-351.94"/>
+<polygon fill="#668071" stroke="#668071" points="166.31,-354.06 173.67,-354.9 168.44,-349.65 166.31,-354.06"/>
+</g>
+<!-- session -->
+<g id="node5" class="node">
+<title>session</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M312.96,-327.48C312.96,-327.48 165.96,-327.48 165.96,-327.48 159.96,-327.48 153.96,-321.48 153.96,-315.48 153.96,-315.48 153.96,-279 153.96,-279 153.96,-273 159.96,-267 165.96,-267 165.96,-267 312.96,-267 312.96,-267 318.96,-267 324.96,-273 324.96,-279 324.96,-279 324.96,-315.48 324.96,-315.48 324.96,-321.48 318.96,-327.48 312.96,-327.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-308.04" font-family="Arial" font-size="12.00">Thỏa thuận và ca</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-293.64" font-family="Arial" font-size="12.00">Chốt phiên bản · Bắt đầu</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-279.24" font-family="Arial" font-size="12.00">Hoàn thành · Hủy ca</text>
+</g>
+<!-- app&#45;&gt;session -->
+<g id="edge4" class="edge">
+<title>app&#45;&gt;session</title>
+<path fill="none" stroke="#668071" d="M107.2,-297.24C119.25,-297.24 132.4,-297.24 145.58,-297.24"/>
+<polygon fill="#668071" stroke="#668071" points="145.26,-299.69 152.26,-297.24 145.26,-294.79 145.26,-299.69"/>
+</g>
+<!-- payment -->
+<g id="node6" class="node">
+<title>payment</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M305.28,-238.48C305.28,-238.48 173.64,-238.48 173.64,-238.48 167.64,-238.48 161.64,-232.48 161.64,-226.48 161.64,-226.48 161.64,-190 161.64,-190 161.64,-184 167.64,-178 173.64,-178 173.64,-178 305.28,-178 305.28,-178 311.28,-178 317.28,-184 317.28,-190 317.28,-190 317.28,-226.48 317.28,-226.48 317.28,-232.48 311.28,-238.48 305.28,-238.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-219.04" font-family="Arial" font-size="12.00">Tiền và phí mô phỏng</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-204.64" font-family="Arial" font-size="12.00">Cấp · Giữ · Chi · Hoàn</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-190.24" font-family="Arial" font-size="12.00">Phí người thuê 10%</text>
+</g>
+<!-- app&#45;&gt;payment -->
+<g id="edge5" class="edge">
+<title>app&#45;&gt;payment</title>
+<path fill="none" stroke="#668071" d="M92.6,-278.8C114.25,-268.33 142.05,-254.88 167.56,-242.54"/>
+<polygon fill="#668071" stroke="#668071" points="168.44,-244.83 173.67,-239.58 166.31,-240.42 168.44,-244.83"/>
+</g>
+<!-- admin -->
+<g id="node7" class="node">
+<title>admin</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M298.95,-149.48C298.95,-149.48 179.97,-149.48 179.97,-149.48 173.97,-149.48 167.97,-143.48 167.97,-137.48 167.97,-137.48 167.97,-101 167.97,-101 167.97,-95 173.97,-89 179.97,-89 179.97,-89 298.95,-89 298.95,-89 304.95,-89 310.95,-95 310.95,-101 310.95,-101 310.95,-137.48 310.95,-137.48 310.95,-143.48 304.95,-149.48 298.95,-149.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-130.04" font-family="Arial" font-size="12.00">Quản trị</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-115.64" font-family="Arial" font-size="12.00">Báo cáo · Tranh chấp</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-101.24" font-family="Arial" font-size="12.00">Lịch sử · Thống kê</text>
+</g>
+<!-- app&#45;&gt;admin -->
+<g id="edge6" class="edge">
+<title>app&#45;&gt;admin</title>
+<path fill="none" stroke="#668071" d="M68.1,-278.89C95.35,-242.19 153.96,-163.24 153.96,-163.24 153.96,-163.24 161.63,-159.25 172.34,-153.67"/>
+<polygon fill="#668071" stroke="#668071" points="173.35,-155.9 178.43,-150.5 171.09,-151.56 173.35,-155.9"/>
+</g>
+<!-- support -->
+<g id="node8" class="node">
+<title>support</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M299.61,-60.48C299.61,-60.48 179.31,-60.48 179.31,-60.48 173.31,-60.48 167.31,-54.48 167.31,-48.48 167.31,-48.48 167.31,-12 167.31,-12 167.31,-6 173.31,0 179.31,0 179.31,0 299.61,0 299.61,0 305.61,0 311.61,-6 311.61,-12 311.61,-12 311.61,-48.48 311.61,-48.48 311.61,-54.48 305.61,-60.48 299.61,-60.48"/>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-41.04" font-family="Arial" font-size="12.00">Hỗ trợ sử dụng</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-26.64" font-family="Arial" font-size="12.00">Chữ lớn · Giọng đọc</text>
+<text xml:space="preserve" text-anchor="middle" x="239.46" y="-12.24" font-family="Arial" font-size="12.00">Gọi điện · Offline</text>
+</g>
+<!-- app&#45;&gt;support -->
+<g id="edge7" class="edge">
+<title>app&#45;&gt;support</title>
+<path fill="none" stroke="#668071" d="M62.62,-278.99C86.38,-225.73 153.96,-74.24 153.96,-74.24 153.96,-74.24 161.63,-70.25 172.34,-64.67"/>
+<polygon fill="#668071" stroke="#668071" points="173.35,-66.9 178.43,-61.5 171.09,-62.56 173.35,-66.9"/>
+</g>
+</g>
+</svg>
+</div><figcaption>Phân rã chức năng · <a href="diagrams/functions.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>flowchart TB
+    app[&quot;GrandMa Assist&quot;]
+    app --&gt; account[&quot;Tài khoản và xác minh&quot;]
+    app --&gt; search[&quot;Tìm việc có hướng dẫn&quot;]
+    app --&gt; recruitment[&quot;Tin và ứng tuyển&quot;]
+    app --&gt; session[&quot;Thỏa thuận và ca làm&quot;]
+    app --&gt; payment[&quot;Thanh toán và phí mô phỏng&quot;]
+    app --&gt; admin[&quot;Quản trị&quot;]
+    app --&gt; support[&quot;Hỗ trợ sử dụng&quot;]
+    account --&gt; accountDetail[&quot;Đăng nhập; OTP; hồ sơ; danh tính mẫu&quot;]
+    search --&gt; searchDetail[&quot;Câu hỏi; lưu lựa chọn; gợi ý; lọc; lưu việc&quot;]
+    recruitment --&gt; recruitmentDetail[&quot;Đăng và duyệt tin; gửi và xử lý đơn&quot;]
+    session --&gt; sessionDetail[&quot;Chốt phiên bản; bắt đầu; hoàn thành; hủy&quot;]
+    payment --&gt; paymentDetail[&quot;Cấp tiền; giữ tiền; chi trả; hoàn; phí 10%&quot;]
+    admin --&gt; adminDetail[&quot;Báo cáo; tranh chấp; lịch sử; thống kê&quot;]
+    support --&gt; supportDetail[&quot;Giọng đọc; gọi điện; xem offline&quot;]</code></pre></details><p>Responsive, bảo mật và khả năng đọc là yêu cầu phi chức năng, không phải các nghiệp vụ độc lập trong sơ đồ use case.</p>
+<h2 id="section-15">6. Thiết kế trải nghiệm cho người lớn tuổi</h2><h3 id="section-16">6.1. Trang chính người tìm việc</h3><p>Thứ tự ưu tiên: (1) việc cần xử lý ngay nếu có; (2) nút lớn <strong>Giúp tôi tìm việc</strong>; (3) <strong>Việc của tôi</strong>; (4) <strong>Nghe hướng dẫn/Trợ giúp</strong>. Khi chưa có ca hoặc yêu cầu xác nhận, nút tìm việc là nội dung nổi bật nhất.</p>
+<p>Mục <strong>Thêm</strong> chứa hồ sơ, việc đã lưu và cài đặt. Không giấu ca sắp tới, tiền công đang xử lý hoặc hỗ trợ vào menu khó phát hiện. <strong>Việc của tôi</strong> gom đơn ứng tuyển, ca làm và trạng thái tiền của từng ca, không yêu cầu người dùng hiểu một ví tiền riêng.</p>
+<h3 id="section-17">6.2. Luồng tìm việc từng bước</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Nội dung hiển thị</th>
+<th>Dữ liệu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Cô/chú muốn làm việc gì?</td>
+<td>Chọn một/nhiều categoryId; có Xem thêm và Chưa có ưu tiên</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Cô/chú muốn làm ở khu vực nào?</td>
+<td>Một/nhiều areaCode; gợi ý từ hồ sơ; cho bỏ qua</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Cô/chú rảnh lúc nào?</td>
+<td>Ngày trong tuần và ca sáng/chiều/tối; cho Linh hoạt</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Cô/chú muốn tránh yêu cầu nào?</td>
+<td>Mang vác nặng, đứng lâu, di chuyển nhiều; Không có yêu cầu riêng</td>
+</tr>
+<tr>
+<td>Kết thúc</td>
+<td>Tóm tắt lựa chọn và Xem việc phù hợp</td>
+<td>Cho sửa từng bước, không phải làm lại từ đầu</td>
+</tr>
+</tbody></table></div>
+<p>Một màn hình tập trung một câu hỏi; hiển thị Bước 1/4 và các nút Quay lại/Tiếp tục. Các lựa chọn “không có ưu tiên” loại trừ lựa chọn cụ thể tương ứng. Giữ câu trả lời khi quay lại hoặc xoay màn hình. Lần sau cho chọn <strong>Dùng lựa chọn lần trước</strong> hoặc <strong>Thay đổi lựa chọn</strong>. Có lối <strong>Xem tất cả việc</strong>.</p>
+<p>Nguyên tắc chia nhóm câu hỏi, chỉ báo tiến trình và cho bỏ qua phần tùy chọn được tham khảo từ hướng dẫn biểu mẫu nhiều bước của W3C; cần kiểm thử lại trong bối cảnh ứng dụng Android và người dùng của nhóm. <a class="ref" href="#source-6">[S6]</a></p>
+<p>Không hỏi thông tin bệnh tật. Các yêu cầu tránh phản ánh mong muốn người dùng, không phải kết luận y tế. Nhóm cần thử nghiệm cách xưng hô “cô/chú” với người dùng; nội dung phải nhất quán và có thể điều chỉnh.</p>
+<h3 id="section-18">6.3. Quy tắc gợi ý</h3><p><strong>Tập ứng viên:</strong> tin OPEN, chưa hết hạn, qua kiểm duyệt; lọc trên dữ liệu có cấu trúc.</p>
+<p><strong>Điều kiện bắt buộc:</strong> nếu có chọn khu vực thì chỉ nhận tin trong khu vực đó; lịch cố định phải nằm trong khoảng người dùng khai rảnh; loại các tin có yêu cầu người dùng muốn tránh. Tin thiếu mô tả yêu cầu thể lực không được xem như không có yêu cầu. Ca FLEXIBLE hoặc lịch chưa cụ thể hiển thị “Cần trao đổi lịch”, không khẳng định khớp hoàn toàn.</p>
+<p><strong>Xếp hạng đề xuất:</strong> cộng điểm cho danh mục được chọn, lịch khớp cụ thể và kỹ năng đã khai; hòa điểm thì ưu tiên tin mới. Trọng số ban đầu 50/30/20 là tham số thiết kế, không phải kết quả nghiên cứu. Nếu người dùng không khai một tiêu chí thì không trừ điểm do thiếu thông tin. Không hiển thị phần trăm phù hợp như một xác suất khoa học.</p>
+<p><strong>Giải thích:</strong> “Đúng khu vực đã chọn”, “Làm buổi sáng”, “Không yêu cầu mang vác nặng theo người đăng”. Không nói “cách nhà 2 km” vì chưa dùng GPS; không gợi ý “an toàn sức khỏe”.</p>
+<p><strong>Không có kết quả:</strong> nói rõ chưa có tin phù hợp; đề nghị nới một lựa chọn, người dùng phải đồng ý. Không tự bỏ điều kiện tránh. Kết quả offline chỉ xếp hạng trên tin đã tải; ghi rõ phạm vi. Trực tuyến cần lọc/tính thứ tự trên tập ứng viên hợp lệ trước khi phân trang, không gọi vài tin đầu tải về là “phù hợp nhất toàn hệ thống”.</p>
+<h3 id="section-19">6.4. Hình thức và âm thanh</h3><ul>
+<li>Giá trị khởi đầu để thử nghiệm: chữ nội dung 20sp, tiêu đề 26–28sp, vùng nút chính cao tối thiểu khoảng 56dp và được giãn theo chữ. Đây là đề xuất giao diện, không bảo đảm mọi người dùng đều phù hợp.</li>
+<li>Dùng xanh lá đậm làm màu nhấn, nền sáng, chữ tối; đặt mục tiêu tương phản chữ tối thiểu 4,5:1. Không dùng màu làm dấu hiệu duy nhất. <a class="ref" href="#source-7">[S7]</a></li>
+<li>Không cố định chiều cao khối văn bản; hỗ trợ font hệ thống lớn, TalkBack, thứ tự focus hợp lý và nhãn cho biểu tượng.</li>
+<li>Nút Nghe hướng dẫn, Dừng, Nghe lại luôn ở vị trí nhất quán. Mặc định không tự phát; người dùng có thể bật tự đọc các bước sau. Không phát nhạc nền.</li>
+<li>Có thể dùng TTS cho nội dung động, bản thu âm cục bộ cho câu hướng dẫn cố định. Giọng tiếng Việt và hỗ trợ offline cần kiểm tra trên thiết bị. <a class="ref" href="#source-8">[S8]</a></li>
+<li>Không đọc OTP hoặc dữ liệu liên hệ tự động. Khi đổi màn hình, dừng câu cũ; xoay màn hình không tự phát lại hoặc phát chồng. Tránh nói chồng TalkBack. Âm thanh không thay thế thao tác xác nhận.</li>
+</ul>
+<h2 id="section-20">7. Yêu cầu responsive và ngoại tuyến</h2><h3 id="section-21">7.1. Responsive/adaptive</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Không gian</th>
+<th>Bố cục</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hẹp, điện thoại dọc</td>
+<td>Một cột, một câu hỏi, nút chính dễ chạm</td>
+</tr>
+<tr>
+<td>Điện thoại ngang</td>
+<td>Cuộn được khi chiều cao thấp; lựa chọn có thể hai cột nếu đủ chỗ</td>
+</tr>
+<tr>
+<td>Tablet</td>
+<td>Giới hạn chiều rộng dòng chữ, không kéo nút hết màn hình</td>
+</tr>
+<tr>
+<td>Vùng rộng</td>
+<td>Kết quả việc có thể danh sách bên trái và chi tiết bên phải</td>
+</tr>
+<tr>
+<td>Chia đôi cửa sổ</td>
+<td>Chuyển bố cục theo chiều rộng hiện có, không theo tên loại thiết bị</td>
+</tr>
+</tbody></table></div>
+<p>Điểm ngắt đề xuất cho vùng hiển thị là dưới 600dp, 600–839dp và từ 840dp trở lên; kiểm chứng lại với font lớn và chiều cao thực tế. Dù tablet rộng, luồng hướng dẫn vẫn giữ một câu hỏi chính mỗi bước. Dùng ViewModel và trạng thái được lưu để giữ lựa chọn, vị trí và nội dung form khi thay đổi cấu hình; không khởi động giao dịch từ hàm vẽ màn hình. Xử lý khoảng an toàn thanh hệ thống và bàn phím. <a class="ref" href="#source-5">[S5]</a></p>
+<h3 id="section-22">7.2. Phạm vi offline</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Được phép khi offline</th>
+<th>Cần có mạng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Xem bản sao tin đã tải, danh mục và khu vực</td>
+<td>OTP, liên kết/đổi số liên hệ</td>
+</tr>
+<tr>
+<td>Trả lời và lưu lựa chọn tìm việc cục bộ</td>
+<td>Gửi/rút đơn; tạo/sửa/duyệt tin</td>
+</tr>
+<tr>
+<td>Nghe bản ghi âm hoặc giọng TTS có dữ liệu offline</td>
+<td>Thay đổi lưu việc trên tài khoản</td>
+</tr>
+<tr>
+<td>Soạn nháp form chưa gửi</td>
+<td>Xác nhận ca, bắt đầu/kết thúc, thanh toán, tranh chấp</td>
+</tr>
+</tbody></table></div>
+<p>SQLite lưu CachedJob, CachedCategory, CachedArea, CachedSavedJob và LocalSearchPreference. Mỗi bản ghi cần cachedAt; dữ liệu theo tài khoản cần ownerUid. Không lưu hồ sơ căn cước, snapshot đơn, địa chỉ riêng của ca, OTP hoặc token trong các bảng này. Hồ sơ thanh toán và thông tin danh tính không được trình bày là dữ liệu mới khi chỉ có cache.</p>
+<p>Firestore Android có cơ chế offline riêng, không thay thế phần SQLite nhóm chủ động thiết kế. Để tránh lưu ngầm tài liệu riêng xuống đĩa, cấu hình Firestore dùng bộ nhớ cache không bền cho bản triển khai này; SQLite chỉ chứa dữ liệu được cho phép. Firebase Authentication quản lý phiên theo cơ chế SDK riêng. <a class="ref" href="#source-3">[S3]</a></p>
+<p>Khi online: đọc nguồn từ dịch vụ, cập nhật cache và giao diện. Tin đã ẩn/đóng phải được kiểm tra lại bằng nguồn server hoặc endpoint trạng thái; không dùng kết quả từ cache làm bằng chứng tin còn mở. Khi offline chưa thể biết tin vừa bị gỡ: hiển thị nhãn dữ liệu cũ, không cho ứng tuyển. Khi đăng xuất, xóa cache theo tài khoản và dữ liệu nhạy cảm trong bộ nhớ.</p>
+<h2 id="section-23">8. Danh sách Use Case và hướng dẫn vẽ</h2><h3 id="section-24">8.1. Danh mục</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mã</th>
+<th>Use case</th>
+<th>Tác nhân chính</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UC01</td>
+<td>Đăng nhập/đăng xuất</td>
+<td>Người dùng</td>
+</tr>
+<tr>
+<td>UC02</td>
+<td>Xác minh số liên hệ/liên kết tài khoản</td>
+<td>Người dùng</td>
+</tr>
+<tr>
+<td>UC03</td>
+<td>Thiết lập vai trò và hồ sơ</td>
+<td>Người tìm việc, người thuê</td>
+</tr>
+<tr>
+<td>UC04</td>
+<td>Gửi/bổ sung hồ sơ danh tính mẫu</td>
+<td>Người tìm việc, người thuê</td>
+</tr>
+<tr>
+<td>UC05</td>
+<td>Xét duyệt hồ sơ mẫu</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td>UC06</td>
+<td>Tìm việc có hướng dẫn</td>
+<td>Khách, người tìm việc</td>
+</tr>
+<tr>
+<td>UC07</td>
+<td>Xem/lọc danh sách và xem chi tiết</td>
+<td>Khách, người tìm việc</td>
+</tr>
+<tr>
+<td>UC08</td>
+<td>Lưu/bỏ lưu việc</td>
+<td>Người tìm việc</td>
+</tr>
+<tr>
+<td>UC09</td>
+<td>Gửi đơn ứng tuyển</td>
+<td>Người tìm việc</td>
+</tr>
+<tr>
+<td>UC10</td>
+<td>Theo dõi/rút đơn</td>
+<td>Người tìm việc</td>
+</tr>
+<tr>
+<td>UC11</td>
+<td>Đăng/sửa/gửi tin duyệt</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC12</td>
+<td>Đóng tin</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC13</td>
+<td>Duyệt/từ chối/ẩn tin</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td>UC14</td>
+<td>Xem và xử lý ứng viên</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC15</td>
+<td>Báo cáo tin</td>
+<td>Người tìm việc</td>
+</tr>
+<tr>
+<td>UC16</td>
+<td>Xử lý báo cáo</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td>UC17</td>
+<td>Đề xuất/sửa thỏa thuận ca</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC18</td>
+<td>Xác nhận/từ chối thỏa thuận</td>
+<td>Hai bên</td>
+</tr>
+<tr>
+<td>UC19</td>
+<td>Cấp tiền mô phỏng cho ca</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC20</td>
+<td>Ghi nhận bắt đầu ca</td>
+<td>Hai bên</td>
+</tr>
+<tr>
+<td>UC21</td>
+<td>Báo hoàn thành</td>
+<td>Người làm</td>
+</tr>
+<tr>
+<td>UC22</td>
+<td>Xác nhận kết quả/đề nghị xử lý</td>
+<td>Người thuê</td>
+</tr>
+<tr>
+<td>UC23</td>
+<td>Yêu cầu và xác nhận hủy ca</td>
+<td>Hai bên</td>
+</tr>
+<tr>
+<td>UC24</td>
+<td>Gửi/trao đổi tranh chấp</td>
+<td>Hai bên</td>
+</tr>
+<tr>
+<td>UC25</td>
+<td>Xử lý tranh chấp</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td>UC26</td>
+<td>Quyết toán và xem lịch sử tiền</td>
+<td>Dịch vụ hệ thống; hai bên xem</td>
+</tr>
+<tr>
+<td>UC27</td>
+<td>Liên hệ bằng điện thoại</td>
+<td>Hai bên theo quyền</td>
+</tr>
+<tr>
+<td>UC28</td>
+<td>Nghe hướng dẫn/cài đặt hỗ trợ</td>
+<td>Người dùng</td>
+</tr>
+<tr>
+<td>UC29</td>
+<td>Xem lại khi offline</td>
+<td>Người dùng</td>
+</tr>
+<tr>
+<td>UC30</td>
+<td>Xem hàng đợi và thống kê vận hành</td>
+<td>Admin</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-25">8.2. Biểu diễn UML</h3><p>Vẽ biên <strong>GrandMa Assist</strong>; tác nhân ở ngoài, use case hình ellipse ở trong. Có tác nhân tổng quát Người dùng đã đăng nhập và chuyên biệt SEEKER, EMPLOYER, ADMIN khi cần giảm đường nối. Firebase Authentication là tác nhân hỗ trợ UC01–UC02; Android TTS hỗ trợ UC28; cổng thanh toán thật không xuất hiện như một tích hợp đã có.</p>
+<p>“Đã đăng nhập”, “đã xác minh” thường là tiền điều kiện; không nối include đến đăng nhập từ mọi nghiệp vụ. Không nối use case bằng mũi tên để biểu diễn thứ tự bước. Nếu cần include: UC19 bao gồm kiểm tra tổng tiền và ghi nhận cấp tiền; UC26 bao gồm tính phân bổ theo chính sách đã chốt. Các xử lý nội bộ này có thể chỉ ghi trong đặc tả để sơ đồ gọn.</p>
+<p>Nên vẽ ba sơ đồ con: (a) Tài khoản và tìm việc; (b) Tuyển dụng và ca làm; (c) Quản trị và thanh toán. Bộ nguồn đi kèm cung cấp sơ đồ tổng quan chọn các use case chính; bảng trên là danh sách đầy đủ.</p>
+<figure data-diagram="usecases"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: usecases Pages: 1 -->
+<svg width="507pt" height="984pt"
+ viewBox="0.00 0.00 507.00 984.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 969.4)">
+<title>usecases</title>
+<g id="clust1" class="cluster">
+<title>clusterSystem</title>
+<path fill="none" stroke="#8caf9a" d="M158.61,-8C158.61,-8 458.45,-8 458.45,-8 464.45,-8 470.45,-14 470.45,-20 470.45,-20 470.45,-935 470.45,-935 470.45,-941 464.45,-947 458.45,-947 458.45,-947 158.61,-947 158.61,-947 152.61,-947 146.61,-941 146.61,-935 146.61,-935 146.61,-20 146.61,-20 146.61,-14 152.61,-8 158.61,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-930.4" font-family="Arial" font-size="14.00">GrandMa Assist — use case tổng quan</text>
+</g>
+<!-- seeker -->
+<g id="node1" class="node">
+<title>seeker</title>
+<path fill="#e0eee4" stroke="#8caf9a" d="M95.61,-705.04C95.61,-705.04 12,-705.04 12,-705.04 6,-705.04 0,-699.04 0,-693.04 0,-693.04 0,-670.96 0,-670.96 0,-664.96 6,-658.96 12,-658.96 12,-658.96 95.61,-658.96 95.61,-658.96 101.61,-658.96 107.61,-664.96 107.61,-670.96 107.61,-670.96 107.61,-693.04 107.61,-693.04 107.61,-699.04 101.61,-705.04 95.61,-705.04"/>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-685.6" font-family="Arial" font-size="12.00">«actor»</text>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-671.2" font-family="Arial" font-size="12.00">Người tìm việc</text>
+</g>
+<!-- account -->
+<g id="node4" class="node">
+<title>account</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-640" rx="112.42" ry="32.58"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-643.6" font-family="Arial" font-size="12.00">Đăng nhập / OTP</text>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-629.2" font-family="Arial" font-size="12.00">Hồ sơ và danh tính mẫu</text>
+</g>
+<!-- seeker&#45;&gt;account -->
+<g id="edge1" class="edge">
+<title>seeker&#45;&gt;account</title>
+<path fill="none" stroke="#668071" d="M108.09,-673.14C137.71,-668.22 175.48,-661.94 210.17,-656.18"/>
+</g>
+<!-- search -->
+<g id="node5" class="node">
+<title>search</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-808" rx="110.53" ry="32.58"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-811.6" font-family="Arial" font-size="12.00">Tìm việc có hướng dẫn</text>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-797.2" font-family="Arial" font-size="12.00">Xem và lưu việc</text>
+</g>
+<!-- seeker&#45;&gt;search -->
+<g id="edge3" class="edge">
+<title>seeker&#45;&gt;search</title>
+<path fill="none" stroke="#668071" d="M81.85,-705.28C108.93,-728.58 146.61,-761 146.61,-761 146.61,-761 188.11,-773.12 228.96,-785.05"/>
+</g>
+<!-- apply -->
+<g id="node6" class="node">
+<title>apply</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-892" rx="113.85" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-888.4" font-family="Arial" font-size="12.00">Ứng tuyển / Theo dõi đơn</text>
+</g>
+<!-- seeker&#45;&gt;apply -->
+<g id="edge4" class="edge">
+<title>seeker&#45;&gt;apply</title>
+<path fill="none" stroke="#668071" d="M67.19,-705.33C92.24,-752.55 146.61,-855 146.61,-855 146.61,-855 191.03,-865.21 233.19,-874.91"/>
+</g>
+<!-- agreement -->
+<g id="node9" class="node">
+<title>agreement</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-724" rx="94.04" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-720.4" font-family="Arial" font-size="12.00">Chốt thỏa thuận ca</text>
+</g>
+<!-- seeker&#45;&gt;agreement -->
+<g id="edge7" class="edge">
+<title>seeker&#45;&gt;agreement</title>
+<path fill="none" stroke="#668071" d="M108.09,-690.86C143.57,-696.75 190.76,-704.59 230.34,-711.17"/>
+</g>
+<!-- work -->
+<g id="node11" class="node">
+<title>work</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-482" rx="111.49" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-478.4" font-family="Arial" font-size="12.00">Bắt đầu / Hoàn thành ca</text>
+</g>
+<!-- seeker&#45;&gt;work -->
+<g id="edge10" class="edge">
+<title>seeker&#45;&gt;work</title>
+<path fill="none" stroke="#668071" d="M67.96,-658.65C93.34,-613.58 146.61,-519 146.61,-519 146.61,-519 191.36,-508.71 233.66,-498.98"/>
+</g>
+<!-- money -->
+<g id="node12" class="node">
+<title>money</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-556" rx="153.92" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-552.4" font-family="Arial" font-size="12.00">Xem quyết toán / Hủy / Tranh chấp</text>
+</g>
+<!-- seeker&#45;&gt;money -->
+<g id="edge12" class="edge">
+<title>seeker&#45;&gt;money</title>
+<path fill="none" stroke="#668071" d="M78.93,-658.62C106.13,-632.25 146.61,-593 146.61,-593 146.61,-593 184.98,-584.18 224.24,-575.15"/>
+</g>
+<!-- employer -->
+<g id="node2" class="node">
+<title>employer</title>
+<path fill="#e0eee4" stroke="#8caf9a" d="M83.28,-505.04C83.28,-505.04 24.33,-505.04 24.33,-505.04 18.33,-505.04 12.33,-499.04 12.33,-493.04 12.33,-493.04 12.33,-470.96 12.33,-470.96 12.33,-464.96 18.33,-458.96 24.33,-458.96 24.33,-458.96 83.28,-458.96 83.28,-458.96 89.28,-458.96 95.28,-464.96 95.28,-470.96 95.28,-470.96 95.28,-493.04 95.28,-493.04 95.28,-499.04 89.28,-505.04 83.28,-505.04"/>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-485.6" font-family="Arial" font-size="12.00">«actor»</text>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-471.2" font-family="Arial" font-size="12.00">Người thuê</text>
+</g>
+<!-- employer&#45;&gt;account -->
+<g id="edge2" class="edge">
+<title>employer&#45;&gt;account</title>
+<path fill="none" stroke="#668071" d="M74.05,-505.27C100.97,-537.82 146.61,-593 146.61,-593 146.61,-593 187.79,-605.03 228.48,-616.91"/>
+</g>
+<!-- post -->
+<g id="node7" class="node">
+<title>post</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-408" rx="89.32" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-404.4" font-family="Arial" font-size="12.00">Đăng và quản lý tin</text>
+</g>
+<!-- employer&#45;&gt;post -->
+<g id="edge5" class="edge">
+<title>employer&#45;&gt;post</title>
+<path fill="none" stroke="#668071" d="M95.61,-465.56C120.13,-455.67 146.61,-445 146.61,-445 146.61,-445 197.17,-433.37 241.61,-423.16"/>
+</g>
+<!-- review -->
+<g id="node8" class="node">
+<title>review</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-334" rx="73.75" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-330.4" font-family="Arial" font-size="12.00">Xử lý ứng viên</text>
+</g>
+<!-- employer&#45;&gt;review -->
+<g id="edge6" class="edge">
+<title>employer&#45;&gt;review</title>
+<path fill="none" stroke="#668071" d="M74.05,-458.73C100.97,-426.18 146.61,-371 146.61,-371 146.61,-371 202.97,-358.04 248.98,-347.46"/>
+</g>
+<!-- employer&#45;&gt;agreement -->
+<g id="edge8" class="edge">
+<title>employer&#45;&gt;agreement</title>
+<path fill="none" stroke="#668071" d="M65.34,-505.52C89.45,-559.36 146.61,-687 146.61,-687 146.61,-687 195.77,-698.3 239.75,-708.42"/>
+</g>
+<!-- fund -->
+<g id="node10" class="node">
+<title>fund</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-260" rx="94.03" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-256.4" font-family="Arial" font-size="12.00">Cấp tiền mô phỏng</text>
+</g>
+<!-- employer&#45;&gt;fund -->
+<g id="edge9" class="edge">
+<title>employer&#45;&gt;fund</title>
+<path fill="none" stroke="#668071" d="M66.43,-458.57C91.14,-408.79 146.61,-297 146.61,-297 146.61,-297 195.77,-285.7 239.75,-275.58"/>
+</g>
+<!-- employer&#45;&gt;work -->
+<g id="edge11" class="edge">
+<title>employer&#45;&gt;work</title>
+<path fill="none" stroke="#668071" d="M95.69,-482C123.14,-482 160.73,-482 196.62,-482"/>
+</g>
+<!-- employer&#45;&gt;money -->
+<g id="edge13" class="edge">
+<title>employer&#45;&gt;money</title>
+<path fill="none" stroke="#668071" d="M95.61,-498.44C120.13,-508.33 146.61,-519 146.61,-519 146.61,-519 184.98,-527.82 224.24,-536.85"/>
+</g>
+<!-- adminActor -->
+<g id="node3" class="node">
+<title>adminActor</title>
+<path fill="#e0eee4" stroke="#8caf9a" d="M72.61,-135.04C72.61,-135.04 35,-135.04 35,-135.04 29,-135.04 23,-129.04 23,-123.04 23,-123.04 23,-100.96 23,-100.96 23,-94.96 29,-88.96 35,-88.96 35,-88.96 72.61,-88.96 72.61,-88.96 78.61,-88.96 84.61,-94.96 84.61,-100.96 84.61,-100.96 84.61,-123.04 84.61,-123.04 84.61,-129.04 78.61,-135.04 72.61,-135.04"/>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-115.6" font-family="Arial" font-size="12.00">«actor»</text>
+<text xml:space="preserve" text-anchor="middle" x="53.8" y="-101.2" font-family="Arial" font-size="12.00">Admin</text>
+</g>
+<!-- moderation -->
+<g id="node13" class="node">
+<title>moderation</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-38" rx="109.11" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-34.4" font-family="Arial" font-size="12.00">Duyệt tin và hồ sơ mẫu</text>
+</g>
+<!-- adminActor&#45;&gt;moderation -->
+<g id="edge14" class="edge">
+<title>adminActor&#45;&gt;moderation</title>
+<path fill="none" stroke="#668071" d="M84.87,-99.88C111.64,-89.09 146.61,-75 146.61,-75 146.61,-75 192.03,-64.56 234.6,-54.77"/>
+</g>
+<!-- resolution -->
+<g id="node14" class="node">
+<title>resolution</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-112" rx="121.86" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-108.4" font-family="Arial" font-size="12.00">Xử lý báo cáo / Tranh chấp</text>
+</g>
+<!-- adminActor&#45;&gt;resolution -->
+<g id="edge15" class="edge">
+<title>adminActor&#45;&gt;resolution</title>
+<path fill="none" stroke="#668071" d="M85.04,-112C110.52,-112 148.75,-112 186.37,-112"/>
+</g>
+<!-- stats -->
+<g id="node15" class="node">
+<title>stats</title>
+<ellipse fill="#f2f8f4" stroke="#8caf9a" cx="308.53" cy="-186" rx="86.49" ry="22.4"/>
+<text xml:space="preserve" text-anchor="middle" x="308.53" y="-182.4" font-family="Arial" font-size="12.00">Xem thống kê phí</text>
+</g>
+<!-- adminActor&#45;&gt;stats -->
+<g id="edge16" class="edge">
+<title>adminActor&#45;&gt;stats</title>
+<path fill="none" stroke="#668071" d="M84.87,-124.12C111.64,-134.91 146.61,-149 146.61,-149 146.61,-149 198.24,-160.87 243.01,-171.16"/>
+</g>
+</g>
+</svg>
+</div><figcaption>Use case tổng quan — các nhóm nghiệp vụ chính · <a href="diagrams/usecases.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<h3 id="section-26">8.3. Đặc tả các use case trọng tâm</h3><h4 id="section-27">UC02 — Xác minh số liên hệ</h4><ul>
+<li><strong>Tiền điều kiện:</strong> có mạng; người dùng đồng ý cung cấp số cho cơ chế xác thực; số được chuẩn hóa E.164, xử lý +84 đúng, không ghép thành +840…</li>
+<li><strong>Luồng chính:</strong> nhập số → xem lại số → yêu cầu OTP → nhận/nhập mã hoặc SDK xác minh hợp lệ → Firebase trả credential → đăng nhập hoặc liên kết vào UID hiện tại → dịch vụ ghi nhận số liên hệ đã xác minh từ nguồn Auth tin cậy.</li>
+<li><strong>Ngoại lệ:</strong> mã sai/hết hạn, gửi lại quá nhiều, mất mạng, số đã gắn tài khoản khác, liên kết thất bại. Không tự hợp nhất tài khoản chỉ dựa trên số hoặc email trùng; cần chứng minh quyền truy cập tài khoản liên quan.</li>
+<li><strong>Hậu điều kiện:</strong> có kết quả xác minh số liên hệ, chưa tự đổi trạng thái danh tính.</li>
+<li><strong>Đổi số:</strong> yêu cầu xác thực lại tài khoản, xác minh số mới; nếu không còn truy cập phương thức cũ thì vào quy trình hỗ trợ, không cấp quyền chỉ vì người mới nhận OTP của số tái sử dụng.</li>
+</ul>
+<h4 id="section-28">UC04–UC05 — Xét duyệt danh tính mẫu</h4><ul>
+<li><strong>Tiền điều kiện:</strong> đã đăng nhập và xác minh số liên hệ. Chỉ dùng dữ liệu mẫu gắn nhãn DEMO.</li>
+<li><strong>Luồng:</strong> giải thích mục đích → chọn/cung cấp hồ sơ mẫu → xem lại → gửi SUBMITTED → admin kiểm tra → VERIFIED hoặc NEEDS_INFO/REJECTED với lý do.</li>
+<li><strong>Ngoại lệ:</strong> hồ sơ thiếu, hai admin xử lý đồng thời, người dùng sửa dữ liệu lúc đang xét. Mỗi lần bổ sung tạo phiên bản/yêu cầu mới, giữ lịch sử cũ.</li>
+<li><strong>Hậu điều kiện:</strong> nhãn “Hồ sơ mẫu đã được duyệt — mô phỏng”; không hiển thị “đã xác minh bởi cơ quan nhà nước”.</li>
+<li><strong>Giới hạn:</strong> xác minh người đại diện không tự xác minh doanh nghiệp; chưa có eKYC, liveness hoặc truy vấn căn cước thật.</li>
+</ul>
+<h4 id="section-29">UC06 — Tìm việc có hướng dẫn</h4><ul>
+<li><strong>Tiền điều kiện:</strong> không bắt đăng nhập.</li>
+<li><strong>Luồng:</strong> trả lời bốn bước → xem tóm tắt → áp dụng điều kiện → xếp hạng → xem danh sách và lý do phù hợp → mở chi tiết.</li>
+<li><strong>Ngoại lệ:</strong> không có kết quả; thiếu dữ liệu; offline chỉ có cache; quay lại sửa câu trả lời. Không tự nới điều kiện cứng.</li>
+<li><strong>Hậu điều kiện:</strong> lựa chọn được giữ cục bộ; khi đăng nhập có thể đồng bộ theo sự lựa chọn của người dùng, không ghi đè âm thầm lựa chọn đã có.</li>
+</ul>
+<h4 id="section-30">UC11–UC13 — Đăng và duyệt tin</h4><ul>
+<li><strong>Tiền điều kiện gửi tin:</strong> người thuê đã xác minh số, hồ sơ đủ, có mạng.</li>
+<li><strong>Luồng:</strong> nhập nội dung cấu trúc → xem trước → gửi PENDING_REVIEW → admin đọc → OPEN hoặc REJECTED kèm lý do.</li>
+<li><strong>Kiểm tra:</strong> tiêu đề/nhiệm vụ rõ; danh mục/khu vực hợp lệ; tiền công dương; thời hạn tương lai; lịch và yêu cầu thể lực được khai rõ.</li>
+<li><strong>Ngoại lệ:</strong> tin hết hạn trước lúc duyệt; thiếu trường; người khác sửa; tài khoản không có quyền. Dùng version để tránh duyệt nhầm nội dung mới.</li>
+<li><strong>Hậu điều kiện:</strong> chỉ bản đã duyệt được công khai. Sửa tin OPEN làm nó quay lại chờ duyệt; snapshot đơn và thỏa thuận cũ không bị đổi.</li>
+</ul>
+<h4 id="section-31">UC09 — Gửi đơn ứng tuyển</h4><ul>
+<li><strong>Tiền điều kiện:</strong> SEEKER, hồ sơ đủ, số liên hệ đã xác minh; chưa bắt buộc duyệt danh tính mẫu ở bước này.</li>
+<li><strong>Luồng:</strong> xem thông tin sẽ gửi → lời nhắn tùy chọn → đồng ý chia sẻ số với chủ tin → xác nhận → kiểm tra tin OPEN/chưa hết hạn và chưa có đơn → tạo PENDING cùng snapshot.</li>
+<li><strong>Ngoại lệ:</strong> trùng đơn, tin vừa đóng/ẩn, hết hạn, mất mạng. ID duy nhất cho cặp jobId–seekerId và transaction ngăn gửi trùng.</li>
+<li><strong>Hậu điều kiện:</strong> đúng một đơn được tạo sau xác nhận thành công; thất bại không tạo đơn giả trong giao diện.</li>
+</ul>
+<h4 id="section-32">UC10/UC14 — Rút và xử lý đơn</h4><ul>
+<li>Người gửi chỉ rút PENDING; chủ tin chỉ chấp nhận/từ chối PENDING của tin mình.</li>
+<li>Tin OPEN/CLOSED cho xử lý đơn đã có; PENDING_REVIEW/REJECTED/HIDDEN không cho xử lý đơn chờ.</li>
+<li>Khi chấp nhận, chia sẻ snapshot liên hệ chủ tin với ứng viên. Chủ tin đã đọc số ứng viên theo đồng ý khi nộp đơn.</li>
+<li>Nếu rút và chấp nhận đồng thời, chỉ một chuyển trạng thái thắng; thao tác còn lại nhận trạng thái mới, không ghi đè.</li>
+<li>ACCEPTED không tự tạo ca, không tự thu tiền; không cho gửi lại cùng tin sau trạng thái cuối trong bản đầu.</li>
+</ul>
+<h4 id="section-33">UC17–UC18 — Chốt thỏa thuận ca</h4><ul>
+<li><strong>Tiền điều kiện:</strong> đơn ACCEPTED; cả hai đủ hồ sơ và danh tính mẫu đã được duyệt; tài khoản hoạt động; tin không HIDDEN. Tin CLOSED hoặc hết hạn nhận đơn vẫn cho lập ca từ quan hệ đã được chấp nhận.</li>
+<li><strong>Luồng:</strong> người thuê đề xuất nhiệm vụ, địa điểm riêng, thời gian, tiền công → hệ thống tính phí và tổng → người thuê xác nhận gửi phiên bản → người làm xem tiền mình nhận và điều kiện → xác nhận đúng phiên bản → AWAITING_FUNDS.</li>
+<li><strong>Sửa trước cấp tiền:</strong> tạo version mới, xóa hiệu lực cả hai xác nhận cũ, quay về PROPOSED. Khi đã cấp tiền, bản đầu không sửa trực tiếp; dùng hủy có thỏa thuận hoặc tạo ca bổ sung riêng.</li>
+<li><strong>Ngoại lệ:</strong> lịch không hợp lệ/trùng ca READY hoặc IN_PROGRESS của người làm; trạng thái xác minh thay đổi; xác nhận phiên bản cũ; số tiền vượt giới hạn cấu hình.</li>
+<li><strong>Hậu điều kiện:</strong> khóa snapshot và feePolicyVersion đã được cả hai xác nhận.</li>
+</ul>
+<h4 id="section-34">UC19 — Cấp tiền mô phỏng</h4><ul>
+<li><strong>Tiền điều kiện:</strong> người thuê của ca, ca AWAITING_FUNDS, chưa quá hạn, version hiện tại được hai bên xác nhận.</li>
+<li><strong>Luồng:</strong> hiển thị tiền công + phí → xác nhận mô phỏng → backend kiểm tra → SimulatedPaymentGateway trả kết quả → ghi sự kiện và số tiền giữ → ca READY.</li>
+<li><strong>Ngoại lệ:</strong> giao dịch thất bại/đang xử lý, double tap, mất phản hồi, request cũ. Client không được tự viết funded=true. Retry cùng requestId trả kết quả cũ thay vì cấp tiền lần hai.</li>
+<li><strong>Hậu điều kiện:</strong> READY chỉ khi đủ toàn bộ tổng tiền; đang xử lý chưa được bắt đầu ca.</li>
+</ul>
+<h4 id="section-35">UC20–UC22 — Bắt đầu và hoàn thành</h4><ul>
+<li><strong>Bắt đầu:</strong> ca READY, đủ tiền và tới khoảng thời gian cho phép; hai bên xác nhận bắt đầu. Lưu thời điểm từng xác nhận, chuyển IN_PROGRESS khi đủ hai bên. Thiếu xác nhận thì cần hỗ trợ, không coi một nút bấm là bằng chứng tuyệt đối.</li>
+<li><strong>Kết thúc:</strong> người làm báo xong → COMPLETION_PENDING → người thuê xác nhận hoặc mở tranh chấp. Xác nhận đồng ý tạo quyết định phân bổ và yêu cầu quyết toán.</li>
+<li><strong>Không phản hồi:</strong> sau 24 giờ đề xuất, đánh dấu quá hạn, chuyển hàng đợi admin; không tự trả tiền chỉ vì hết thời gian. Admin xử lý theo quy trình có bằng chứng và lý do.</li>
+<li><strong>Ngoại lệ:</strong> mất mạng, sai trạng thái, hai thao tác đồng thời. Không gửi lệnh nghiệp vụ âm thầm từ hàng đợi offline.</li>
+</ul>
+<h4 id="section-36">UC23 — Hủy ca</h4><ul>
+<li>PROPOSED/AWAITING_FUNDS chưa có tiền: một trong hai bên có thể hủy hoặc từ chối; không phát sinh phí.</li>
+<li>READY đã có tiền và chưa bắt đầu: một bên yêu cầu hủy; bên còn lại đồng ý thì hoàn toàn bộ và phí bằng 0. Trong lúc yêu cầu hủy chờ xử lý, không bắt đầu ca.</li>
+<li>Không đồng ý, không phản hồi hoặc có bất đồng việc đã bắt đầu: mở tranh chấp, không tự hoàn.</li>
+<li>Khi funding đang xử lý, yêu cầu hủy phải được tuần tự hóa với kết quả funding: nếu funding thành công muộn, hoàn theo quy trình; không để ca hủy nhưng tiền bị bỏ quên.</li>
+<li>Đang làm thì dùng tranh chấp để xác định phần công việc đã hoàn thành; không áp chính sách hủy trước ca máy móc.</li>
+</ul>
+<h4 id="section-37">UC24–UC26 — Tranh chấp và quyết toán</h4><ul>
+<li><strong>Tiền điều kiện:</strong> hai bên của ca có quyền gửi; tối đa một tranh chấp đang mở mỗi ca; ca chưa quyết toán cuối trong bản đầu.</li>
+<li><strong>Luồng:</strong> nêu lý do → lưu thỏa thuận và lịch sử → nhận giải trình bên kia → admin xem → quyết định phần công được duyệt, phí và tiền hoàn → ghi lý do → thực thi phân bổ mô phỏng → đóng tranh chấp sau khi hoàn tất.</li>
+<li><strong>Nguyên tắc:</strong> admin không tự quyết vụ liên quan tài khoản của mình; không dùng kiểm duyệt tin thay cho giải quyết tranh chấp; hệ thống kiểm tra tổng số tiền, không tin phép tính client.</li>
+<li><strong>Hậu điều kiện:</strong> tiền chi + phí ghi nhận + hoàn + tiền còn giữ bằng tổng đã cấp; có lịch sử bất biến. Nếu thao tác thất bại, vẫn có trạng thái cần xử lý, không báo thành công.</li>
+<li><strong>Giới hạn:</strong> chưa xử lý tranh chấp mở mới sau quyết toán cuối/chargeback thật. Báo cáo vận hành sau quyết toán vẫn được tiếp nhận để hỗ trợ nhưng không tự đảo tiền.</li>
+</ul>
+<h2 id="section-38">9. Quy tắc nghiệp vụ thống nhất</h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mã</th>
+<th>Quy tắc bắt buộc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BR01</td>
+<td>Vai trò do cơ chế tin cậy cấp; không cho tự nâng quyền admin</td>
+</tr>
+<tr>
+<td>BR02</td>
+<td>Một số liên hệ đã xác minh chỉ gắn với một tài khoản đang sử dụng trong bản đầu; số điện thoại không phải bằng chứng một người chỉ có một tài khoản</td>
+</tr>
+<tr>
+<td>BR03</td>
+<td>OTP thật, OTP kiểm thử và xét duyệt danh tính mẫu có nhãn khác nhau</td>
+</tr>
+<tr>
+<td>BR04</td>
+<td>Số liên hệ chia sẻ phải là số đã xác minh, không phải trường điện thoại tùy ý trong hồ sơ</td>
+</tr>
+<tr>
+<td>BR05</td>
+<td>SEEKER/EMPLOYER chỉ chỉnh hồ sơ của mình; thay đổi dữ liệu định danh cốt lõi yêu cầu xét lại</td>
+</tr>
+<tr>
+<td>BR06</td>
+<td>Tin chỉ nhận đơn khi OPEN, chưa hết hạn và chủ tin còn quyền hoạt động</td>
+</tr>
+<tr>
+<td>BR07</td>
+<td>Sửa tin đã duyệt làm tin trở về PENDING_REVIEW; lưu version</td>
+</tr>
+<tr>
+<td>BR08</td>
+<td>Người thuê chỉ sửa/đóng tin của mình; admin chỉ xử lý trường kiểm duyệt được phép</td>
+</tr>
+<tr>
+<td>BR09</td>
+<td>Mỗi cặp người tìm việc–tin có tối đa một đơn; chưa gửi lại sau rút/từ chối</td>
+</tr>
+<tr>
+<td>BR10</td>
+<td>Chỉ PENDING được rút/chấp nhận/từ chối; chuyển trạng thái phải kiểm tra lại trên server</td>
+</tr>
+<tr>
+<td>BR11</td>
+<td>Không xóa đơn hoặc tin để làm mất lịch sử nghiệp vụ</td>
+</tr>
+<tr>
+<td>BR12</td>
+<td>Một đơn ACCEPTED có thể có nhiều ca; mỗi ca độc lập về thỏa thuận, thời gian và tiền</td>
+</tr>
+<tr>
+<td>BR13</td>
+<td>Mỗi ca chỉ có một người làm và một người thuê; nhiều người làm phải là các ca riêng</td>
+</tr>
+<tr>
+<td>BR14</td>
+<td>Cả hai bên phải đủ mức xác minh của bản demo trước khi xác nhận ca mới</td>
+</tr>
+<tr>
+<td>BR15</td>
+<td>Hai bên xác nhận cùng agreementVersion; đổi nội dung trước cấp tiền làm mất hiệu lực xác nhận cũ</td>
+</tr>
+<tr>
+<td>BR16</td>
+<td>Ca đã cấp tiền không được sửa âm thầm tiền công/nhiệm vụ/thời gian/địa điểm</td>
+</tr>
+<tr>
+<td>BR17</td>
+<td>Tổng tiền cần cấp bằng tiền công cộng phí 10%; không khấu trừ phí vào tiền công người làm</td>
+</tr>
+<tr>
+<td>BR18</td>
+<td>Chỉ READY với đủ tiền và không có yêu cầu hủy/tranh chấp chờ mới được bắt đầu</td>
+</tr>
+<tr>
+<td>BR19</td>
+<td>Tiền đang giữ không được tính là doanh thu phí</td>
+</tr>
+<tr>
+<td>BR20</td>
+<td>Ca hoàn thành đầy đủ thu 10%; phần hoàn thành được công nhận thu 10% phần đó</td>
+</tr>
+<tr>
+<td>BR21</td>
+<td>Ca hủy chưa thực hiện và đủ điều kiện hoàn toàn bộ không thu phí</td>
+</tr>
+<tr>
+<td>BR22</td>
+<td>Không tính phí trên tiền hoàn, bồi thường hoặc các khoản ngoài tiền công</td>
+</tr>
+<tr>
+<td>BR23</td>
+<td>Phí áp dụng theo snapshot chính sách của ca, không áp ngược cấu hình mới</td>
+</tr>
+<tr>
+<td>BR24</td>
+<td>Một request nghiệp vụ có requestId; retry không tạo kết quả tài chính thứ hai</td>
+</tr>
+<tr>
+<td>BR25</td>
+<td>Quyết toán phải bảo toàn tiền, số nguyên VND và không âm</td>
+</tr>
+<tr>
+<td>BR26</td>
+<td>Chưa phản hồi không đồng nghĩa đồng ý; quá hạn chuyển hàng đợi admin</td>
+</tr>
+<tr>
+<td>BR27</td>
+<td>Tin HIDDEN chặn đơn/ca mới; không xóa thỏa thuận, đơn hoặc tiền của các ca hiện có</td>
+</tr>
+<tr>
+<td>BR28</td>
+<td>Cần dừng ca hiện có vì vi phạm phải có quyết định riêng và đường xử lý tiền, không chỉ đổi trạng thái tin</td>
+</tr>
+<tr>
+<td>BR29</td>
+<td>Người dùng chỉ xem dữ liệu riêng thuộc quan hệ nghiệp vụ của mình; admin đọc đúng phạm vi cần xử lý</td>
+</tr>
+<tr>
+<td>BR30</td>
+<td>Offline không được xác nhận nghiệp vụ nhạy cảm; không dùng đồng hồ thiết bị để quyết định hạn hay tiền</td>
+</tr>
+<tr>
+<td>BR31</td>
+<td>Mở trình quay số không tự gọi; người dùng chủ động xác nhận cuộc gọi</td>
+</tr>
+<tr>
+<td>BR32</td>
+<td>Không hiển thị “đã đảm bảo an toàn” chỉ từ kết quả duyệt tin, OTP hoặc hồ sơ mẫu</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-39">10. Mô hình trạng thái</h2><h3 id="section-40">10.1. Tin và đơn</h3><p><strong>JobStatus:</strong> PENDING_REVIEW, OPEN, REJECTED, CLOSED, HIDDEN.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chuyển trạng thái</th>
+<th>Ai thực hiện</th>
+<th>Điều kiện</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tạo → PENDING_REVIEW</td>
+<td>Người thuê</td>
+<td>Đủ dữ liệu và quyền</td>
+</tr>
+<tr>
+<td>PENDING_REVIEW → OPEN</td>
+<td>Admin</td>
+<td>Duyệt đúng version, còn hạn</td>
+</tr>
+<tr>
+<td>PENDING_REVIEW → REJECTED</td>
+<td>Admin</td>
+<td>Có lý do</td>
+</tr>
+<tr>
+<td>REJECTED → PENDING_REVIEW</td>
+<td>Chủ tin</td>
+<td>Sửa và gửi lại</td>
+</tr>
+<tr>
+<td>OPEN → PENDING_REVIEW</td>
+<td>Chủ tin</td>
+<td>Sửa nội dung</td>
+</tr>
+<tr>
+<td>OPEN → CLOSED</td>
+<td>Chủ tin</td>
+<td>Đóng nhận đơn mới</td>
+</tr>
+<tr>
+<td>OPEN/CLOSED → HIDDEN</td>
+<td>Admin</td>
+<td>Có lý do, lưu lịch sử</td>
+</tr>
+</tbody></table></div>
+<p>expiresAt là điều kiện riêng; OPEN nhưng quá hạn không nhận đơn. Không cần tự đổi sang trạng thái EXPIRED. Chưa hỗ trợ mở lại CLOSED/HIDDEN trong bản đầu; chủ tin có thể tạo tin mới qua kiểm duyệt. Soạn nháp là local, không phải trạng thái server của tin.</p>
+<p><strong>ApplicationStatus:</strong> PENDING → ACCEPTED / REJECTED / WITHDRAWN. Ba trạng thái cuối không đổi lại. ACCEPTED là liên kết để đề xuất ca, không phải trạng thái hoàn thành việc.</p>
+<h3 id="section-41">10.2. Ca làm</h3><figure data-diagram="sessionState"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: sessionState Pages: 1 -->
+<svg width="765pt" height="867pt"
+ viewBox="0.00 0.00 765.00 867.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 852.64)">
+<title>sessionState</title>
+<!-- PROPOSED -->
+<g id="node1" class="node">
+<title>PROPOSED</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M577.95,-785.64C577.95,-785.64 512.34,-785.64 512.34,-785.64 506.34,-785.64 500.34,-779.64 500.34,-773.64 500.34,-773.64 500.34,-751.56 500.34,-751.56 500.34,-745.56 506.34,-739.56 512.34,-739.56 512.34,-739.56 577.95,-739.56 577.95,-739.56 583.95,-739.56 589.95,-745.56 589.95,-751.56 589.95,-751.56 589.95,-773.64 589.95,-773.64 589.95,-779.64 583.95,-785.64 577.95,-785.64"/>
+<text xml:space="preserve" text-anchor="middle" x="545.14" y="-766.2" font-family="Arial" font-size="12.00">Đề xuất</text>
+<text xml:space="preserve" text-anchor="middle" x="545.14" y="-751.8" font-family="Arial" font-size="12.00">PROPOSED</text>
+</g>
+<!-- AWAITING_FUNDS -->
+<g id="node2" class="node">
+<title>AWAITING_FUNDS</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M509.61,-679.56C509.61,-679.56 404.68,-679.56 404.68,-679.56 398.68,-679.56 392.68,-673.56 392.68,-667.56 392.68,-667.56 392.68,-645.48 392.68,-645.48 392.68,-639.48 398.68,-633.48 404.68,-633.48 404.68,-633.48 509.61,-633.48 509.61,-633.48 515.61,-633.48 521.61,-639.48 521.61,-645.48 521.61,-645.48 521.61,-667.56 521.61,-667.56 521.61,-673.56 515.61,-679.56 509.61,-679.56"/>
+<text xml:space="preserve" text-anchor="middle" x="457.14" y="-660.12" font-family="Arial" font-size="12.00">Chờ cấp tiền</text>
+<text xml:space="preserve" text-anchor="middle" x="457.14" y="-645.72" font-family="Arial" font-size="12.00">AWAITING_FUNDS</text>
+</g>
+<!-- PROPOSED&#45;&gt;AWAITING_FUNDS -->
+<g id="edge2" class="edge">
+<title>PROPOSED&#45;&gt;AWAITING_FUNDS</title>
+<path fill="none" stroke="#668071" d="M532.48,-739.33C523.17,-722.96 512.14,-703.56 512.14,-703.56 512.14,-703.56 502.05,-695.11 490.51,-685.45"/>
+<polygon fill="#668071" stroke="#668071" points="492.1,-683.59 485.16,-680.97 488.96,-687.34 492.1,-683.59"/>
+<text xml:space="preserve" text-anchor="middle" x="570.98" y="-706.56" font-family="Arial" font-size="10.00">Cùng xác nhận version</text>
+</g>
+<!-- CANCELLED -->
+<g id="node9" class="node">
+<title>CANCELLED</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M529.96,-50.08C529.96,-50.08 460.33,-50.08 460.33,-50.08 454.33,-50.08 448.33,-44.08 448.33,-38.08 448.33,-38.08 448.33,-16 448.33,-16 448.33,-10 454.33,-4 460.33,-4 460.33,-4 529.96,-4 529.96,-4 535.96,-4 541.96,-10 541.96,-16 541.96,-16 541.96,-38.08 541.96,-38.08 541.96,-44.08 535.96,-50.08 529.96,-50.08"/>
+<path fill="none" stroke="#8caf9a" d="M533.96,-54.08C533.96,-54.08 456.33,-54.08 456.33,-54.08 450.33,-54.08 444.33,-48.08 444.33,-42.08 444.33,-42.08 444.33,-12 444.33,-12 444.33,-6 450.33,0 456.33,0 456.33,0 533.96,0 533.96,0 539.96,0 545.96,-6 545.96,-12 545.96,-12 545.96,-42.08 545.96,-42.08 545.96,-48.08 539.96,-54.08 533.96,-54.08"/>
+<text xml:space="preserve" text-anchor="middle" x="495.14" y="-30.64" font-family="Arial" font-size="12.00">Đã hủy</text>
+<text xml:space="preserve" text-anchor="middle" x="495.14" y="-16.24" font-family="Arial" font-size="12.00">CANCELLED</text>
+</g>
+<!-- PROPOSED&#45;&gt;CANCELLED -->
+<g id="edge5" class="edge">
+<title>PROPOSED&#45;&gt;CANCELLED</title>
+<path fill="none" stroke="#668071" d="M586.65,-739.12C608.23,-727.43 630.14,-715.56 630.14,-715.56 630.14,-715.56 670.14,-657.52 670.14,-657.52 670.14,-657.52 670.14,-657.52 670.14,-136.12 670.14,-136.12 596.82,-90.84 545.1,-58.89"/>
+<polygon fill="#668071" stroke="#668071" points="546.49,-56.87 539.24,-55.27 543.91,-61.04 546.49,-56.87"/>
+<text xml:space="preserve" text-anchor="middle" x="702.93" y="-388.32" font-family="Arial" font-size="10.00">Từ chối / hủy</text>
+</g>
+<!-- AWAITING_FUNDS&#45;&gt;PROPOSED -->
+<g id="edge3" class="edge">
+<title>AWAITING_FUNDS&#45;&gt;PROPOSED</title>
+<path fill="none" stroke="#668071" d="M435.81,-680C424.72,-691.69 413.45,-703.56 413.45,-703.56 413.45,-703.56 413.45,-715.56 413.45,-715.56 413.45,-715.56 455.8,-730.37 492.47,-743.19"/>
+<polygon fill="#668071" stroke="#668071" points="491.35,-745.39 498.76,-745.38 492.96,-740.76 491.35,-745.39"/>
+<text xml:space="preserve" text-anchor="middle" x="459.3" y="-706.56" font-family="Arial" font-size="10.00">Sửa trước cấp tiền</text>
+</g>
+<!-- READY -->
+<g id="node3" class="node">
+<title>READY</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M327.96,-573.48C327.96,-573.48 276.33,-573.48 276.33,-573.48 270.33,-573.48 264.33,-567.48 264.33,-561.48 264.33,-561.48 264.33,-539.4 264.33,-539.4 264.33,-533.4 270.33,-527.4 276.33,-527.4 276.33,-527.4 327.96,-527.4 327.96,-527.4 333.96,-527.4 339.96,-533.4 339.96,-539.4 339.96,-539.4 339.96,-561.48 339.96,-561.48 339.96,-567.48 333.96,-573.48 327.96,-573.48"/>
+<text xml:space="preserve" text-anchor="middle" x="302.14" y="-554.04" font-family="Arial" font-size="12.00">Sẵn sàng</text>
+<text xml:space="preserve" text-anchor="middle" x="302.14" y="-539.64" font-family="Arial" font-size="12.00">READY</text>
+</g>
+<!-- AWAITING_FUNDS&#45;&gt;READY -->
+<g id="edge4" class="edge">
+<title>AWAITING_FUNDS&#45;&gt;READY</title>
+<path fill="none" stroke="#668071" d="M423.89,-633.19C400.07,-617.2 367.86,-595.56 342.55,-578.57"/>
+<polygon fill="#668071" stroke="#668071" points="344.04,-576.62 336.86,-574.75 341.31,-580.69 344.04,-576.62"/>
+<text xml:space="preserve" text-anchor="middle" x="402.08" y="-600.48" font-family="Arial" font-size="10.00">Đủ tiền</text>
+</g>
+<!-- AWAITING_FUNDS&#45;&gt;CANCELLED -->
+<g id="edge6" class="edge">
+<title>AWAITING_FUNDS&#45;&gt;CANCELLED</title>
+<path fill="none" stroke="#668071" d="M465.3,-633.19C476.46,-602.61 495.14,-551.44 495.14,-551.44 495.14,-551.44 495.14,-551.44 495.14,-136.12 495.14,-136.12 495.14,-94.29 495.14,-62.67"/>
+<polygon fill="#668071" stroke="#668071" points="497.59,-62.99 495.14,-55.99 492.69,-62.99 497.59,-62.99"/>
+<text xml:space="preserve" text-anchor="middle" x="560.45" y="-335.28" font-family="Arial" font-size="10.00">Chưa có tiền, hủy / quá hạn</text>
+</g>
+<!-- IN_PROGRESS -->
+<g id="node4" class="node">
+<title>IN_PROGRESS</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M165.29,-467.4C165.29,-467.4 81,-467.4 81,-467.4 75,-467.4 69,-461.4 69,-455.4 69,-455.4 69,-433.32 69,-433.32 69,-427.32 75,-421.32 81,-421.32 81,-421.32 165.29,-421.32 165.29,-421.32 171.29,-421.32 177.29,-427.32 177.29,-433.32 177.29,-433.32 177.29,-455.4 177.29,-455.4 177.29,-461.4 171.29,-467.4 165.29,-467.4"/>
+<text xml:space="preserve" text-anchor="middle" x="123.14" y="-447.96" font-family="Arial" font-size="12.00">Đang thực hiện</text>
+<text xml:space="preserve" text-anchor="middle" x="123.14" y="-433.56" font-family="Arial" font-size="12.00">IN_PROGRESS</text>
+</g>
+<!-- READY&#45;&gt;IN_PROGRESS -->
+<g id="edge7" class="edge">
+<title>READY&#45;&gt;IN_PROGRESS</title>
+<path fill="none" stroke="#668071" d="M264.14,-539.79C210.99,-526.29 120.86,-503.4 120.86,-503.4 120.86,-503.4 120.86,-491.4 120.86,-491.4 120.86,-491.4 121.2,-484.58 121.62,-476.19"/>
+<polygon fill="#668071" stroke="#668071" points="124.06,-476.46 121.96,-469.35 119.16,-476.22 124.06,-476.46"/>
+<text xml:space="preserve" text-anchor="middle" x="182" y="-494.4" font-family="Arial" font-size="10.00">Hai bên xác nhận bắt đầu</text>
+</g>
+<!-- DISPUTED -->
+<g id="node6" class="node">
+<title>DISPUTED</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M278.97,-266.24C278.97,-266.24 191.32,-266.24 191.32,-266.24 185.32,-266.24 179.32,-260.24 179.32,-254.24 179.32,-254.24 179.32,-232.16 179.32,-232.16 179.32,-226.16 185.32,-220.16 191.32,-220.16 191.32,-220.16 278.97,-220.16 278.97,-220.16 284.97,-220.16 290.97,-226.16 290.97,-232.16 290.97,-232.16 290.97,-254.24 290.97,-254.24 290.97,-260.24 284.97,-266.24 278.97,-266.24"/>
+<text xml:space="preserve" text-anchor="middle" x="235.14" y="-246.8" font-family="Arial" font-size="12.00">Đang tranh chấp</text>
+<text xml:space="preserve" text-anchor="middle" x="235.14" y="-232.4" font-family="Arial" font-size="12.00">DISPUTED</text>
+</g>
+<!-- READY&#45;&gt;DISPUTED -->
+<g id="edge11" class="edge">
+<title>READY&#45;&gt;DISPUTED</title>
+<path fill="none" stroke="#668071" d="M297.22,-526.99C285.38,-473.08 255.34,-336.22 241.87,-274.82"/>
+<polygon fill="#668071" stroke="#668071" points="244.3,-274.47 240.4,-268.16 239.51,-275.52 244.3,-274.47"/>
+</g>
+<!-- SETTLEMENT_PENDING -->
+<g id="node7" class="node">
+<title>SETTLEMENT_PENDING</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M301.29,-160.16C301.29,-160.16 163,-160.16 163,-160.16 157,-160.16 151,-154.16 151,-148.16 151,-148.16 151,-126.08 151,-126.08 151,-120.08 157,-114.08 163,-114.08 163,-114.08 301.29,-114.08 301.29,-114.08 307.29,-114.08 313.29,-120.08 313.29,-126.08 313.29,-126.08 313.29,-148.16 313.29,-148.16 313.29,-154.16 307.29,-160.16 301.29,-160.16"/>
+<text xml:space="preserve" text-anchor="middle" x="232.14" y="-140.72" font-family="Arial" font-size="12.00">Chờ quyết toán</text>
+<text xml:space="preserve" text-anchor="middle" x="232.14" y="-126.32" font-family="Arial" font-size="12.00">SETTLEMENT_PENDING</text>
+</g>
+<!-- READY&#45;&gt;SETTLEMENT_PENDING -->
+<g id="edge10" class="edge">
+<title>READY&#45;&gt;SETTLEMENT_PENDING</title>
+<path fill="none" stroke="#668071" d="M309.87,-527.11C320.45,-496.53 338.14,-445.36 338.14,-445.36 338.14,-445.36 338.14,-445.36 338.14,-242.2 338.14,-242.2 319.14,-184.16 319.14,-184.16 319.14,-184.16 301.5,-174.83 282.11,-164.56"/>
+<polygon fill="#668071" stroke="#668071" points="283.3,-162.42 275.96,-161.31 281,-166.75 283.3,-162.42"/>
+<text xml:space="preserve" text-anchor="middle" x="387.89" y="-335.28" font-family="Arial" font-size="10.00">Đồng ý hủy, hoàn đủ</text>
+</g>
+<!-- COMPLETION_PENDING -->
+<g id="node5" class="node">
+<title>COMPLETION_PENDING</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M150.29,-361.32C150.29,-361.32 12,-361.32 12,-361.32 6,-361.32 0,-355.32 0,-349.32 0,-349.32 0,-327.24 0,-327.24 0,-321.24 6,-315.24 12,-315.24 12,-315.24 150.29,-315.24 150.29,-315.24 156.29,-315.24 162.29,-321.24 162.29,-327.24 162.29,-327.24 162.29,-349.32 162.29,-349.32 162.29,-355.32 156.29,-361.32 150.29,-361.32"/>
+<text xml:space="preserve" text-anchor="middle" x="81.14" y="-341.88" font-family="Arial" font-size="12.00">Chờ xác nhận kết quả</text>
+<text xml:space="preserve" text-anchor="middle" x="81.14" y="-327.48" font-family="Arial" font-size="12.00">COMPLETION_PENDING</text>
+</g>
+<!-- IN_PROGRESS&#45;&gt;COMPLETION_PENDING -->
+<g id="edge8" class="edge">
+<title>IN_PROGRESS&#45;&gt;COMPLETION_PENDING</title>
+<path fill="none" stroke="#668071" d="M108.15,-420.88C100.36,-409.19 92.44,-397.32 92.44,-397.32 92.44,-397.32 89.8,-383.76 87.08,-369.76"/>
+<polygon fill="#668071" stroke="#668071" points="89.51,-369.44 85.77,-363.04 84.7,-370.38 89.51,-369.44"/>
+<text xml:space="preserve" text-anchor="middle" x="138.29" y="-388.32" font-family="Arial" font-size="10.00">Người làm báo xong</text>
+</g>
+<!-- IN_PROGRESS&#45;&gt;DISPUTED -->
+<g id="edge12" class="edge">
+<title>IN_PROGRESS&#45;&gt;DISPUTED</title>
+<path fill="none" stroke="#668071" d="M154.39,-420.88C170.64,-409.19 187.14,-397.32 187.14,-397.32 187.14,-397.32 211.7,-318.99 225.69,-274.38"/>
+<polygon fill="#668071" stroke="#668071" points="227.96,-275.32 227.71,-267.91 223.28,-273.86 227.96,-275.32"/>
+</g>
+<!-- COMPLETION_PENDING&#45;&gt;DISPUTED -->
+<g id="edge13" class="edge">
+<title>COMPLETION_PENDING&#45;&gt;DISPUTED</title>
+<path fill="none" stroke="#668071" d="M118.42,-314.75C140.19,-301.59 167.79,-284.91 190.69,-271.07"/>
+<polygon fill="#668071" stroke="#668071" points="191.92,-273.19 196.65,-267.47 189.39,-268.99 191.92,-273.19"/>
+</g>
+<!-- COMPLETION_PENDING&#45;&gt;SETTLEMENT_PENDING -->
+<g id="edge9" class="edge">
+<title>COMPLETION_PENDING&#45;&gt;SETTLEMENT_PENDING</title>
+<path fill="none" stroke="#668071" d="M82.96,-314.97C85.72,-280.99 90.67,-220.16 90.67,-220.16 90.67,-220.16 144.89,-188.72 186.2,-164.76"/>
+<polygon fill="#668071" stroke="#668071" points="187.35,-166.93 192.18,-161.3 184.89,-162.69 187.35,-166.93"/>
+<text xml:space="preserve" text-anchor="middle" x="127.91" y="-240.2" font-family="Arial" font-size="10.00">Đồng ý kết quả</text>
+</g>
+<!-- DISPUTED&#45;&gt;SETTLEMENT_PENDING -->
+<g id="edge14" class="edge">
+<title>DISPUTED&#45;&gt;SETTLEMENT_PENDING</title>
+<path fill="none" stroke="#668071" d="M232.63,-219.72C231.32,-208.03 229.99,-196.16 229.99,-196.16 229.99,-196.16 229.99,-184.16 229.99,-184.16 229.99,-184.16 230.31,-177.34 230.7,-168.95"/>
+<polygon fill="#668071" stroke="#668071" points="233.14,-169.22 231.02,-162.11 228.25,-168.99 233.14,-169.22"/>
+<text xml:space="preserve" text-anchor="middle" x="273.07" y="-187.16" font-family="Arial" font-size="10.00">Admin quyết định</text>
+</g>
+<!-- COMPLETED -->
+<g id="node8" class="node">
+<title>COMPLETED</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M217.28,-50.08C217.28,-50.08 145.01,-50.08 145.01,-50.08 139.01,-50.08 133.01,-44.08 133.01,-38.08 133.01,-38.08 133.01,-16 133.01,-16 133.01,-10 139.01,-4 145.01,-4 145.01,-4 217.28,-4 217.28,-4 223.28,-4 229.28,-10 229.28,-16 229.28,-16 229.28,-38.08 229.28,-38.08 229.28,-44.08 223.28,-50.08 217.28,-50.08"/>
+<path fill="none" stroke="#8caf9a" d="M221.28,-54.08C221.28,-54.08 141.01,-54.08 141.01,-54.08 135.01,-54.08 129.01,-48.08 129.01,-42.08 129.01,-42.08 129.01,-12 129.01,-12 129.01,-6 135.01,0 141.01,0 141.01,0 221.28,0 221.28,0 227.28,0 233.28,-6 233.28,-12 233.28,-12 233.28,-42.08 233.28,-42.08 233.28,-48.08 227.28,-54.08 221.28,-54.08"/>
+<text xml:space="preserve" text-anchor="middle" x="181.14" y="-30.64" font-family="Arial" font-size="12.00">Hoàn thành</text>
+<text xml:space="preserve" text-anchor="middle" x="181.14" y="-16.24" font-family="Arial" font-size="12.00">COMPLETED</text>
+</g>
+<!-- SETTLEMENT_PENDING&#45;&gt;COMPLETED -->
+<g id="edge15" class="edge">
+<title>SETTLEMENT_PENDING&#45;&gt;COMPLETED</title>
+<path fill="none" stroke="#668071" d="M206.09,-113.64C192.55,-101.95 178.79,-90.08 178.79,-90.08 178.79,-90.08 178.79,-78.08 178.79,-78.08 178.79,-78.08 179.1,-71.45 179.5,-63.01"/>
+<polygon fill="#668071" stroke="#668071" points="181.94,-63.14 179.83,-56.04 177.05,-62.91 181.94,-63.14"/>
+<text xml:space="preserve" text-anchor="middle" x="243.97" y="-81.08" font-family="Arial" font-size="10.00">Phân bổ xong, tiền công &gt; 0</text>
+</g>
+<!-- SETTLEMENT_PENDING&#45;&gt;CANCELLED -->
+<g id="edge16" class="edge">
+<title>SETTLEMENT_PENDING&#45;&gt;CANCELLED</title>
+<path fill="none" stroke="#668071" d="M274.92,-113.68C306.06,-97.35 342.79,-78.08 342.79,-78.08 342.79,-78.08 393.25,-61.51 436.09,-47.44"/>
+<polygon fill="#668071" stroke="#668071" points="436.66,-49.83 442.55,-45.31 435.14,-45.17 436.66,-49.83"/>
+<text xml:space="preserve" text-anchor="middle" x="407.97" y="-81.08" font-family="Arial" font-size="10.00">Phân bổ xong, tiền công = 0</text>
+</g>
+<!-- start -->
+<g id="node10" class="node">
+<title>start</title>
+<ellipse fill="#185b3e" stroke="#8caf9a" cx="545.14" cy="-836.44" rx="1.8" ry="1.8"/>
+</g>
+<!-- start&#45;&gt;PROPOSED -->
+<g id="edge1" class="edge">
+<title>start&#45;&gt;PROPOSED</title>
+<path fill="none" stroke="#668071" d="M545.14,-834.19C545.14,-829.29 545.14,-810.8 545.14,-793.98"/>
+<polygon fill="#668071" stroke="#668071" points="547.59,-794.43 545.14,-787.43 542.69,-794.43 547.59,-794.43"/>
+</g>
+</g>
+</svg>
+</div><figcaption>Trạng thái ca làm · <a href="diagrams/sessionState.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>stateDiagram-v2
+    [*] --&gt; PROPOSED
+    PROPOSED --&gt; AWAITING_FUNDS: Hai bên xác nhận cùng phiên bản
+    AWAITING_FUNDS --&gt; PROPOSED: Sửa trước cấp tiền
+    AWAITING_FUNDS --&gt; READY: Cấp đủ tiền
+    PROPOSED --&gt; CANCELLED: Từ chối hoặc hủy
+    AWAITING_FUNDS --&gt; CANCELLED: Hủy hoặc hết hạn khi chưa có tiền
+    READY --&gt; IN_PROGRESS: Hai bên xác nhận bắt đầu
+    IN_PROGRESS --&gt; COMPLETION_PENDING: Người làm báo xong
+    COMPLETION_PENDING --&gt; SETTLEMENT_PENDING: Người thuê đồng ý
+    READY --&gt; SETTLEMENT_PENDING: Hai bên đồng ý hủy
+    READY --&gt; DISPUTED: Có bất đồng
+    IN_PROGRESS --&gt; DISPUTED: Có bất đồng
+    COMPLETION_PENDING --&gt; DISPUTED: Có bất đồng hoặc cần admin xử lý
+    DISPUTED --&gt; SETTLEMENT_PENDING: Admin quyết định
+    SETTLEMENT_PENDING --&gt; COMPLETED: Đã phân bổ, có tiền công được duyệt
+    SETTLEMENT_PENDING --&gt; CANCELLED: Đã phân bổ, tiền công bằng không</code></pre></details><p>Yêu cầu hủy chờ được lưu bằng CancelRequest, không ép ca sang CANCELLED trước khi hoàn tiền. COMPLETED có completionOutcome FULL/PARTIAL. Các lỗi giao dịch được giữ ở PaymentRecord, không tự đổi ca thành hoàn thành. Các terminal COMPLETED/CANCELLED chỉ được đặt khi tiền còn giữ bằng 0 hoặc chưa từng cấp tiền.</p>
+<h3 id="section-42">10.3. Thanh toán</h3><p><strong>PaymentStatus:</strong> UNFUNDED → FUNDING → HELD → SETTLING → SETTLED.</p>
+<ul>
+<li>Funding thất bại chắc chắn: trở lại UNFUNDED, lưu lỗi và sự kiện thất bại. Chưa biết kết quả: giữ FUNDING để đối chiếu, không cho cấp thêm một lần khác.</li>
+<li>Settlement thất bại trước áp dụng: trở lại HELD, ca vẫn SETTLEMENT_PENDING, có nút thử xử lý lại theo quyền. Chưa rõ kết quả: giữ SETTLING để đối chiếu.</li>
+<li>SETTLED nghĩa là toàn bộ tiền đã được phân bổ theo quyết định, có thể chi trả đầy đủ, hoàn toàn bộ hoặc kết hợp chi/hoàn; không đồng nghĩa luôn trả toàn bộ cho người làm.</li>
+<li>Trong bản mô phỏng, áp dụng các phần chi/hoàn/phí cùng transaction. Kịch bản lỗi xảy ra trước transaction hoặc trả lại kết quả đã ghi; không giả lập chuyển khoản thật từng phần.</li>
+</ul>
+<p><strong>IdentityStatus:</strong> NOT_SUBMITTED → SUBMITTED → VERIFIED / NEEDS_INFO / REJECTED; sửa định danh hoặc thu hồi quyết định → REVERIFY_REQUIRED. Gửi lại tạo request mới; trạng thái tóm tắt User được cập nhật từ request hợp lệ mới nhất.</p>
+<p><strong>DisputeStatus:</strong> OPEN → UNDER_REVIEW → DECIDED → RESOLVED; DECIDED có thể tồn tại trong lúc quyết toán thất bại. <strong>ReportStatus:</strong> OPEN → RESOLVED với resolution NO_VIOLATION/JOB_HIDDEN.</p>
+<h2 id="section-43">11. Chính sách tiền công, phí và duy trì hệ thống</h2><h3 id="section-44">11.1. Công thức</h3><p>Gọi C là tiền công đã chốt, r = 10%, F(x) = làm tròn half-up(x × r) đến một đồng. Tất cả giá trị tiền là số nguyên VND, không dùng số thực dấu phẩy động để cộng tiền.</p>
+<ul>
+<li>Tổng phải cấp T = C + F(C).</li>
+<li>Hoàn thành đầy đủ: người làm nhận C; phí F(C); hoàn 0.</li>
+<li>Hoàn thành một phần được duyệt A, với 0 ≤ A ≤ C: người làm nhận A; phí F(A); hoàn T − A − F(A).</li>
+<li>Hủy đủ điều kiện hoàn toàn bộ: A = 0, phí = 0, hoàn T.</li>
+<li>Bất biến: <strong>totalFunded = workerPaid + feeRecognized + employerRefunded + heldAmount</strong>.</li>
+</ul>
+<p>Một ca chỉ cấp tiền thành công một lần trong bản đầu. Không có nạp ví, rút ví hoặc top-up ca đã khóa. Nếu có phần việc bổ sung, tạo một ca bổ sung riêng được xác nhận và cấp tiền trước khi làm phần đó. Không cho tăng A vượt C khi quyết toán.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Kịch bản ca 240.000đ</th>
+<th align="right">Đã cấp</th>
+<th align="right">Người làm</th>
+<th align="right">Phí</th>
+<th align="right">Hoàn</th>
+<th align="right">Còn giữ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vừa cấp tiền</td>
+<td align="right">264.000</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">264.000</td>
+</tr>
+<tr>
+<td>Hoàn thành đủ</td>
+<td align="right">264.000</td>
+<td align="right">240.000</td>
+<td align="right">24.000</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr>
+<td>Duyệt một phần 120.000</td>
+<td align="right">264.000</td>
+<td align="right">120.000</td>
+<td align="right">12.000</td>
+<td align="right">132.000</td>
+<td align="right">0</td>
+</tr>
+<tr>
+<td>Hủy hoàn toàn bộ</td>
+<td align="right">264.000</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">264.000</td>
+<td align="right">0</td>
+</tr>
+</tbody></table></div>
+<p>Trường hợp hủy/tranh chấp phải có lý do và kết quả được thông báo cho hai bên. Phí của phần việc được công nhận sau tranh chấp là chính sách GrandMa Assist, cần được nêu trước khi chốt ca.</p>
+<h3 id="section-45">11.2. Cách hiển thị</h3><p>Người thuê thấy: “Tiền công người làm nhận: 240.000đ”; “Phí dịch vụ 10%: 24.000đ”; “Tổng: 264.000đ”. Người làm thấy nổi bật: “Tiền công của cô/chú: 240.000đ — không trừ phí nền tảng”. Mọi màn hình tiền có nhãn <strong>Mô phỏng — không sử dụng tiền thật</strong>.</p>
+<p>Tổng phí phải được dự tính ngay khi nhập tiền công, không xuất hiện như phụ thu bất ngờ ở bước cuối. Không tự thay mức phí với thỏa thuận đã xác nhận. Bản đầu dùng policy GMA_FEE_V1, rateBps = 1000, payer = EMPLOYER, chưa có phí tối thiểu/trần/hội viên/khuyến mại.</p>
+<h3 id="section-46">11.3. Cơ sở tham khảo và giới hạn</h3><p>bTaskee công bố trong tài liệu đối tác mức khấu trừ 20% theo giao dịch hoàn thành, có thể thay đổi; Taskrabbit mô tả phí tính cho khách ngoài đơn giá người làm; Airtasker ở Úc có phí đối tác và phí kết nối khách riêng. Đây là cơ sở tham khảo các cách thu, không chứng minh 10% là trung bình thị trường. <a class="ref" href="#source-9">[S9]</a><a class="ref" href="#source-10">[S10]</a><a class="ref" href="#source-11">[S11]</a></p>
+<p>GrandMa Assist chọn người thuê chịu 10% để người nghỉ hưu nhìn thấy tiền công nhất quán. Thu phí tạo nguồn thu nhưng chưa chứng minh đủ duy trì. Chi phí cần theo dõi gồm hạ tầng, OTP, hỗ trợ, kiểm duyệt, xử lý tranh chấp, bảo trì; khi có tiền thật còn có phí xử lý thanh toán và các nghĩa vụ liên quan.</p>
+<p><strong>Kịch bản minh họa, không phải báo giá:</strong> tiền công bình quân 200.000đ, phí 20.000đ/ca; biến phí 5.000đ/ca; định phí 3.000.000đ/tháng. Điểm hòa vốn theo giả định = 3.000.000 / (20.000 − 5.000) = 200 ca/tháng. Nếu phí không lớn hơn biến phí thì không thể hòa vốn chỉ bằng tăng số ca. Chưa có dữ liệu thực tế về nhu cầu hay lợi nhuận.</p>
+<p>Admin xem tách biệt: tổng giao dịch, tiền đang giữ, đã trả người làm, đã hoàn, phí đã ghi nhận và số ca quyết toán. Lợi nhuận không đồng nghĩa phí thu được; cần trừ chi phí. Mô hình duy trì còn cần sao lưu, kiểm thử phân quyền, kiểm soát chi phí OTP, giới hạn truy vấn và lịch sử xử lý.</p>
+<h2 id="section-47">12. Mô hình lớp nghiệp vụ và từ điển dữ liệu</h2><h3 id="section-48">12.1. Quy ước chung</h3><ul>
+<li>String là chuỗi; Long là số nguyên VND hoặc bộ đếm; Instant lưu timestamp server; LocalTime dùng cho lịch mẫu; dấu ? là trường tùy chọn.</li>
+<li>ID là giá trị không chứa dữ liệu riêng. Không dùng số điện thoại/căn cước làm document ID công khai.</li>
+<li>Mọi snapshot đã khóa giữ nguyên; thông tin hiện tại của hồ sơ không tự thay thế nội dung đã xác nhận.</li>
+<li>Dữ liệu thời gian sự kiện lưu UTC, hiển thị theo Asia/Ho_Chi_Minh cho bối cảnh Việt Nam; không quyết định hết hạn bằng giờ thiết bị.</li>
+<li>Các thuộc tính *By là UID/reference, *At là Instant; trường trạng thái dùng enum, không dùng chuỗi tiếng Việt tùy ý.</li>
+</ul>
+<h3 id="section-49">12.2. Tài khoản, hồ sơ và gợi ý</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lớp</th>
+<th>Thuộc tính chính</th>
+<th>Trách nhiệm/phương thức</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>User</td>
+<td>id, displayName, role, accountStatus, phoneE164?, phoneVerifiedAt?, phoneVerificationMode, identityStatus, identityMode, identityRequestId?, createdAt, updatedAt</td>
+<td>canApply(), canConfirmSession(); kết quả cuối do backend kiểm tra</td>
+</tr>
+<tr>
+<td>JobSeekerProfile</td>
+<td>userId, areaCode, skills: List, experienceSummary, preferredShifts: List</td>
+<td>isCompleteForApplication()</td>
+</tr>
+<tr>
+<td>EmployerProfile</td>
+<td>userId, employerType, organizationName?, introduction, areaCode</td>
+<td>isCompleteForPosting()</td>
+</tr>
+<tr>
+<td>SearchPreference</td>
+<td>userId, categoryIds: List, areaCodes: List, availableDays: List, availableShifts: List, avoidedDemands: List, updatedAt</td>
+<td>validate(), hasHardConstraints()</td>
+</tr>
+<tr>
+<td>AccessibilitySettings</td>
+<td>fontScaleOption, voiceEnabled, autoReadEnabled, speechRate</td>
+<td>Value object cục bộ; không giảm cỡ chữ hệ thống</td>
+</tr>
+<tr>
+<td>Area</td>
+<td>code, name, parentCode?, active</td>
+<td>Danh mục khu vực; quan hệ tự tham chiếu 0..1 cha</td>
+</tr>
+<tr>
+<td>JobCategory</td>
+<td>id, name, iconKey, active</td>
+<td>Danh mục việc</td>
+</tr>
+<tr>
+<td>IdentityVerificationRequest</td>
+<td>id, userId, profileVersion, sampleEvidenceRefs: List, mode, status, submittedAt, reviewedBy?, reviewedAt?, reason?</td>
+<td>canReview(); luôn mode DEMO trong bản này</td>
+</tr>
+</tbody></table></div>
+<p>Số liên hệ không lặp dưới dạng có thể sửa tùy ý trong hai profile. Lấy từ User đã được đồng bộ với Firebase Auth để tạo contact snapshot. User là tài liệu riêng, không đọc công khai; public name/badge nếu cần dùng một bản chiếu chỉ chứa trường công khai.</p>
+<h3 id="section-50">12.3. Tin, đơn và báo cáo</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lớp</th>
+<th>Thuộc tính chính</th>
+<th>Trách nhiệm/phương thức</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JobPost</td>
+<td>id, employerId, employerDisplayName, categoryId, areaCode, title, description, requirementsText, requiredSkillTags: List, workDays: List, workShift, scheduleText, physicalDemands: List, demandsDeclared, payAmount: Long, payUnit, status, version, expiresAt, createdAt, updatedAt, reviewedBy?, reviewedAt?, reviewReason?</td>
+<td>isExpired(now), canReceiveApplication(now), validate()</td>
+</tr>
+<tr>
+<td>Application</td>
+<td>id, jobId, seekerId, employerId, message?, status, applicantSnapshot, jobSnapshot, employerContactSnapshot?, createdAt, updatedAt</td>
+<td>canWithdraw(), canReview()</td>
+</tr>
+<tr>
+<td>SavedJob</td>
+<td>seekerId, jobId, savedAt</td>
+<td>Liên kết duy nhất theo cặp</td>
+</tr>
+<tr>
+<td>Report</td>
+<td>id, reporterId, jobId, reason, detail?, status, resolution?, handledBy?, resolutionNote?, createdAt, resolvedAt?</td>
+<td>isResolved()</td>
+</tr>
+<tr>
+<td>ApplicantSnapshot</td>
+<td>displayName, verifiedPhone, skills, experienceSummary, consentAt, profileVersion</td>
+<td>Dữ liệu người gửi đồng ý chia sẻ khi ứng tuyển</td>
+</tr>
+<tr>
+<td>JobSnapshot</td>
+<td>title, categoryId, areaCode, scheduleText, physicalDemands, payAmount, payUnit, jobVersion</td>
+<td>Điều kiện tin tại lúc nộp đơn</td>
+</tr>
+<tr>
+<td>ContactSnapshot</td>
+<td>displayName, verifiedPhone, sharedAt</td>
+<td>Liên hệ chủ tin khi chấp nhận</td>
+</tr>
+</tbody></table></div>
+<p>payUnit của tin có thể HOUR/SESSION/DAY. Tin là thông tin tham khảo; khi lập ca phải chốt tổng laborAmount cụ thể. Nếu tính từ đơn giá giờ thì hiển thị thời lượng và phép tính để hai bên xác nhận, không tự dùng số giờ GPS hoặc bộ đếm làm tiền cuối.</p>
+<h3 id="section-51">12.4. Ca, tiền và tranh chấp</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lớp</th>
+<th>Thuộc tính chính</th>
+<th>Trách nhiệm/phương thức</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WorkSession</td>
+<td>id, applicationId, jobId, seekerId, employerId, agreement, agreementVersion, employerAcceptedVersion?, seekerAcceptedVersion?, status, cancellationRequest?, employerStartedAt?, seekerStartedAt?, completionReportedAt?, completionResponseDueAt?, completionOutcome?, createdAt, updatedAt</td>
+<td>isAgreementConfirmed(), canStart(), canReportCompletion()</td>
+</tr>
+<tr>
+<td>AgreementSnapshot</td>
+<td>tasks, privateAddress, areaCode, startAt, endAt, laborAmount: Long, feeRateBps, serviceFee: Long, totalDue: Long, feePolicyVersion, cancellationPolicyVersion, fundingDeadline</td>
+<td>Bản chốt có version; thay đổi tạo phiên bản mới trước funding</td>
+</tr>
+<tr>
+<td>CancelRequest</td>
+<td>requestedBy, reason, requestedAt, respondedBy?, respondedAt?, status</td>
+<td>Value object; PENDING/ACCEPTED/REJECTED</td>
+</tr>
+<tr>
+<td>FeePolicy</td>
+<td>version, rateBps, payer, roundingMode, effectiveAt, active</td>
+<td>feeFor(amount), quote(amount); không sửa policy đã được ca tham chiếu</td>
+</tr>
+<tr>
+<td>PaymentRecord</td>
+<td>sessionId, employerId, seekerId, mode, agreementVersion, status, expectedTotal, totalFunded, heldAmount, workerPaid, feeRecognized, employerRefunded, approvedLaborAmount?, lastOperationId?, lastError?, updatedAt</td>
+<td>allocationFor(approvedAmount), isBalanced()</td>
+</tr>
+<tr>
+<td>PaymentEvent</td>
+<td>id, sessionId, operationId, type, status, fundingDelta, workerPaidDelta, feeDelta, refundDelta, actorId?, createdAt, errorCode?</td>
+<td>Bất biến; chỉ sự kiện thành công thay đổi số tiền</td>
+</tr>
+<tr>
+<td>Dispute</td>
+<td>id, sessionId, openedBy?, openedByType: USER/SYSTEM, reason, description, status, responseDueAt, assignedAdminId?, decision?, createdAt, resolvedAt?</td>
+<td>canRespond(), canResolve(); SYSTEM dùng khi chuyển quá hạn sang xử lý</td>
+</tr>
+<tr>
+<td>DisputeDecision</td>
+<td>approvedLaborAmount, computedFee, computedRefund, reason, decidedBy, decidedAt, version</td>
+<td>Lý do quyết định; tiền tính theo FeePolicy snapshot</td>
+</tr>
+<tr>
+<td>AuditEvent</td>
+<td>id, entityType, entityId, action, actorId, requestId, previousVersion?, newVersion?, createdAt</td>
+<td>Nhật ký thay đổi quan trọng; không chứa OTP/giấy tờ thô</td>
+</tr>
+</tbody></table></div>
+<p>Dispute có các phản hồi bên trong subcollection Responses gồm id, authorId, message, createdAt. Bản đầu dùng giải trình chữ và lịch sử hệ thống; chưa bắt buộc tải ảnh nhà riêng hay ảnh người thật. Mỗi quyết định cần lý do; dữ liệu hiện có không được coi là chứng cứ tuyệt đối.</p>
+<h3 id="section-52">12.5. Enum</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Enum</th>
+<th>Giá trị</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UserRole</td>
+<td>SEEKER, EMPLOYER, ADMIN</td>
+</tr>
+<tr>
+<td>AccountStatus</td>
+<td>ACTIVE, RESTRICTED</td>
+</tr>
+<tr>
+<td>EmployerType</td>
+<td>INDIVIDUAL, ORGANIZATION</td>
+</tr>
+<tr>
+<td>WorkShift</td>
+<td>MORNING, AFTERNOON, EVENING, FLEXIBLE</td>
+</tr>
+<tr>
+<td>PhysicalDemand</td>
+<td>HEAVY_LIFTING, PROLONGED_STANDING, FREQUENT_MOVEMENT</td>
+</tr>
+<tr>
+<td>PayUnit</td>
+<td>HOUR, SESSION, DAY</td>
+</tr>
+<tr>
+<td>JobStatus</td>
+<td>PENDING_REVIEW, OPEN, REJECTED, CLOSED, HIDDEN</td>
+</tr>
+<tr>
+<td>ApplicationStatus</td>
+<td>PENDING, ACCEPTED, REJECTED, WITHDRAWN</td>
+</tr>
+<tr>
+<td>SessionStatus</td>
+<td>PROPOSED, AWAITING_FUNDS, READY, IN_PROGRESS, COMPLETION_PENDING, DISPUTED, SETTLEMENT_PENDING, COMPLETED, CANCELLED</td>
+</tr>
+<tr>
+<td>PaymentStatus</td>
+<td>UNFUNDED, FUNDING, HELD, SETTLING, SETTLED</td>
+</tr>
+<tr>
+<td>VerificationMode</td>
+<td>REAL, TEST, DEMO; áp dụng phù hợp từng loại xác minh</td>
+</tr>
+<tr>
+<td>IdentityStatus</td>
+<td>NOT_SUBMITTED, SUBMITTED, NEEDS_INFO, VERIFIED, REJECTED, REVERIFY_REQUIRED</td>
+</tr>
+<tr>
+<td>DisputeStatus</td>
+<td>OPEN, UNDER_REVIEW, DECIDED, RESOLVED</td>
+</tr>
+<tr>
+<td>ReportReason</td>
+<td>MISLEADING, INAPPROPRIATE, SUSPECTED_SCAM, OTHER</td>
+</tr>
+<tr>
+<td>ReportResolution</td>
+<td>NO_VIOLATION, JOB_HIDDEN</td>
+</tr>
+<tr>
+<td>PaymentEventType</td>
+<td>FUNDING_SUCCEEDED, SETTLEMENT_SUCCEEDED, ATTEMPT_FAILED</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-53">12.6. Quan hệ và bội số</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Quan hệ</th>
+<th>Bội số và ràng buộc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>User — JobSeekerProfile</td>
+<td>1 — 0..1, chỉ role SEEKER</td>
+</tr>
+<tr>
+<td>User — EmployerProfile</td>
+<td>1 — 0..1, chỉ role EMPLOYER; hai profile loại trừ nhau</td>
+</tr>
+<tr>
+<td>User — SearchPreference</td>
+<td>1 — 0..1; khách có bản local chưa gắn User</td>
+</tr>
+<tr>
+<td>User — IdentityVerificationRequest</td>
+<td>1 — 0..*; tối đa một yêu cầu đang xét hiện hành</td>
+</tr>
+<tr>
+<td>EmployerProfile — JobPost</td>
+<td>1 — 0..*</td>
+</tr>
+<tr>
+<td>JobCategory/Area — JobPost</td>
+<td>Mỗi tin thuộc 1 category và 1 area; danh mục có 0..* tin</td>
+</tr>
+<tr>
+<td>JobPost — Application</td>
+<td>1 — 0..*</td>
+</tr>
+<tr>
+<td>JobSeekerProfile — Application</td>
+<td>1 — 0..*; duy nhất cặp seekerId–jobId</td>
+</tr>
+<tr>
+<td>JobSeekerProfile/JobPost — SavedJob</td>
+<td>Mỗi SavedJob liên kết đúng 1 người và 1 tin</td>
+</tr>
+<tr>
+<td>Application — WorkSession</td>
+<td>1 — 0..*; chỉ Application ACCEPTED</td>
+</tr>
+<tr>
+<td>WorkSession — AgreementSnapshot</td>
+<td>Composition 1 — 1 cho phiên bản hiện hành; lịch sử riêng</td>
+</tr>
+<tr>
+<td>WorkSession — PaymentRecord</td>
+<td>1 — 1, tạo UNFUNDED khi tạo ca</td>
+</tr>
+<tr>
+<td>PaymentRecord — PaymentEvent</td>
+<td>1 — 0..*</td>
+</tr>
+<tr>
+<td>WorkSession — Dispute</td>
+<td>1 — 0..* về lịch sử, tối đa một tranh chấp hoạt động</td>
+</tr>
+<tr>
+<td>FeePolicy — AgreementSnapshot</td>
+<td>1 — 0..*, theo version đã chốt</td>
+</tr>
+<tr>
+<td>User — Report; JobPost — Report</td>
+<td>Mỗi report có 1 người gửi và 1 tin; mỗi bên có 0..* report</td>
+</tr>
+</tbody></table></div>
+<p>Không dùng kế thừa SEEKER/EMPLOYER/ADMIN như ba bản sao người dùng; dùng role và profile chuyên biệt để ánh xạ Firebase UID. Các phương thức trong lớp chỉ thể hiện quy tắc, không thay thế kiểm tra quyền tại backend.</p>
+<h3 id="section-54">12.7. Class diagram A — tài khoản và tuyển dụng</h3><figure data-diagram="classRecruitment"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: classRecruitment Pages: 1 -->
+<svg width="1069pt" height="608pt"
+ viewBox="0.00 0.00 1069.00 608.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 593.2)">
+<title>classRecruitment</title>
+<!-- User -->
+<g id="node1" class="node">
+<title>User</title>
+<path fill="#f2f8f4" stroke="none" d="M657.56,-578.8C657.56,-578.8 503.56,-578.8 503.56,-578.8 497.56,-578.8 491.56,-572.8 491.56,-566.8 491.56,-566.8 491.56,-476.8 491.56,-476.8 491.56,-470.8 497.56,-464.8 503.56,-464.8 503.56,-464.8 657.56,-464.8 657.56,-464.8 663.56,-464.8 669.56,-470.8 669.56,-476.8 669.56,-476.8 669.56,-566.8 669.56,-566.8 669.56,-572.8 663.56,-578.8 657.56,-578.8"/>
+<polygon fill="#185b3e" stroke="none" points="491.56,-550.4 491.56,-578.8 656.97,-578.8 656.97,-550.4 491.56,-550.4"/>
+<polygon fill="none" stroke="#8caf9a" points="491.56,-550.4 491.56,-578.8 656.97,-578.8 656.97,-550.4 491.56,-550.4"/>
+<text xml:space="preserve" text-anchor="start" x="560.92" y="-562" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">User</text>
+<polygon fill="#f7fbf8" stroke="none" points="491.56,-493.2 491.56,-550.4 656.97,-550.4 656.97,-493.2 491.56,-493.2"/>
+<polygon fill="none" stroke="#8caf9a" points="491.56,-493.2 491.56,-550.4 656.97,-550.4 656.97,-493.2 491.56,-493.2"/>
+<text xml:space="preserve" text-anchor="start" x="498.56" y="-531.4" font-family="Arial" font-size="12.00">id: String</text>
+<text xml:space="preserve" text-anchor="start" x="498.56" y="-517" font-family="Arial" font-size="12.00">role: UserRole</text>
+<text xml:space="preserve" text-anchor="start" x="498.56" y="-502.6" font-family="Arial" font-size="12.00">identityStatus: IdentityStatus</text>
+<polygon fill="none" stroke="#8caf9a" points="491.56,-464.8 491.56,-493.2 656.97,-493.2 656.97,-464.8 491.56,-464.8"/>
+<text xml:space="preserve" text-anchor="start" x="498.56" y="-474.2" font-family="Arial" font-size="12.00">canConfirmSession()</text>
+</g>
+<!-- JobSeekerProfile -->
+<g id="node2" class="node">
+<title>JobSeekerProfile</title>
+<path fill="#f2f8f4" stroke="none" d="M159.06,-266.4C159.06,-266.4 12.06,-266.4 12.06,-266.4 6.06,-266.4 0.06,-260.4 0.06,-254.4 0.06,-254.4 0.06,-178.8 0.06,-178.8 0.06,-172.8 6.06,-166.8 12.06,-166.8 12.06,-166.8 159.06,-166.8 159.06,-166.8 165.06,-166.8 171.06,-172.8 171.06,-178.8 171.06,-178.8 171.06,-254.4 171.06,-254.4 171.06,-260.4 165.06,-266.4 159.06,-266.4"/>
+<polygon fill="#185b3e" stroke="none" points="0.06,-238 0.06,-266.4 158.78,-266.4 158.78,-238 0.06,-238"/>
+<polygon fill="none" stroke="#8caf9a" points="0.06,-238 0.06,-266.4 158.78,-266.4 158.78,-238 0.06,-238"/>
+<text xml:space="preserve" text-anchor="start" x="30.39" y="-249.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">JobSeekerProfile</text>
+<polygon fill="#f7fbf8" stroke="none" points="0.06,-195.2 0.06,-238 158.78,-238 158.78,-195.2 0.06,-195.2"/>
+<polygon fill="none" stroke="#8caf9a" points="0.06,-195.2 0.06,-238 158.78,-238 158.78,-195.2 0.06,-195.2"/>
+<text xml:space="preserve" text-anchor="start" x="7.06" y="-219" font-family="Arial" font-size="12.00">userId: String</text>
+<text xml:space="preserve" text-anchor="start" x="17.07" y="-204.6" font-family="Arial" font-size="12.00">skills: List</text>
+<polygon fill="none" stroke="#8caf9a" points="0.06,-166.8 0.06,-195.2 158.78,-195.2 158.78,-166.8 0.06,-166.8"/>
+<text xml:space="preserve" text-anchor="start" x="7.06" y="-176.2" font-family="Arial" font-size="12.00">isCompleteForApplication()</text>
+</g>
+<!-- User&#45;&gt;JobSeekerProfile -->
+<g id="edge1" class="edge">
+<title>User&#45;&gt;JobSeekerProfile</title>
+<path fill="none" stroke="#668071" d="M491.75,-503.06C329.12,-470.56 0,-404.8 0,-404.8 0,-404.8 0,-333.6 0,-333.6 0,-333.6 26.32,-297.91 49.77,-266.12"/>
+<text xml:space="preserve" text-anchor="middle" x="5.28" y="-366.2" font-family="Arial" font-size="10.00">có</text>
+<text xml:space="preserve" text-anchor="middle" x="47" y="-276.85" font-family="Arial" font-size="10.00">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="478.15" y="-503.37" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- EmployerProfile -->
+<g id="node3" class="node">
+<title>EmployerProfile</title>
+<path fill="#f2f8f4" stroke="none" d="M198.06,-404.8C198.06,-404.8 37.06,-404.8 37.06,-404.8 31.06,-404.8 25.06,-398.8 25.06,-392.8 25.06,-392.8 25.06,-345.6 25.06,-345.6 25.06,-339.6 31.06,-333.6 37.06,-333.6 37.06,-333.6 198.06,-333.6 198.06,-333.6 204.06,-333.6 210.06,-339.6 210.06,-345.6 210.06,-345.6 210.06,-392.8 210.06,-392.8 210.06,-398.8 204.06,-404.8 198.06,-404.8"/>
+<polygon fill="#185b3e" stroke="none" points="25.06,-376.4 25.06,-404.8 199.12,-404.8 199.12,-376.4 25.06,-376.4"/>
+<polygon fill="none" stroke="#8caf9a" points="25.06,-376.4 25.06,-404.8 199.12,-404.8 199.12,-376.4 25.06,-376.4"/>
+<text xml:space="preserve" text-anchor="start" x="66.07" y="-388" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">EmployerProfile</text>
+<polygon fill="#f7fbf8" stroke="none" points="25.06,-333.6 25.06,-376.4 199.12,-376.4 199.12,-333.6 25.06,-333.6"/>
+<polygon fill="none" stroke="#8caf9a" points="25.06,-333.6 25.06,-376.4 199.12,-376.4 199.12,-333.6 25.06,-333.6"/>
+<text xml:space="preserve" text-anchor="start" x="32.06" y="-357.4" font-family="Arial" font-size="12.00">userId: String</text>
+<text xml:space="preserve" text-anchor="start" x="32.06" y="-343" font-family="Arial" font-size="12.00">employerType: EmployerType</text>
+</g>
+<!-- User&#45;&gt;EmployerProfile -->
+<g id="edge2" class="edge">
+<title>User&#45;&gt;EmployerProfile</title>
+<path fill="none" stroke="#668071" d="M491.56,-491.85C410.65,-465.54 291.75,-426.86 209.83,-400.21"/>
+<text xml:space="preserve" text-anchor="middle" x="326.61" y="-431.8" font-family="Arial" font-size="10.00">có</text>
+<text xml:space="preserve" text-anchor="middle" x="223.73" y="-395.51" font-family="Arial" font-size="10.00">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="477.66" y="-490.55" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- SearchPreference -->
+<g id="node6" class="node">
+<title>SearchPreference</title>
+<path fill="#f2f8f4" stroke="none" d="M818.06,-404.8C818.06,-404.8 637.06,-404.8 637.06,-404.8 631.06,-404.8 625.06,-398.8 625.06,-392.8 625.06,-392.8 625.06,-345.6 625.06,-345.6 625.06,-339.6 631.06,-333.6 637.06,-333.6 637.06,-333.6 818.06,-333.6 818.06,-333.6 824.06,-333.6 830.06,-339.6 830.06,-345.6 830.06,-345.6 830.06,-392.8 830.06,-392.8 830.06,-398.8 824.06,-404.8 818.06,-404.8"/>
+<polygon fill="#185b3e" stroke="none" points="625.06,-376.4 625.06,-404.8 820.49,-404.8 820.49,-376.4 625.06,-376.4"/>
+<polygon fill="none" stroke="#8caf9a" points="625.06,-376.4 625.06,-404.8 820.49,-404.8 820.49,-376.4 625.06,-376.4"/>
+<text xml:space="preserve" text-anchor="start" x="671.74" y="-388" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">SearchPreference</text>
+<polygon fill="#f7fbf8" stroke="none" points="625.06,-333.6 625.06,-376.4 820.49,-376.4 820.49,-333.6 625.06,-333.6"/>
+<polygon fill="none" stroke="#8caf9a" points="625.06,-333.6 625.06,-376.4 820.49,-376.4 820.49,-333.6 625.06,-333.6"/>
+<text xml:space="preserve" text-anchor="start" x="632.06" y="-357.4" font-family="Arial" font-size="12.00">categoryIds · areaCodes</text>
+<text xml:space="preserve" text-anchor="start" x="632.06" y="-343" font-family="Arial" font-size="12.00">availableDays · avoidedDemands</text>
+</g>
+<!-- User&#45;&gt;SearchPreference -->
+<g id="edge3" class="edge">
+<title>User&#45;&gt;SearchPreference</title>
+<path fill="none" stroke="#668071" d="M634.88,-465.15C654.67,-444.87 676.46,-422.55 693.93,-404.65"/>
+<text xml:space="preserve" text-anchor="middle" x="688.9" y="-431.8" font-family="Arial" font-size="10.00">lựa chọn</text>
+<text xml:space="preserve" text-anchor="middle" x="689.3" y="-414.86" font-family="Arial" font-size="10.00">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="639.51" y="-448.94" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- IdentityVerificationRequest -->
+<g id="node7" class="node">
+<title>IdentityVerificationRequest</title>
+<path fill="#f2f8f4" stroke="none" d="M1028.06,-404.8C1028.06,-404.8 871.06,-404.8 871.06,-404.8 865.06,-404.8 859.06,-398.8 859.06,-392.8 859.06,-392.8 859.06,-345.6 859.06,-345.6 859.06,-339.6 865.06,-333.6 871.06,-333.6 871.06,-333.6 1028.06,-333.6 1028.06,-333.6 1034.06,-333.6 1040.06,-339.6 1040.06,-345.6 1040.06,-345.6 1040.06,-392.8 1040.06,-392.8 1040.06,-398.8 1034.06,-404.8 1028.06,-404.8"/>
+<polygon fill="#185b3e" stroke="none" points="859.06,-376.4 859.06,-404.8 1028.42,-404.8 1028.42,-376.4 859.06,-376.4"/>
+<polygon fill="none" stroke="#8caf9a" points="859.06,-376.4 859.06,-404.8 1028.42,-404.8 1028.42,-376.4 859.06,-376.4"/>
+<text xml:space="preserve" text-anchor="start" x="866.06" y="-388" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">IdentityVerificationRequest</text>
+<polygon fill="#f7fbf8" stroke="none" points="859.06,-333.6 859.06,-376.4 1028.42,-376.4 1028.42,-333.6 859.06,-333.6"/>
+<polygon fill="none" stroke="#8caf9a" points="859.06,-333.6 859.06,-376.4 1028.42,-376.4 1028.42,-333.6 859.06,-333.6"/>
+<text xml:space="preserve" text-anchor="start" x="866.06" y="-357.4" font-family="Arial" font-size="12.00">userId · status · mode</text>
+<text xml:space="preserve" text-anchor="start" x="866.06" y="-343" font-family="Arial" font-size="12.00">profileVersion · reviewedBy</text>
+</g>
+<!-- User&#45;&gt;IdentityVerificationRequest -->
+<g id="edge4" class="edge">
+<title>User&#45;&gt;IdentityVerificationRequest</title>
+<path fill="none" stroke="#668071" d="M669.41,-484.54C728.8,-460.3 806.47,-428.6 864.96,-404.73"/>
+<text xml:space="preserve" text-anchor="middle" x="806.17" y="-431.8" font-family="Arial" font-size="10.00">gửi</text>
+<text xml:space="preserve" text-anchor="middle" x="855.45" y="-412" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="678.92" y="-471.26" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Report -->
+<g id="node11" class="node">
+<title>Report</title>
+<path fill="#f2f8f4" stroke="none" d="M591.56,-78.2C591.56,-78.2 457.56,-78.2 457.56,-78.2 451.56,-78.2 445.56,-72.2 445.56,-66.2 445.56,-66.2 445.56,-33.4 445.56,-33.4 445.56,-27.4 451.56,-21.4 457.56,-21.4 457.56,-21.4 591.56,-21.4 591.56,-21.4 597.56,-21.4 603.56,-27.4 603.56,-33.4 603.56,-33.4 603.56,-66.2 603.56,-66.2 603.56,-72.2 597.56,-78.2 591.56,-78.2"/>
+<polygon fill="#185b3e" stroke="none" points="445.56,-49.8 445.56,-78.2 596.29,-78.2 596.29,-49.8 445.56,-49.8"/>
+<polygon fill="none" stroke="#8caf9a" points="445.56,-49.8 445.56,-78.2 596.29,-78.2 596.29,-49.8 445.56,-49.8"/>
+<text xml:space="preserve" text-anchor="start" x="501.59" y="-61.4" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">Report</text>
+<polygon fill="#f7fbf8" stroke="none" points="445.56,-21.4 445.56,-49.8 596.29,-49.8 596.29,-21.4 445.56,-21.4"/>
+<polygon fill="none" stroke="#8caf9a" points="445.56,-21.4 445.56,-49.8 596.29,-49.8 596.29,-21.4 445.56,-21.4"/>
+<text xml:space="preserve" text-anchor="start" x="452.56" y="-30.8" font-family="Arial" font-size="12.00">reporterId · jobId · status</text>
+</g>
+<!-- User&#45;&gt;Report -->
+<g id="edge12" class="edge">
+<title>User&#45;&gt;Report</title>
+<path fill="none" stroke="#668071" d="M573.91,-465.04C561.85,-363.76 536.75,-153.14 527.81,-78.09"/>
+<text xml:space="preserve" text-anchor="middle" x="563.2" y="-300.6" font-family="Arial" font-size="10.00">gửi</text>
+<text xml:space="preserve" text-anchor="middle" x="535.18" y="-86.99" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="566.54" y="-450.14" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Application -->
+<g id="node5" class="node">
+<title>Application</title>
+<path fill="#f2f8f4" stroke="none" d="M348.06,-99.6C348.06,-99.6 215.06,-99.6 215.06,-99.6 209.06,-99.6 203.06,-93.6 203.06,-87.6 203.06,-87.6 203.06,-12 203.06,-12 203.06,-6 209.06,0 215.06,0 215.06,0 348.06,0 348.06,0 354.06,0 360.06,-6 360.06,-12 360.06,-12 360.06,-87.6 360.06,-87.6 360.06,-93.6 354.06,-99.6 348.06,-99.6"/>
+<polygon fill="#185b3e" stroke="none" points="203.06,-71.2 203.06,-99.6 348.46,-99.6 348.46,-71.2 203.06,-71.2"/>
+<polygon fill="none" stroke="#8caf9a" points="203.06,-71.2 203.06,-99.6 348.46,-99.6 348.46,-71.2 203.06,-71.2"/>
+<text xml:space="preserve" text-anchor="start" x="243.09" y="-82.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">Application</text>
+<polygon fill="#f7fbf8" stroke="none" points="203.06,-28.4 203.06,-71.2 348.46,-71.2 348.46,-28.4 203.06,-28.4"/>
+<polygon fill="none" stroke="#8caf9a" points="203.06,-28.4 203.06,-71.2 348.46,-71.2 348.46,-28.4 203.06,-28.4"/>
+<text xml:space="preserve" text-anchor="start" x="210.06" y="-52.2" font-family="Arial" font-size="12.00">id: String</text>
+<text xml:space="preserve" text-anchor="start" x="210.06" y="-37.8" font-family="Arial" font-size="12.00">status: ApplicationStatus</text>
+<polygon fill="none" stroke="#8caf9a" points="203.06,0 203.06,-28.4 348.46,-28.4 348.46,0 203.06,0"/>
+<text xml:space="preserve" text-anchor="start" x="210.06" y="-9.4" font-family="Arial" font-size="12.00">canWithdraw()</text>
+</g>
+<!-- JobSeekerProfile&#45;&gt;Application -->
+<g id="edge9" class="edge">
+<title>JobSeekerProfile&#45;&gt;Application</title>
+<path fill="none" stroke="#668071" d="M120.43,-166.91C136.23,-144.84 151.44,-123.6 151.44,-123.6 151.44,-123.6 175.68,-110.04 203.24,-94.62"/>
+<text xml:space="preserve" text-anchor="middle" x="159.5" y="-126.6" font-family="Arial" font-size="10.00">gửi</text>
+<text xml:space="preserve" text-anchor="middle" x="195.05" y="-102.98" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="123" y="-150.15" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- SavedJob -->
+<g id="node10" class="node">
+<title>SavedJob</title>
+<path fill="#f2f8f4" stroke="none" d="M160.06,-78.2C160.06,-78.2 21.06,-78.2 21.06,-78.2 15.06,-78.2 9.06,-72.2 9.06,-66.2 9.06,-66.2 9.06,-33.4 9.06,-33.4 9.06,-27.4 15.06,-21.4 21.06,-21.4 21.06,-21.4 160.06,-21.4 160.06,-21.4 166.06,-21.4 172.06,-27.4 172.06,-33.4 172.06,-33.4 172.06,-66.2 172.06,-66.2 172.06,-72.2 166.06,-78.2 160.06,-78.2"/>
+<polygon fill="#185b3e" stroke="none" points="9.06,-49.8 9.06,-78.2 165.13,-78.2 165.13,-49.8 9.06,-49.8"/>
+<polygon fill="none" stroke="#8caf9a" points="9.06,-49.8 9.06,-78.2 165.13,-78.2 165.13,-49.8 9.06,-49.8"/>
+<text xml:space="preserve" text-anchor="start" x="58.75" y="-61.4" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">SavedJob</text>
+<polygon fill="#f7fbf8" stroke="none" points="9.06,-21.4 9.06,-49.8 165.13,-49.8 165.13,-21.4 9.06,-21.4"/>
+<polygon fill="none" stroke="#8caf9a" points="9.06,-21.4 9.06,-49.8 165.13,-49.8 165.13,-21.4 9.06,-21.4"/>
+<text xml:space="preserve" text-anchor="start" x="16.06" y="-30.8" font-family="Arial" font-size="12.00">seekerId · jobId · savedAt</text>
+</g>
+<!-- JobSeekerProfile&#45;&gt;SavedJob -->
+<g id="edge10" class="edge">
+<title>JobSeekerProfile&#45;&gt;SavedJob</title>
+<path fill="none" stroke="#668071" d="M87.03,-167.05C87.91,-137.99 89,-102.14 89.73,-78"/>
+<text xml:space="preserve" text-anchor="middle" x="94.88" y="-126.6" font-family="Arial" font-size="10.00">lưu</text>
+<text xml:space="preserve" text-anchor="middle" x="95.26" y="-87.86" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="81.5" y="-151.18" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- JobPost -->
+<g id="node4" class="node">
+<title>JobPost</title>
+<path fill="#f2f8f4" stroke="none" d="M366.56,-273.6C366.56,-273.6 212.56,-273.6 212.56,-273.6 206.56,-273.6 200.56,-267.6 200.56,-261.6 200.56,-261.6 200.56,-171.6 200.56,-171.6 200.56,-165.6 206.56,-159.6 212.56,-159.6 212.56,-159.6 366.56,-159.6 366.56,-159.6 372.56,-159.6 378.56,-165.6 378.56,-171.6 378.56,-171.6 378.56,-261.6 378.56,-261.6 378.56,-267.6 372.56,-273.6 366.56,-273.6"/>
+<polygon fill="#185b3e" stroke="none" points="200.56,-245.2 200.56,-273.6 365.97,-273.6 365.97,-245.2 200.56,-245.2"/>
+<polygon fill="none" stroke="#8caf9a" points="200.56,-245.2 200.56,-273.6 365.97,-273.6 365.97,-245.2 200.56,-245.2"/>
+<text xml:space="preserve" text-anchor="start" x="259.59" y="-256.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">JobPost</text>
+<polygon fill="#f7fbf8" stroke="none" points="200.56,-188 200.56,-245.2 365.97,-245.2 365.97,-188 200.56,-188"/>
+<polygon fill="none" stroke="#8caf9a" points="200.56,-188 200.56,-245.2 365.97,-245.2 365.97,-188 200.56,-188"/>
+<text xml:space="preserve" text-anchor="start" x="207.56" y="-226.2" font-family="Arial" font-size="12.00">id: String</text>
+<text xml:space="preserve" text-anchor="start" x="207.56" y="-211.8" font-family="Arial" font-size="12.00">status: JobStatus</text>
+<text xml:space="preserve" text-anchor="start" x="207.56" y="-197.4" font-family="Arial" font-size="12.00">payAmount: Long</text>
+<polygon fill="none" stroke="#8caf9a" points="200.56,-159.6 200.56,-188 365.97,-188 365.97,-159.6 200.56,-159.6"/>
+<text xml:space="preserve" text-anchor="start" x="207.56" y="-169" font-family="Arial" font-size="12.00">canReceiveApplication(now)</text>
+</g>
+<!-- EmployerProfile&#45;&gt;JobPost -->
+<g id="edge5" class="edge">
+<title>EmployerProfile&#45;&gt;JobPost</title>
+<path fill="none" stroke="#668071" d="M157.02,-333.65C177.35,-315.85 202.65,-293.7 225.68,-273.53"/>
+<text xml:space="preserve" text-anchor="middle" x="204.38" y="-300.6" font-family="Arial" font-size="10.00">đăng</text>
+<text xml:space="preserve" text-anchor="middle" x="220.03" y="-283.34" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="162.67" y="-317.84" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- JobPost&#45;&gt;Application -->
+<g id="edge8" class="edge">
+<title>JobPost&#45;&gt;Application</title>
+<path fill="none" stroke="#668071" d="M286.85,-159.81C285.9,-140.2 284.84,-118.34 283.91,-99.37"/>
+<text xml:space="preserve" text-anchor="middle" x="298.07" y="-126.6" font-family="Arial" font-size="10.00">nhận</text>
+<text xml:space="preserve" text-anchor="middle" x="290.44" y="-108.75" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="280.32" y="-144.42" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- JobPost&#45;&gt;SavedJob -->
+<g id="edge11" class="edge">
+<title>JobPost&#45;&gt;SavedJob</title>
+<path fill="none" stroke="#668071" d="M222.18,-159.81C188.92,-132.26 150.29,-100.27 123.52,-78.1"/>
+<text xml:space="preserve" text-anchor="middle" x="210.34" y="-126.6" font-family="Arial" font-size="10.00">được lưu</text>
+<text xml:space="preserve" text-anchor="middle" x="137.07" y="-78.64" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="208.64" y="-153.27" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- JobPost&#45;&gt;Report -->
+<g id="edge13" class="edge">
+<title>JobPost&#45;&gt;Report</title>
+<path fill="none" stroke="#668071" d="M369.12,-159.81C408.4,-132.26 454.02,-100.27 485.63,-78.1"/>
+<text xml:space="preserve" text-anchor="middle" x="445.5" y="-126.6" font-family="Arial" font-size="10.00">được báo cáo</text>
+<text xml:space="preserve" text-anchor="middle" x="478.64" y="-87.23" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="376.11" y="-144.68" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- JobCategory -->
+<g id="node8" class="node">
+<title>JobCategory</title>
+<path fill="#f2f8f4" stroke="none" d="M327.56,-397.6C327.56,-397.6 251.56,-397.6 251.56,-397.6 245.56,-397.6 239.56,-391.6 239.56,-385.6 239.56,-385.6 239.56,-352.8 239.56,-352.8 239.56,-346.8 245.56,-340.8 251.56,-340.8 251.56,-340.8 327.56,-340.8 327.56,-340.8 333.56,-340.8 339.56,-346.8 339.56,-352.8 339.56,-352.8 339.56,-385.6 339.56,-385.6 339.56,-391.6 333.56,-397.6 327.56,-397.6"/>
+<polygon fill="#185b3e" stroke="none" points="239.56,-369.2 239.56,-397.6 326.9,-397.6 326.9,-369.2 239.56,-369.2"/>
+<polygon fill="none" stroke="#8caf9a" points="239.56,-369.2 239.56,-397.6 326.9,-397.6 326.9,-369.2 239.56,-369.2"/>
+<text xml:space="preserve" text-anchor="start" x="246.56" y="-380.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">JobCategory</text>
+<polygon fill="#f7fbf8" stroke="none" points="239.56,-340.8 239.56,-369.2 326.9,-369.2 326.9,-340.8 239.56,-340.8"/>
+<polygon fill="none" stroke="#8caf9a" points="239.56,-340.8 239.56,-369.2 326.9,-369.2 326.9,-340.8 239.56,-340.8"/>
+<text xml:space="preserve" text-anchor="start" x="246.56" y="-350.2" font-family="Arial" font-size="12.00">id · name</text>
+</g>
+<!-- JobCategory&#45;&gt;JobPost -->
+<g id="edge6" class="edge">
+<title>JobCategory&#45;&gt;JobPost</title>
+<path fill="none" stroke="#668071" d="M289.56,-340.93C289.56,-322.11 289.56,-296.42 289.56,-273.37"/>
+<text xml:space="preserve" text-anchor="middle" x="311.24" y="-300.6" font-family="Arial" font-size="10.00">phân loại</text>
+<text xml:space="preserve" text-anchor="middle" x="295.47" y="-283.05" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="283.64" y="-325.24" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Area -->
+<g id="node9" class="node">
+<title>Area</title>
+<path fill="#f2f8f4" stroke="none" d="M524.06,-397.6C524.06,-397.6 381.06,-397.6 381.06,-397.6 375.06,-397.6 369.06,-391.6 369.06,-385.6 369.06,-385.6 369.06,-352.8 369.06,-352.8 369.06,-346.8 375.06,-340.8 381.06,-340.8 381.06,-340.8 524.06,-340.8 524.06,-340.8 530.06,-340.8 536.06,-346.8 536.06,-352.8 536.06,-352.8 536.06,-385.6 536.06,-385.6 536.06,-391.6 530.06,-397.6 524.06,-397.6"/>
+<polygon fill="#185b3e" stroke="none" points="369.06,-369.2 369.06,-397.6 528.48,-397.6 528.48,-369.2 369.06,-369.2"/>
+<polygon fill="none" stroke="#8caf9a" points="369.06,-369.2 369.06,-397.6 528.48,-397.6 528.48,-369.2 369.06,-369.2"/>
+<text xml:space="preserve" text-anchor="start" x="435.43" y="-380.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">Area</text>
+<polygon fill="#f7fbf8" stroke="none" points="369.06,-340.8 369.06,-369.2 528.48,-369.2 528.48,-340.8 369.06,-340.8"/>
+<polygon fill="none" stroke="#8caf9a" points="369.06,-340.8 369.06,-369.2 528.48,-369.2 528.48,-340.8 369.06,-340.8"/>
+<text xml:space="preserve" text-anchor="start" x="376.06" y="-350.2" font-family="Arial" font-size="12.00">code · name · parentCode</text>
+</g>
+<!-- Area&#45;&gt;JobPost -->
+<g id="edge7" class="edge">
+<title>Area&#45;&gt;JobPost</title>
+<path fill="none" stroke="#668071" d="M423.04,-340.93C402.67,-322.11 374.87,-296.42 349.91,-273.37"/>
+<text xml:space="preserve" text-anchor="middle" x="404.27" y="-300.6" font-family="Arial" font-size="10.00">khu vực</text>
+<text xml:space="preserve" text-anchor="middle" x="363.25" y="-274.63" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="409.7" y="-333.66" font-family="Arial" font-size="10.00">1</text>
+</g>
+</g>
+</svg>
+</div><figcaption>Class diagram — tài khoản và tuyển dụng · <a href="diagrams/classRecruitment.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>classDiagram
+    class User {
+        +String id
+        +UserRole role
+        +IdentityStatus identityStatus
+        +canConfirmSession() boolean
+    }
+    class JobSeekerProfile {
+        +String userId
+        +List skills
+        +isCompleteForApplication() boolean
+    }
+    class EmployerProfile {
+        +String userId
+        +EmployerType employerType
+    }
+    class JobPost {
+        +String id
+        +JobStatus status
+        +long payAmount
+        +canReceiveApplication(now) boolean
+    }
+    class Application {
+        +String id
+        +ApplicationStatus status
+        +canWithdraw() boolean
+    }
+    class SavedJob
+    class SearchPreference
+    class Area
+    class JobCategory
+    class IdentityVerificationRequest
+    class Report
+    User &quot;1&quot; -- &quot;0..1&quot; JobSeekerProfile : có
+    User &quot;1&quot; -- &quot;0..1&quot; EmployerProfile : có
+    User &quot;1&quot; -- &quot;0..1&quot; SearchPreference : lựa chọn
+    User &quot;1&quot; -- &quot;0..*&quot; IdentityVerificationRequest : gửi
+    EmployerProfile &quot;1&quot; -- &quot;0..*&quot; JobPost : đăng
+    JobCategory &quot;1&quot; -- &quot;0..*&quot; JobPost : phân loại
+    Area &quot;1&quot; -- &quot;0..*&quot; JobPost : khu vực
+    JobPost &quot;1&quot; -- &quot;0..*&quot; Application : nhận
+    JobSeekerProfile &quot;1&quot; -- &quot;0..*&quot; Application : gửi
+    JobSeekerProfile &quot;1&quot; -- &quot;0..*&quot; SavedJob : lưu
+    JobPost &quot;1&quot; -- &quot;0..*&quot; SavedJob : được lưu
+    User &quot;1&quot; -- &quot;0..*&quot; Report : gửi
+    JobPost &quot;1&quot; -- &quot;0..*&quot; Report : được báo cáo</code></pre></details><h3 id="section-55">12.8. Class diagram B — ca và thanh toán</h3><figure data-diagram="classPayment"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: classPayment Pages: 1 -->
+<svg width="602pt" height="568pt"
+ viewBox="0.00 0.00 602.00 568.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 553.8)">
+<title>classPayment</title>
+<!-- Application -->
+<g id="node1" class="node">
+<title>Application</title>
+<path fill="#f2f8f4" stroke="none" d="M345.5,-539.4C345.5,-539.4 277.5,-539.4 277.5,-539.4 271.5,-539.4 265.5,-533.4 265.5,-527.4 265.5,-527.4 265.5,-494.6 265.5,-494.6 265.5,-488.6 271.5,-482.6 277.5,-482.6 277.5,-482.6 345.5,-482.6 345.5,-482.6 351.5,-482.6 357.5,-488.6 357.5,-494.6 357.5,-494.6 357.5,-527.4 357.5,-527.4 357.5,-533.4 351.5,-539.4 345.5,-539.4"/>
+<polygon fill="#185b3e" stroke="none" points="265.5,-511 265.5,-539.4 344.83,-539.4 344.83,-511 265.5,-511"/>
+<polygon fill="none" stroke="#8caf9a" points="265.5,-511 265.5,-539.4 344.83,-539.4 344.83,-511 265.5,-511"/>
+<text xml:space="preserve" text-anchor="start" x="272.5" y="-522.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">Application</text>
+<polygon fill="#f7fbf8" stroke="none" points="265.5,-482.6 265.5,-511 344.83,-511 344.83,-482.6 265.5,-482.6"/>
+<polygon fill="none" stroke="#8caf9a" points="265.5,-482.6 265.5,-511 344.83,-511 344.83,-482.6 265.5,-482.6"/>
+<text xml:space="preserve" text-anchor="start" x="272.5" y="-492" font-family="Arial" font-size="12.00">id · status</text>
+</g>
+<!-- WorkSession -->
+<g id="node2" class="node">
+<title>WorkSession</title>
+<path fill="#f2f8f4" stroke="none" d="M378,-422.6C378,-422.6 245,-422.6 245,-422.6 239,-422.6 233,-416.6 233,-410.6 233,-410.6 233,-320.6 233,-320.6 233,-314.6 239,-308.6 245,-308.6 245,-308.6 378,-308.6 378,-308.6 384,-308.6 390,-314.6 390,-320.6 390,-320.6 390,-410.6 390,-410.6 390,-416.6 384,-422.6 378,-422.6"/>
+<polygon fill="#185b3e" stroke="none" points="233,-394.2 233,-422.6 377.71,-422.6 377.71,-394.2 233,-394.2"/>
+<polygon fill="none" stroke="#8caf9a" points="233,-394.2 233,-422.6 377.71,-422.6 377.71,-394.2 233,-394.2"/>
+<text xml:space="preserve" text-anchor="start" x="267.35" y="-405.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">WorkSession</text>
+<polygon fill="#f7fbf8" stroke="none" points="233,-351.4 233,-394.2 377.71,-394.2 377.71,-351.4 233,-351.4"/>
+<polygon fill="none" stroke="#8caf9a" points="233,-351.4 233,-394.2 377.71,-394.2 377.71,-351.4 233,-351.4"/>
+<text xml:space="preserve" text-anchor="start" x="240" y="-375.2" font-family="Arial" font-size="12.00">id · agreementVersion</text>
+<text xml:space="preserve" text-anchor="start" x="242.67" y="-360.8" font-family="Arial" font-size="12.00">status: SessionStatus</text>
+<polygon fill="none" stroke="#8caf9a" points="233,-308.6 233,-351.4 377.71,-351.4 377.71,-308.6 233,-308.6"/>
+<text xml:space="preserve" text-anchor="start" x="240" y="-332.4" font-family="Arial" font-size="12.00">isAgreementConfirmed()</text>
+<text xml:space="preserve" text-anchor="start" x="279.01" y="-318" font-family="Arial" font-size="12.00">canStart()</text>
+</g>
+<!-- Application&#45;&gt;WorkSession -->
+<g id="edge1" class="edge">
+<title>Application&#45;&gt;WorkSession</title>
+<path fill="none" stroke="#668071" d="M311.5,-482.69C311.5,-465.62 311.5,-443.03 311.5,-422.31"/>
+<text xml:space="preserve" text-anchor="middle" x="327.34" y="-449.6" font-family="Arial" font-size="10.00">sinh ca</text>
+<text xml:space="preserve" text-anchor="middle" x="317.42" y="-432" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="305.58" y="-467" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- AgreementSnapshot -->
+<g id="node3" class="node">
+<title>AgreementSnapshot</title>
+<path fill="#f2f8f4" stroke="none" d="M561,-227.2C561,-227.2 414,-227.2 414,-227.2 408,-227.2 402,-221.2 402,-215.2 402,-215.2 402,-168 402,-168 402,-162 408,-156 414,-156 414,-156 561,-156 561,-156 567,-156 573,-162 573,-168 573,-168 573,-215.2 573,-215.2 573,-221.2 567,-227.2 561,-227.2"/>
+<polygon fill="#185b3e" stroke="none" points="402,-198.8 402,-227.2 563.41,-227.2 563.41,-198.8 402,-198.8"/>
+<polygon fill="none" stroke="#8caf9a" points="402,-198.8 402,-227.2 563.41,-227.2 563.41,-198.8 402,-198.8"/>
+<text xml:space="preserve" text-anchor="start" x="424.03" y="-210.4" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">AgreementSnapshot</text>
+<polygon fill="#f7fbf8" stroke="none" points="402,-156 402,-198.8 563.41,-198.8 563.41,-156 402,-156"/>
+<polygon fill="none" stroke="#8caf9a" points="402,-156 402,-198.8 563.41,-198.8 563.41,-156 402,-156"/>
+<text xml:space="preserve" text-anchor="start" x="409" y="-179.8" font-family="Arial" font-size="12.00">laborAmount · serviceFee</text>
+<text xml:space="preserve" text-anchor="start" x="409" y="-165.4" font-family="Arial" font-size="12.00">totalDue · feePolicyVersion</text>
+</g>
+<!-- WorkSession&#45;&gt;AgreementSnapshot -->
+<g id="edge2" class="edge">
+<title>WorkSession&#45;&gt;AgreementSnapshot</title>
+<path fill="none" stroke="#668071" d="M375.17,-302.38C401.11,-277.03 430.12,-248.68 452.16,-227.14"/>
+<polygon fill="#668071" stroke="#668071" points="375.29,-302.26 374.25,-307.19 369.29,-308.13 370.33,-303.19 375.29,-302.26"/>
+<text xml:space="preserve" text-anchor="middle" x="447.22" y="-237.24" font-family="Arial" font-size="10.00">1</text>
+<text xml:space="preserve" text-anchor="middle" x="373.58" y="-292.66" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- PaymentRecord -->
+<g id="node4" class="node">
+<title>PaymentRecord</title>
+<path fill="#f2f8f4" stroke="none" d="M207,-248.6C207,-248.6 12,-248.6 12,-248.6 6,-248.6 0,-242.6 0,-236.6 0,-236.6 0,-146.6 0,-146.6 0,-140.6 6,-134.6 12,-134.6 12,-134.6 207,-134.6 207,-134.6 213,-134.6 219,-140.6 219,-146.6 219,-146.6 219,-236.6 219,-236.6 219,-242.6 213,-248.6 207,-248.6"/>
+<polygon fill="#185b3e" stroke="none" points="0,-220.2 0,-248.6 208.79,-248.6 208.79,-220.2 0,-220.2"/>
+<polygon fill="none" stroke="#8caf9a" points="0,-220.2 0,-248.6 208.79,-248.6 208.79,-220.2 0,-220.2"/>
+<text xml:space="preserve" text-anchor="start" x="58.71" y="-231.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">PaymentRecord</text>
+<polygon fill="#f7fbf8" stroke="none" points="0,-163 0,-220.2 208.79,-220.2 208.79,-163 0,-163"/>
+<polygon fill="none" stroke="#8caf9a" points="0,-163 0,-220.2 208.79,-220.2 208.79,-163 0,-163"/>
+<text xml:space="preserve" text-anchor="start" x="7" y="-201.2" font-family="Arial" font-size="12.00">status · totalFunded</text>
+<text xml:space="preserve" text-anchor="start" x="7" y="-186.8" font-family="Arial" font-size="12.00">heldAmount · workerPaid</text>
+<text xml:space="preserve" text-anchor="start" x="7" y="-172.4" font-family="Arial" font-size="12.00">feeRecognized · employerRefunded</text>
+<polygon fill="none" stroke="#8caf9a" points="0,-134.6 0,-163 208.79,-163 208.79,-134.6 0,-134.6"/>
+<text xml:space="preserve" text-anchor="start" x="7" y="-144" font-family="Arial" font-size="12.00">isBalanced()</text>
+</g>
+<!-- WorkSession&#45;&gt;PaymentRecord -->
+<g id="edge3" class="edge">
+<title>WorkSession&#45;&gt;PaymentRecord</title>
+<path fill="none" stroke="#668071" d="M245.92,-308.76C223.22,-289.43 197.8,-267.78 175.1,-248.46"/>
+<text xml:space="preserve" text-anchor="middle" x="188.6" y="-249.18" font-family="Arial" font-size="10.00">1</text>
+<text xml:space="preserve" text-anchor="middle" x="232.42" y="-302.04" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Dispute -->
+<g id="node7" class="node">
+<title>Dispute</title>
+<path fill="#f2f8f4" stroke="none" d="M361,-227.2C361,-227.2 262,-227.2 262,-227.2 256,-227.2 250,-221.2 250,-215.2 250,-215.2 250,-168 250,-168 250,-162 256,-156 262,-156 262,-156 361,-156 361,-156 367,-156 373,-162 373,-168 373,-168 373,-215.2 373,-215.2 373,-221.2 367,-227.2 361,-227.2"/>
+<polygon fill="#185b3e" stroke="none" points="250,-198.8 250,-227.2 363.4,-227.2 363.4,-198.8 250,-198.8"/>
+<polygon fill="none" stroke="#8caf9a" points="250,-198.8 250,-227.2 363.4,-227.2 363.4,-198.8 250,-198.8"/>
+<text xml:space="preserve" text-anchor="start" x="284.7" y="-210.4" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">Dispute</text>
+<polygon fill="#f7fbf8" stroke="none" points="250,-156 250,-198.8 363.4,-198.8 363.4,-156 250,-156"/>
+<polygon fill="none" stroke="#8caf9a" points="250,-156 250,-198.8 363.4,-198.8 363.4,-156 250,-156"/>
+<text xml:space="preserve" text-anchor="start" x="257" y="-179.8" font-family="Arial" font-size="12.00">status · openedBy</text>
+<text xml:space="preserve" text-anchor="start" x="288.35" y="-165.4" font-family="Arial" font-size="12.00">reason</text>
+</g>
+<!-- WorkSession&#45;&gt;Dispute -->
+<g id="edge6" class="edge">
+<title>WorkSession&#45;&gt;Dispute</title>
+<path fill="none" stroke="#668071" d="M311.5,-308.76C311.5,-281.88 311.5,-250.5 311.5,-227.14"/>
+<text xml:space="preserve" text-anchor="middle" x="317.42" y="-236.83" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="305.58" y="-293.07" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- PaymentEvent -->
+<g id="node5" class="node">
+<title>PaymentEvent</title>
+<path fill="#f2f8f4" stroke="none" d="M170,-78.4C170,-78.4 45,-78.4 45,-78.4 39,-78.4 33,-72.4 33,-66.4 33,-66.4 33,-19.2 33,-19.2 33,-13.2 39,-7.2 45,-7.2 45,-7.2 170,-7.2 170,-7.2 176,-7.2 182,-13.2 182,-19.2 182,-19.2 182,-66.4 182,-66.4 182,-72.4 176,-78.4 170,-78.4"/>
+<polygon fill="#185b3e" stroke="none" points="33,-50 33,-78.4 172.41,-78.4 172.41,-50 33,-50"/>
+<polygon fill="none" stroke="#8caf9a" points="33,-50 33,-78.4 172.41,-78.4 172.41,-50 33,-50"/>
+<text xml:space="preserve" text-anchor="start" x="61.36" y="-61.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">PaymentEvent</text>
+<polygon fill="#f7fbf8" stroke="none" points="33,-7.2 33,-50 172.41,-50 172.41,-7.2 33,-7.2"/>
+<polygon fill="none" stroke="#8caf9a" points="33,-7.2 33,-50 172.41,-50 172.41,-7.2 33,-7.2"/>
+<text xml:space="preserve" text-anchor="start" x="40" y="-31" font-family="Arial" font-size="12.00">operationId · type</text>
+<text xml:space="preserve" text-anchor="start" x="40" y="-16.6" font-family="Arial" font-size="12.00">fundingDelta · feeDelta</text>
+</g>
+<!-- PaymentRecord&#45;&gt;PaymentEvent -->
+<g id="edge4" class="edge">
+<title>PaymentRecord&#45;&gt;PaymentEvent</title>
+<path fill="none" stroke="#668071" d="M108.74,-134.68C108.48,-115.72 108.2,-95.11 107.97,-78.32"/>
+<text xml:space="preserve" text-anchor="middle" x="114.06" y="-87.92" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="102.65" y="-119.08" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- FeePolicy -->
+<g id="node6" class="node">
+<title>FeePolicy</title>
+<path fill="#f2f8f4" stroke="none" d="M534,-408.2C534,-408.2 441,-408.2 441,-408.2 435,-408.2 429,-402.2 429,-396.2 429,-396.2 429,-335 429,-335 429,-329 435,-323 441,-323 441,-323 534,-323 534,-323 540,-323 546,-329 546,-335 546,-335 546,-396.2 546,-396.2 546,-402.2 540,-408.2 534,-408.2"/>
+<polygon fill="#185b3e" stroke="none" points="429,-379.8 429,-408.2 536.38,-408.2 536.38,-379.8 429,-379.8"/>
+<polygon fill="none" stroke="#8caf9a" points="429,-379.8 429,-408.2 536.38,-408.2 536.38,-379.8 429,-379.8"/>
+<text xml:space="preserve" text-anchor="start" x="454.67" y="-391.4" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">FeePolicy</text>
+<polygon fill="#f7fbf8" stroke="none" points="429,-351.4 429,-379.8 536.38,-379.8 536.38,-351.4 429,-351.4"/>
+<polygon fill="none" stroke="#8caf9a" points="429,-351.4 429,-379.8 536.38,-379.8 536.38,-351.4 429,-351.4"/>
+<text xml:space="preserve" text-anchor="start" x="436" y="-360.8" font-family="Arial" font-size="12.00">version · rateBps</text>
+<polygon fill="none" stroke="#8caf9a" points="429,-323 429,-351.4 536.38,-351.4 536.38,-323 429,-323"/>
+<text xml:space="preserve" text-anchor="start" x="436" y="-332.4" font-family="Arial" font-size="12.00">feeFor(amount)</text>
+</g>
+<!-- FeePolicy&#45;&gt;AgreementSnapshot -->
+<g id="edge5" class="edge">
+<title>FeePolicy&#45;&gt;AgreementSnapshot</title>
+<path fill="none" stroke="#668071" d="M487.5,-323.4C487.5,-293.98 487.5,-254.86 487.5,-227.09"/>
+<text xml:space="preserve" text-anchor="middle" x="506.96" y="-275.6" font-family="Arial" font-size="10.00">áp dụng</text>
+<text xml:space="preserve" text-anchor="middle" x="493.42" y="-236.78" font-family="Arial" font-size="10.00">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="481.58" y="-307.71" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- DisputeDecision -->
+<g id="node8" class="node">
+<title>DisputeDecision</title>
+<path fill="#f2f8f4" stroke="none" d="M401.5,-85.6C401.5,-85.6 223.5,-85.6 223.5,-85.6 217.5,-85.6 211.5,-79.6 211.5,-73.6 211.5,-73.6 211.5,-12 211.5,-12 211.5,-6 217.5,0 223.5,0 223.5,0 401.5,0 401.5,0 407.5,0 413.5,-6 413.5,-12 413.5,-12 413.5,-73.6 413.5,-73.6 413.5,-79.6 407.5,-85.6 401.5,-85.6"/>
+<polygon fill="#185b3e" stroke="none" points="211.5,-57.2 211.5,-85.6 403.61,-85.6 403.61,-57.2 211.5,-57.2"/>
+<polygon fill="none" stroke="#8caf9a" points="211.5,-57.2 211.5,-85.6 403.61,-85.6 403.61,-57.2 211.5,-57.2"/>
+<text xml:space="preserve" text-anchor="start" x="260.54" y="-68.8" font-family="Arial" font-weight="bold" font-size="12.00" fill="white">DisputeDecision</text>
+<polygon fill="#f7fbf8" stroke="none" points="211.5,0 211.5,-57.2 403.61,-57.2 403.61,0 211.5,0"/>
+<polygon fill="none" stroke="#8caf9a" points="211.5,0 211.5,-57.2 403.61,-57.2 403.61,0 211.5,0"/>
+<text xml:space="preserve" text-anchor="start" x="218.5" y="-38.2" font-family="Arial" font-size="12.00">approvedLaborAmount</text>
+<text xml:space="preserve" text-anchor="start" x="218.5" y="-23.8" font-family="Arial" font-size="12.00">computedFee · computedRefund</text>
+<text xml:space="preserve" text-anchor="start" x="254.52" y="-9.4" font-family="Arial" font-size="12.00">decidedBy · reason</text>
+</g>
+<!-- Dispute&#45;&gt;DisputeDecision -->
+<g id="edge7" class="edge">
+<title>Dispute&#45;&gt;DisputeDecision</title>
+<path fill="none" stroke="#668071" d="M311.8,-146.95C311.93,-127.54 312.08,-104.78 312.22,-85.59"/>
+<polygon fill="#668071" stroke="#668071" points="311.8,-146.88 314.57,-151.1 311.74,-155.28 308.97,-151.06 311.8,-146.88"/>
+<text xml:space="preserve" text-anchor="middle" x="318.05" y="-95.32" font-family="Arial" font-size="10.00">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="305.9" y="-140.45" font-family="Arial" font-size="10.00">1</text>
+</g>
+</g>
+</svg>
+</div><figcaption>Class diagram — ca làm và thanh toán · <a href="diagrams/classPayment.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>classDiagram
+    class Application
+    class WorkSession {
+        +String id
+        +int agreementVersion
+        +SessionStatus status
+        +isAgreementConfirmed() boolean
+        +canStart() boolean
+    }
+    class AgreementSnapshot {
+        +long laborAmount
+        +long serviceFee
+        +long totalDue
+        +String feePolicyVersion
+    }
+    class PaymentRecord {
+        +PaymentStatus status
+        +long totalFunded
+        +long heldAmount
+        +long workerPaid
+        +long feeRecognized
+        +long employerRefunded
+        +isBalanced() boolean
+    }
+    class PaymentEvent {
+        +String operationId
+        +PaymentEventType type
+    }
+    class FeePolicy {
+        +String version
+        +int rateBps
+        +feeFor(amount) long
+    }
+    class Dispute {
+        +DisputeStatus status
+        +String reason
+    }
+    class DisputeDecision
+    Application &quot;1&quot; -- &quot;0..*&quot; WorkSession : sinh ca
+    WorkSession &quot;1&quot; *-- &quot;1&quot; AgreementSnapshot
+    WorkSession &quot;1&quot; -- &quot;1&quot; PaymentRecord
+    PaymentRecord &quot;1&quot; -- &quot;0..*&quot; PaymentEvent
+    FeePolicy &quot;1&quot; -- &quot;0..*&quot; AgreementSnapshot : áp dụng
+    WorkSession &quot;1&quot; -- &quot;0..*&quot; Dispute
+    Dispute &quot;1&quot; *-- &quot;0..1&quot; DisputeDecision</code></pre></details><p>Hai sơ đồ là các góc nhìn của cùng mô hình; Application xuất hiện ở cả hai để nối phần tuyển dụng với ca làm. Số lớp có thể chia thành package khi vẽ, không cần ép toàn bộ lên một trang.</p>
+<h2 id="section-56">13. Thiết kế Firestore và SQLite</h2><h3 id="section-57">13.1. Cấu trúc Firestore</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Đường dẫn</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>users/{uid}</td>
+<td>Tài khoản riêng, số liên hệ, quyền, trạng thái xác minh</td>
+</tr>
+<tr>
+<td>seekerProfiles/{uid}</td>
+<td>Hồ sơ tìm việc</td>
+</tr>
+<tr>
+<td>employerProfiles/{uid}</td>
+<td>Hồ sơ người thuê</td>
+</tr>
+<tr>
+<td>users/{uid}/preferences/search</td>
+<td>SearchPreference</td>
+</tr>
+<tr>
+<td>users/{uid}/savedJobs/{jobId}</td>
+<td>SavedJob</td>
+</tr>
+<tr>
+<td>areas/{code}; jobCategories/{id}</td>
+<td>Danh mục chuẩn bị sẵn</td>
+</tr>
+<tr>
+<td>jobs/{jobId}</td>
+<td>Tin và version hiện hành</td>
+</tr>
+<tr>
+<td>applications/{applicationId}</td>
+<td>Đơn, snapshot và hai UID liên quan</td>
+</tr>
+<tr>
+<td>identityRequests/{requestId}</td>
+<td>Hồ sơ mẫu xét duyệt, không chứa căn cước thật</td>
+</tr>
+<tr>
+<td>workSessions/{sessionId}</td>
+<td>Ca và snapshot thỏa thuận hiện hành</td>
+</tr>
+<tr>
+<td>workSessions/{sessionId}/agreementVersions/{version}</td>
+<td>Lịch sử phiên bản thỏa thuận</td>
+</tr>
+<tr>
+<td>payments/{sessionId}</td>
+<td>PaymentRecord một-một với ca</td>
+</tr>
+<tr>
+<td>payments/{sessionId}/events/{eventId}</td>
+<td>Sự kiện tiền bất biến</td>
+</tr>
+<tr>
+<td>disputes/{disputeId}</td>
+<td>Tranh chấp và quyết định</td>
+</tr>
+<tr>
+<td>disputes/{disputeId}/responses/{responseId}</td>
+<td>Giải trình của hai bên/admin</td>
+</tr>
+<tr>
+<td>reports/{reportId}</td>
+<td>Báo cáo tin</td>
+</tr>
+<tr>
+<td>feePolicies/{version}</td>
+<td>Chính sách phí có phiên bản</td>
+</tr>
+<tr>
+<td>operations/{operationId}</td>
+<td>Khóa idempotency, actor, lệnh, fingerprint và kết quả</td>
+</tr>
+<tr>
+<td>auditEvents/{eventId}</td>
+<td>Nhật ký hành động quan trọng</td>
+</tr>
+</tbody></table></div>
+<p>applicationId tạo nhất quán từ jobId và seekerId bằng hàm phía backend; quy tắc mã hóa không gây va chạm. SavedJob dùng jobId dưới đường dẫn người dùng. Không đổi UID khi bổ sung Google/phone. Trường liên kết ở Firestore không tự có tính chất khóa ngoại: dịch vụ phải kiểm tra tài liệu đích, chủ sở hữu và trạng thái.</p>
+<h3 id="section-58">13.2. Nhóm truy vấn và chỉ mục dự kiến</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Màn hình</th>
+<th>Truy vấn</th>
+<th>Chỉ mục dự kiến</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Danh sách việc</td>
+<td>status, areaCode, categoryId, hạn và thứ tự</td>
+<td>Chỉ mục ghép theo bộ lọc thực tế</td>
+</tr>
+<tr>
+<td>Tin của tôi</td>
+<td>employerId, status, updatedAt</td>
+<td>employerId + status + updatedAt</td>
+</tr>
+<tr>
+<td>Đơn của tôi</td>
+<td>seekerId, createdAt</td>
+<td>seekerId + createdAt</td>
+</tr>
+<tr>
+<td>Ứng viên của tin</td>
+<td>jobId, status, createdAt</td>
+<td>jobId + status + createdAt</td>
+</tr>
+<tr>
+<td>Ca của tôi</td>
+<td>seekerId hoặc employerId, status, agreement.startAt</td>
+<td>Hai nhóm chỉ mục theo vai trò</td>
+</tr>
+<tr>
+<td>Hàng đợi admin</td>
+<td>status và createdAt/submittedAt/dueAt</td>
+<td>Chỉ mục riêng từng collection</td>
+</tr>
+</tbody></table></div>
+<p>Chỉ mục chính xác được tạo theo truy vấn triển khai và kiểm thử, không giả định Firestore tự tìm kiếm toàn văn tiếng Việt. Bản đầu ưu tiên bộ lọc cấu trúc; chưa có tìm kiếm ngữ nghĩa hay search engine ngoài.</p>
+<p>Gợi ý có thể được tính trong endpoint searchJobs trên tập dữ liệu demo có giới hạn cấu hình. Đề xuất giới hạn kiểm thử 500 tin còn hiệu lực: nếu vượt giới hạn xử lý thì trả trạng thái giới hạn rõ ràng hoặc chuyển sang danh sách lọc theo thời gian; không cắt âm thầm rồi khẳng định kết quả tốt nhất. Khi triển khai lớn cần thiết kế chỉ mục/tìm kiếm riêng.</p>
+<h3 id="section-59">13.3. SQLite</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bảng</th>
+<th>Khóa và trường quan trọng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cached_jobs</td>
+<td>job_id PK, public fields, remote_version, cached_at</td>
+</tr>
+<tr>
+<td>cached_categories</td>
+<td>category_id PK, name, active</td>
+</tr>
+<tr>
+<td>cached_areas</td>
+<td>area_code PK, name, parent_code, active</td>
+</tr>
+<tr>
+<td>cached_saved_jobs</td>
+<td>(owner_uid, job_id) PK, saved_at, last_synced_at</td>
+</tr>
+<tr>
+<td>local_search_preferences</td>
+<td>owner_key PK, selections_json, updated_at</td>
+</tr>
+</tbody></table></div>
+<p>owner_key của khách là giá trị local riêng; khi đăng nhập không tự gán toàn bộ dữ liệu của một người trước đó cho tài khoản mới. Sử dụng SQLite thông qua Room hoặc lớp truy cập SQLite có cấu trúc; cần chọn phiên bản hỗ trợ dự án Java khi triển khai. Migration schema phải có version. Truy vấn local không chạy trên main thread.</p>
+<h2 id="section-60">14. Kiến trúc và trách nhiệm xử lý</h2><h3 id="section-61">14.1. Kiến trúc tổng quan</h3><figure data-diagram="architecture"><div class="figure-scroll"><!-- Generated by graphviz version 14.1.3 (20260303.0454)
+ -->
+<!-- Title: architecture Pages: 1 -->
+<svg width="883pt" height="315pt"
+ viewBox="0.00 0.00 883.00 315.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 300.76)">
+<title>architecture</title>
+<!-- app -->
+<g id="node1" class="node">
+<title>app</title>
+<path fill="#185b3e" stroke="#8caf9a" d="M106.64,-118.72C106.64,-118.72 12,-118.72 12,-118.72 6,-118.72 0,-112.72 0,-106.72 0,-106.72 0,-84.64 0,-84.64 0,-78.64 6,-72.64 12,-72.64 12,-72.64 106.64,-72.64 106.64,-72.64 112.64,-72.64 118.64,-78.64 118.64,-84.64 118.64,-84.64 118.64,-106.72 118.64,-106.72 118.64,-112.72 112.64,-118.72 106.64,-118.72"/>
+<text xml:space="preserve" text-anchor="middle" x="59.32" y="-99.28" font-family="Arial" font-size="12.00" fill="white">Android Java</text>
+<text xml:space="preserve" text-anchor="middle" x="59.32" y="-84.88" font-family="Arial" font-size="12.00" fill="white">XML + ViewModel</text>
+</g>
+<!-- repo -->
+<g id="node2" class="node">
+<title>repo</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M269.94,-161.68C269.94,-161.68 214.98,-161.68 214.98,-161.68 208.98,-161.68 202.98,-155.68 202.98,-149.68 202.98,-149.68 202.98,-137.68 202.98,-137.68 202.98,-131.68 208.98,-125.68 214.98,-125.68 214.98,-125.68 269.94,-125.68 269.94,-125.68 275.94,-125.68 281.94,-131.68 281.94,-137.68 281.94,-137.68 281.94,-149.68 281.94,-149.68 281.94,-155.68 275.94,-161.68 269.94,-161.68"/>
+<text xml:space="preserve" text-anchor="middle" x="242.46" y="-140.08" font-family="Arial" font-size="12.00">Repository</text>
+</g>
+<!-- app&#45;&gt;repo -->
+<g id="edge1" class="edge">
+<title>app&#45;&gt;repo</title>
+<path fill="none" stroke="#668071" d="M119.13,-111.26C143.62,-117.75 171.66,-125.18 194.7,-131.29"/>
+<polygon fill="#668071" stroke="#668071" points="193.78,-133.58 201.17,-133 195.03,-128.84 193.78,-133.58"/>
+</g>
+<!-- tts -->
+<g id="node8" class="node">
+<title>tts</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M305.28,-96.68C305.28,-96.68 179.64,-96.68 179.64,-96.68 173.64,-96.68 167.64,-90.68 167.64,-84.68 167.64,-84.68 167.64,-72.68 167.64,-72.68 167.64,-66.68 173.64,-60.68 179.64,-60.68 179.64,-60.68 305.28,-60.68 305.28,-60.68 311.28,-60.68 317.28,-66.68 317.28,-72.68 317.28,-72.68 317.28,-84.68 317.28,-84.68 317.28,-90.68 311.28,-96.68 305.28,-96.68"/>
+<text xml:space="preserve" text-anchor="middle" x="242.46" y="-75.08" font-family="Arial" font-size="12.00">TTS / âm thanh cục bộ</text>
+</g>
+<!-- app&#45;&gt;tts -->
+<g id="edge2" class="edge">
+<title>app&#45;&gt;tts</title>
+<path fill="none" stroke="#668071" d="M119.13,-90.16C131.88,-88.96 145.59,-87.68 159.05,-86.41"/>
+<polygon fill="#668071" stroke="#668071" points="159.15,-88.87 165.89,-85.77 158.69,-83.99 159.15,-88.87"/>
+</g>
+<!-- local -->
+<g id="node3" class="node">
+<title>local</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M525.94,-280.6C525.94,-283.78 497.03,-286.36 461.45,-286.36 425.87,-286.36 396.96,-283.78 396.96,-280.6 396.96,-280.6 396.96,-228.76 396.96,-228.76 396.96,-225.58 425.87,-223 461.45,-223 497.03,-223 525.94,-225.58 525.94,-228.76 525.94,-228.76 525.94,-280.6 525.94,-280.6"/>
+<path fill="none" stroke="#8caf9a" d="M525.94,-280.6C525.94,-277.42 497.03,-274.84 461.45,-274.84 425.87,-274.84 396.96,-277.42 396.96,-280.6"/>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-258.28" font-family="Arial" font-size="12.00">SQLite</text>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-243.88" font-family="Arial" font-size="12.00">Tin công khai đã tải</text>
+</g>
+<!-- repo&#45;&gt;local -->
+<g id="edge3" class="edge">
+<title>repo&#45;&gt;local</title>
+<path fill="none" stroke="#668071" d="M278.33,-162.13C314.64,-181.35 366.28,-208.68 366.28,-208.68 366.28,-208.68 377.43,-214.13 392.06,-221.27"/>
+<polygon fill="#668071" stroke="#668071" points="390.76,-223.36 398.12,-224.23 392.91,-218.96 390.76,-223.36"/>
+</g>
+<!-- auth -->
+<g id="node4" class="node">
+<title>auth</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M523.29,-193.72C523.29,-193.72 399.61,-193.72 399.61,-193.72 393.61,-193.72 387.61,-187.72 387.61,-181.72 387.61,-181.72 387.61,-159.64 387.61,-159.64 387.61,-153.64 393.61,-147.64 399.61,-147.64 399.61,-147.64 523.29,-147.64 523.29,-147.64 529.29,-147.64 535.29,-153.64 535.29,-159.64 535.29,-159.64 535.29,-181.72 535.29,-181.72 535.29,-187.72 529.29,-193.72 523.29,-193.72"/>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-174.28" font-family="Arial" font-size="12.00">Firebase Authentication</text>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-159.88" font-family="Arial" font-size="12.00">OTP / Google</text>
+</g>
+<!-- repo&#45;&gt;auth -->
+<g id="edge4" class="edge">
+<title>repo&#45;&gt;auth</title>
+<path fill="none" stroke="#668071" d="M282.26,-148.51C309.11,-151.85 345.86,-156.42 379,-160.54"/>
+<polygon fill="#668071" stroke="#668071" points="378.59,-162.96 385.84,-161.4 379.19,-158.1 378.59,-162.96"/>
+</g>
+<!-- commands -->
+<g id="node5" class="node">
+<title>commands</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M544.62,-118.72C544.62,-118.72 378.28,-118.72 378.28,-118.72 372.28,-118.72 366.28,-112.72 366.28,-106.72 366.28,-106.72 366.28,-84.64 366.28,-84.64 366.28,-78.64 372.28,-72.64 378.28,-72.64 378.28,-72.64 544.62,-72.64 544.62,-72.64 550.62,-72.64 556.62,-78.64 556.62,-84.64 556.62,-84.64 556.62,-106.72 556.62,-106.72 556.62,-112.72 550.62,-118.72 544.62,-118.72"/>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-99.28" font-family="Arial" font-size="12.00">Dịch vụ nghiệp vụ tin cậy</text>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-84.88" font-family="Arial" font-size="12.00">Quyền · Version · Transaction</text>
+</g>
+<!-- repo&#45;&gt;commands -->
+<g id="edge5" class="edge">
+<title>repo&#45;&gt;commands</title>
+<path fill="none" stroke="#668071" d="M282.26,-135.1C303.56,-130.39 331.08,-124.3 358.09,-118.32"/>
+<polygon fill="#668071" stroke="#668071" points="358.28,-120.79 364.59,-116.89 357.22,-116.01 358.28,-120.79"/>
+</g>
+<!-- db -->
+<g id="node6" class="node">
+<title>db</title>
+<path fill="#f2f8f4" stroke="#8caf9a" d="M836.48,-57.6C836.48,-60.78 808.7,-63.36 774.5,-63.36 740.3,-63.36 712.51,-60.78 712.51,-57.6 712.51,-57.6 712.51,-5.76 712.51,-5.76 712.51,-2.58 740.3,0 774.5,0 808.7,0 836.48,-2.58 836.48,-5.76 836.48,-5.76 836.48,-57.6 836.48,-57.6"/>
+<path fill="none" stroke="#8caf9a" d="M836.48,-57.6C836.48,-54.42 808.7,-51.84 774.5,-51.84 740.3,-51.84 712.51,-54.42 712.51,-57.6"/>
+<text xml:space="preserve" text-anchor="middle" x="774.5" y="-35.28" font-family="Arial" font-size="12.00">Cloud Firestore</text>
+<text xml:space="preserve" text-anchor="middle" x="774.5" y="-20.88" font-family="Arial" font-size="12.00">Dữ liệu + lịch sử</text>
+</g>
+<!-- repo&#45;&gt;db -->
+<g id="edge6" class="edge">
+<title>repo&#45;&gt;db</title>
+<path fill="none" stroke="#668071" d="M282.1,-126.93C299.96,-119.19 317.28,-111.68 317.28,-111.68 317.28,-111.68 366.28,-45.68 366.28,-45.68 366.28,-45.68 587.58,-38.07 703.9,-34.07"/>
+<polygon fill="#668071" stroke="#668071" points="703.67,-36.53 710.58,-33.84 703.5,-31.64 703.67,-36.53"/>
+<text xml:space="preserve" text-anchor="middle" x="461.45" y="-48.68" font-family="Arial" font-size="10.00">Đọc theo Rules</text>
+</g>
+<!-- commands&#45;&gt;db -->
+<g id="edge7" class="edge">
+<title>commands&#45;&gt;db</title>
+<path fill="none" stroke="#668071" d="M557.04,-76.22C604.39,-66.47 660.69,-54.89 704.01,-45.98"/>
+<polygon fill="#668071" stroke="#668071" points="704.37,-48.41 710.73,-44.59 703.38,-43.61 704.37,-48.41"/>
+<text xml:space="preserve" text-anchor="middle" x="625.64" y="-74.29" font-family="Arial" font-size="10.00">Ghi trạng thái / tiền</text>
+</g>
+<!-- sim -->
+<g id="node7" class="node">
+<title>sim</title>
+<path fill="#fff4da" stroke="#c9a14b" d="M842.34,-138.72C842.34,-138.72 706.65,-138.72 706.65,-138.72 700.65,-138.72 694.65,-132.72 694.65,-126.72 694.65,-126.72 694.65,-104.64 694.65,-104.64 694.65,-98.64 700.65,-92.64 706.65,-92.64 706.65,-92.64 842.34,-92.64 842.34,-92.64 848.34,-92.64 854.34,-98.64 854.34,-104.64 854.34,-104.64 854.34,-126.72 854.34,-126.72 854.34,-132.72 848.34,-138.72 842.34,-138.72"/>
+<text xml:space="preserve" text-anchor="middle" x="774.5" y="-119.28" font-family="Arial" font-size="12.00">Bộ mô phỏng thanh toán</text>
+<text xml:space="preserve" text-anchor="middle" x="774.5" y="-104.88" font-family="Arial" font-size="12.00">Không có tiền thật</text>
+</g>
+<!-- commands&#45;&gt;sim -->
+<g id="edge8" class="edge">
+<title>commands&#45;&gt;sim</title>
+<path fill="none" stroke="#668071" d="M557.04,-101.76C598.01,-104.4 645.67,-107.46 685.83,-110.04"/>
+<polygon fill="#668071" stroke="#668071" points="685.62,-112.48 692.77,-110.49 685.94,-107.6 685.62,-112.48"/>
+</g>
+</g>
+</svg>
+</div><figcaption>Kiến trúc tổng quan · <a href="diagrams/architecture.svg" target="_blank">Mở hình lớn</a></figcaption></figure>
+
+<details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>flowchart LR
+    ui[&quot;Android Java + XML&quot;] --&gt; vm[&quot;ViewModel&quot;]
+    vm --&gt; repo[&quot;Repository&quot;]
+    repo --&gt; local[&quot;SQLite: dữ liệu công khai và lựa chọn&quot;]
+    repo --&gt; auth[&quot;Firebase Authentication: OTP / Google&quot;]
+    repo --&gt; read[&quot;Firestore: truy vấn được phép&quot;]
+    repo --&gt; command[&quot;Dịch vụ nghiệp vụ tin cậy&quot;]
+    command --&gt; db[&quot;Firestore: dữ liệu và lịch sử&quot;]
+    command --&gt; simulator[&quot;Bộ mô phỏng thanh toán&quot;]
+    ui --&gt; tts[&quot;Android TTS / âm thanh cục bộ&quot;]</code></pre></details><p>Phần Android vẫn viết bằng Java. <strong>Lựa chọn triển khai đề xuất cho lớp tin cậy:</strong> Firebase Cloud Functions callable, có thể viết bằng TypeScript. Đây là phần backend nhỏ trong hệ sinh thái Firebase, không phải server Java riêng và không có nghĩa Android chuyển sang TypeScript. Nếu môn học giới hạn mọi mã nguồn đều phải Java, cần thống nhất phương án backend phù hợp trước khi code; không đưa quyền quyết toán về client để né yêu cầu đó.</p>
+<p>Lớp tin cậy cần thiết để tính phí, ghi nhận tiền, duyệt danh tính và xử lý thời hạn không phụ thuộc thiết bị người dùng. Callable SDK hỗ trợ gọi hàm từ ứng dụng Firebase; quyền của người gọi vẫn phải được kiểm tra trong hàm. <a class="ref" href="#source-4">[S4]</a></p>
+<h3 id="section-62">14.2. Tổ chức mã nguồn đề xuất</h3><pre><code class="language-text">app/
+  ui/                 auth, home, guidedsearch, jobs, applications,
+                      sessions, payments, verification, admin
+  viewmodel/          trạng thái màn hình, lệnh từ người dùng
+  domain/model/       các lớp nghiệp vụ và value object
+  domain/service/     kiểm tra form, quy tắc gợi ý và hiển thị
+  data/repository/    phối hợp nguồn local/remote
+  data/remote/        Firebase Auth, Firestore, callable client
+  data/local/         database, entities, DAO
+  accessibility/     giọng đọc, nhãn, cài đặt hỗ trợ
+  common/             định dạng tiền/thời gian, kết quả lỗi
+firebase-backend/     lệnh tin cậy, mô phỏng tiền, kiểm tra quyền
+firebase-rules/       rules và chỉ mục
+</code></pre>
+<p>Không đặt logic tài chính trong Activity. Logic kiểm tra cục bộ chỉ giúp phản hồi nhanh; server mới quyết định kết quả. Không dùng đồng hồ máy khách làm nguồn chuẩn hoặc lưu khóa quản trị trong APK.</p>
+<h3 id="section-63">14.3. Các lệnh nghiệp vụ trọng tâm</h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lệnh</th>
+<th>Kiểm tra và hiệu ứng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>syncVerifiedPhone</td>
+<td>Đọc số từ Firebase Auth tin cậy, ghi User; không nhận verified=true từ client</td>
+</tr>
+<tr>
+<td>submitIdentity / reviewIdentity</td>
+<td>Chủ hồ sơ/admin, version, trạng thái; cập nhật trạng thái tóm tắt và audit</td>
+</tr>
+<tr>
+<td>submitJob / reviewJob / closeJob</td>
+<td>Vai trò, owner, version, hạn; thay đổi trạng thái hợp lệ</td>
+</tr>
+<tr>
+<td>applyToJob / withdrawApplication / reviewApplication</td>
+<td>Quyền, trạng thái, duy nhất cặp, snapshot và transaction</td>
+</tr>
+<tr>
+<td>proposeSession / reviseSession / confirmAgreement</td>
+<td>Hai bên từ Application, version, fee policy, lịch, mức xác minh</td>
+</tr>
+<tr>
+<td>fundSession</td>
+<td>Quote server, khóa operation, simulator, ghi HELD và READY khi thành công</td>
+</tr>
+<tr>
+<td>confirmStart / reportCompletion / confirmCompletion</td>
+<td>Trạng thái, đủ xác nhận, thời gian và quyền</td>
+</tr>
+<tr>
+<td>requestCancellation / respondCancellation</td>
+<td>Đóng băng start, đồng ý hoặc dispute, phân bổ tiền đúng</td>
+</tr>
+<tr>
+<td>openDispute / respondDispute / decideDispute</td>
+<td>Bên liên quan/admin, một dispute hoạt động, quyết định có lý do</td>
+</tr>
+<tr>
+<td>settleSession / retrySettlement</td>
+<td>Tính phí snapshot, bảo toàn tiền, một lần áp dụng</td>
+</tr>
+<tr>
+<td>getAdminSummary</td>
+<td>Tổng hợp đúng loại số tiền; không trả dữ liệu cá nhân không cần thiết</td>
+</tr>
+</tbody></table></div>
+<p>Request thay đổi nghiệp vụ có requestId; request nhạy cảm thêm expectedVersion. Lỗi trả mã rõ: AUTH_REQUIRED, PHONE_REQUIRED, IDENTITY_DEMO_REQUIRED, FORBIDDEN, INVALID_STATE, VERSION_CONFLICT, DUPLICATE_APPLICATION, JOB_EXPIRED, INSUFFICIENT_FUNDING, OPERATION_PENDING. UI chuyển sang câu tiếng Việt có cách xử lý, không hiển thị stack trace.</p>
+<h3 id="section-64">14.4. Transaction và đồng thời</h3><ul>
+<li>Kiểm tra và tạo đơn trong cùng transaction; nút bị khóa trên UI chỉ là hỗ trợ, không phải cơ chế chống trùng chính.</li>
+<li>Chấp nhận/rút đơn dùng điều kiện PENDING hiện tại.</li>
+<li>Xác nhận thỏa thuận lưu version; nếu bản thay đổi thì yêu cầu đọc lại.</li>
+<li>Idempotency lưu actor + loại lệnh + payload fingerprint. Cùng requestId nhưng nội dung khác phải bị từ chối.</li>
+<li>Áp dụng phân bổ tiền, PaymentEvent, trạng thái ca và operations result nguyên tử trong bộ mô phỏng.</li>
+<li>Không gọi side effect bên ngoài trong callback transaction có thể chạy lại. Tách tạo operation, thực hiện simulator và transaction ghi nhận kết quả có khóa.</li>
+<li>Khi request timeout, tra cứu operation hiện tại trước khi cho tạo một giao dịch khác. <a class="ref" href="#source-12">[S12]</a></li>
+</ul>
+<h3 id="section-65">14.5. Thời hạn và vận hành</h3><p>Các tham số sau là đề xuất triển khai, không phải dữ liệu khảo sát: fundingDeadline không muộn hơn thời điểm bắt đầu; cửa sổ xác nhận bắt đầu có thể từ 30 phút trước giờ hẹn đến giờ kết thúc; phản hồi báo hoàn thành 24 giờ; mục tiêu admin tiếp nhận việc quá hạn trong 48 giờ. Lưu các mốc áp dụng vào ca/chính sách để không đổi ngược.</p>
+<p>Một tác vụ phía server kiểm tra ca chưa cấp tiền quá hạn và việc chờ phản hồi; có kiểm tra lại khi người dùng gọi lệnh. Hết hạn chỉ hủy ca chưa có tiền và không có funding đang chờ đối chiếu. Quá hạn phản hồi kết quả thì chuyển hàng đợi xử lý; không tự duyệt chất lượng hoặc phân bổ tiền.</p>
+<p>Bản đầu dùng nhắc việc trong ứng dụng, không bắt buộc FCM/push. Nếu chưa mở app thì người dùng có thể chưa thấy nhắc, vì vậy không dùng việc “đã gửi nhắc” làm bằng chứng người dùng đã đọc. Admin có nhãn quá hạn và lịch sử; mục tiêu 48 giờ không được quảng bá là bảo đảm giải quyết mọi tranh chấp.</p>
+<h2 id="section-66">15. Ma trận quyền và bảo vệ dữ liệu</h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Dữ liệu/hành động</th>
+<th>Khách</th>
+<th>Người tìm việc</th>
+<th>Người thuê</th>
+<th>Admin/dịch vụ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tin OPEN và thông tin công khai</td>
+<td>Đọc</td>
+<td>Đọc</td>
+<td>Đọc</td>
+<td>Đọc</td>
+</tr>
+<tr>
+<td>Tin chưa công khai</td>
+<td>Không</td>
+<td>Không; xem snapshot đơn của mình</td>
+<td>Chủ tin</td>
+<td>Admin kiểm duyệt</td>
+</tr>
+<tr>
+<td>Hồ sơ và số điện thoại riêng</td>
+<td>Không</td>
+<td>Của mình</td>
+<td>Của mình</td>
+<td>Chỉ phần cần cho hỗ trợ được phân quyền</td>
+</tr>
+<tr>
+<td>Đơn ứng tuyển</td>
+<td>Không</td>
+<td>Đơn mình</td>
+<td>Đơn của tin mình</td>
+<td>Đọc khi cần xử lý vụ liên quan</td>
+</tr>
+<tr>
+<td>Hồ sơ danh tính mẫu</td>
+<td>Không</td>
+<td>Của mình</td>
+<td>Của mình</td>
+<td>Người xét duyệt được phân quyền</td>
+</tr>
+<tr>
+<td>Ca/thỏa thuận/địa chỉ riêng</td>
+<td>Không</td>
+<td>Ca mình</td>
+<td>Ca mình</td>
+<td>Admin được giao xử lý</td>
+</tr>
+<tr>
+<td>Tiền và sự kiện</td>
+<td>Không</td>
+<td>Ca mình, chỉ đọc</td>
+<td>Ca mình, chỉ đọc</td>
+<td>Backend ghi; admin có quyền xem/xử lý qua lệnh</td>
+</tr>
+<tr>
+<td>Số tiền/phí/quyền xác minh</td>
+<td>Không</td>
+<td>Không tự sửa</td>
+<td>Không tự sửa</td>
+<td>Dịch vụ tin cậy</td>
+</tr>
+<tr>
+<td>Tranh chấp</td>
+<td>Không</td>
+<td>Ca mình</td>
+<td>Ca mình</td>
+<td>Admin giải quyết</td>
+</tr>
+<tr>
+<td>Báo cáo tin</td>
+<td>Không</td>
+<td>Báo cáo mình</td>
+<td>Không đọc danh tính người báo cáo</td>
+<td>Admin xử lý</td>
+</tr>
+<tr>
+<td>Dashboard phí</td>
+<td>Không</td>
+<td>Không</td>
+<td>Không</td>
+<td>Admin</td>
+</tr>
+</tbody></table></div>
+<p>Firestore Rules chỉ cho direct writes tới các dữ liệu đơn giản đã kiểm soát như sở thích và SavedJob; các trạng thái và tiền được thay đổi bằng dịch vụ. Backend dùng quyền server nên phải tự kiểm tra authorization, không trông cậy Rules thay mình. Quyền admin không tự cấp trong form đăng ký.</p>
+<p>Không đặt tài liệu riêng chung với tài liệu công khai rồi hy vọng ẩn một số trường trên UI: người được đọc document có thể nhận các trường trong đó. Phân tách document/projection phù hợp. Phone verification dựa trên Firebase Auth và quy trình đồng bộ, không trên giá trị do client tự khai. <a class="ref" href="#source-13">[S13]</a></p>
+<p>Admin quyết định tranh chấp phải có người xử lý, thời gian và lý do. Log không chứa OTP, access token, căn cước thật hoặc dữ liệu nhạy cảm không cần thiết. Tính năng hạn chế tài khoản chỉ chặn giao dịch mới; không cho phép admin tùy tiện xóa tiền hay khóa đường khiếu nại. Trong bản đầu không cần làm một màn hình quản lý tài khoản phức tạp.</p>
+<p>Firebase yêu cầu cung cấp thông tin phù hợp và sự đồng ý khi dùng số điện thoại cho cơ chế xác thực; nhóm cần thông báo trước gửi OTP. Gửi SMS thật yêu cầu cấu hình Blaze theo tài liệu hiện tại; đặt vùng gửi SMS phù hợp, giới hạn gửi lại và theo dõi chi phí. Số kiểm thử chỉ dùng trong môi trường phát triển; không bật chế độ bỏ kiểm tra ứng dụng trong bản nghiệm thu thật. <a class="ref" href="#source-1">[S1]</a><a class="ref" href="#source-2">[S2]</a></p>
+<h2 id="section-67">16. Danh sách màn hình và điều hướng</h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mã</th>
+<th>Màn hình</th>
+<th>Nội dung/hành động chính</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S01</td>
+<td>Chào và đăng nhập</td>
+<td>Số điện thoại, Google, tiếp tục xem việc</td>
+</tr>
+<tr>
+<td>S02</td>
+<td>OTP</td>
+<td>Số đang xác minh, mã, sửa số, gửi lại</td>
+</tr>
+<tr>
+<td>S03</td>
+<td>Vai trò/hồ sơ</td>
+<td>Form theo vai trò, lựa chọn ngắn</td>
+</tr>
+<tr>
+<td>S04</td>
+<td>Danh tính mẫu</td>
+<td>Giải thích mô phỏng, gửi mẫu, trạng thái và bổ sung</td>
+</tr>
+<tr>
+<td>S05</td>
+<td>Trang chính người tìm việc</td>
+<td>Tìm việc, việc cần chú ý, Việc của tôi, trợ giúp</td>
+</tr>
+<tr>
+<td>S06</td>
+<td>Câu hỏi từng bước</td>
+<td>Một câu hỏi, các lựa chọn, tiến trình</td>
+</tr>
+<tr>
+<td>S07</td>
+<td>Tóm tắt lựa chọn/kết quả</td>
+<td>Sửa lựa chọn, lý do gợi ý, xem thêm</td>
+</tr>
+<tr>
+<td>S08</td>
+<td>Chi tiết việc</td>
+<td>Nhiệm vụ, khu vực, lịch, tiền công, lưu, ứng tuyển, báo cáo</td>
+</tr>
+<tr>
+<td>S09</td>
+<td>Xác nhận ứng tuyển</td>
+<td>Snapshot, lời nhắn, đồng ý chia sẻ liên hệ</td>
+</tr>
+<tr>
+<td>S10</td>
+<td>Việc của tôi</td>
+<td>Đơn và ca, trạng thái cần xử lý</td>
+</tr>
+<tr>
+<td>S11</td>
+<td>Chi tiết đơn</td>
+<td>Snapshot, kết quả, rút nếu chờ, liên hệ theo quyền</td>
+</tr>
+<tr>
+<td>S12</td>
+<td>Tin của tôi</td>
+<td>Trạng thái, tạo tin, ứng viên</td>
+</tr>
+<tr>
+<td>S13</td>
+<td>Tạo/sửa/xem trước tin</td>
+<td>Nội dung cấu trúc, gửi duyệt</td>
+</tr>
+<tr>
+<td>S14</td>
+<td>Ứng viên</td>
+<td>Danh sách, chi tiết đơn, chấp nhận/từ chối</td>
+</tr>
+<tr>
+<td>S15</td>
+<td>Thỏa thuận ca</td>
+<td>Nhiệm vụ, địa chỉ riêng, thời gian, tiền công, phí, xác nhận</td>
+</tr>
+<tr>
+<td>S16</td>
+<td>Thanh toán mô phỏng</td>
+<td>Tổng, nhãn demo, kết quả và retry an toàn</td>
+</tr>
+<tr>
+<td>S17</td>
+<td>Chi tiết ca</td>
+<td>Tiến trình, bắt đầu, xong, xác nhận, hủy, báo vấn đề</td>
+</tr>
+<tr>
+<td>S18</td>
+<td>Lịch sử tiền</td>
+<td>Đã cấp/giữ/chi/hoàn/phí; nhãn mô phỏng</td>
+</tr>
+<tr>
+<td>S19</td>
+<td>Tranh chấp</td>
+<td>Giải trình, tiến độ, quyết định</td>
+</tr>
+<tr>
+<td>S20</td>
+<td>Admin hàng đợi</td>
+<td>Tin, hồ sơ, báo cáo, tranh chấp, quá hạn</td>
+</tr>
+<tr>
+<td>S21</td>
+<td>Admin xử lý</td>
+<td>Nội dung liên quan, quyết định, lý do, lịch sử</td>
+</tr>
+<tr>
+<td>S22</td>
+<td>Admin thống kê</td>
+<td>Doanh thu phí và các khoản tiền tách biệt</td>
+</tr>
+<tr>
+<td>S23</td>
+<td>Thêm/cài đặt</td>
+<td>Hồ sơ, việc lưu, giọng đọc, đăng xuất</td>
+</tr>
+</tbody></table></div>
+<p>Các màn hình là nhóm chức năng, có thể triển khai bằng Fragment hoặc dialog phù hợp; không bắt buộc mỗi dòng là một Activity.</p>
+<p><strong>Luồng chính người tìm việc:</strong> S05 → S06 → S07 → S08 → S09 → S10/S11 → S04 nếu chưa xét hồ sơ → S15 → S17 → S18.</p>
+<p><strong>Luồng người thuê:</strong> S12 → S13 → admin duyệt → S14 → S04 nếu cần → S15 → S16 → S17 → S18.</p>
+<p><strong>Luồng lỗi/chưa đủ điều kiện:</strong> giải thích điều kiện còn thiếu và đưa người dùng tới đúng màn hình; sau hoàn tất quay lại thao tác ban đầu, không bắt tìm lại tin/ca. Không phát sinh giao dịch chỉ vì điều hướng quay lại.</p>
+<h2 id="section-68">17. Sequence và activity bổ trợ</h2><p>Giảng viên hiện chưa yêu cầu thêm loại diagram; hai sequence dưới đây giúp giải thích các điểm quan trọng. Không cần thêm nhiều sơ đồ lặp lại nội dung.</p>
+<h3 id="section-69">17.1. Sequence gửi đơn</h3><details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>sequenceDiagram
+    actor seeker as Người tìm việc
+    participant ui as Màn hình xác nhận
+    participant backend as Dịch vụ nghiệp vụ
+    participant db as Firestore
+    seeker-&gt;&gt;ui: Xác nhận gửi đơn
+    ui-&gt;&gt;backend: applyToJob với requestId
+    backend-&gt;&gt;db: Đọc user, tin và đơn theo transaction
+    alt Đủ quyền, tin mở, chưa có đơn
+        backend-&gt;&gt;db: Tạo đơn và snapshot
+        db--&gt;&gt;backend: Commit thành công
+        backend--&gt;&gt;ui: Trả applicationId
+        ui--&gt;&gt;seeker: Đã ứng tuyển
+    else Không hợp lệ hoặc xung đột
+        backend--&gt;&gt;ui: Lỗi và trạng thái hiện tại
+        ui--&gt;&gt;seeker: Giải thích và cho thao tác phù hợp
+    end</code></pre></details><h3 id="section-70">17.2. Sequence cấp tiền và quyết toán</h3><details class="source"><summary>Nguồn Mermaid có thể chỉnh sửa</summary><pre><code>sequenceDiagram
+    actor employer as Người thuê
+    actor seeker as Người làm
+    participant app as Ứng dụng
+    participant backend as Dịch vụ nghiệp vụ
+    participant mock as Bộ mô phỏng tiền
+    participant db as Firestore
+    employer-&gt;&gt;app: Xác nhận cấp tổng tiền
+    app-&gt;&gt;backend: fundSession với requestId
+    backend-&gt;&gt;db: Kiểm tra và giữ operation
+    backend-&gt;&gt;mock: Thực hiện cấp tiền mô phỏng
+    mock--&gt;&gt;backend: Kết quả mô phỏng
+    backend-&gt;&gt;db: Transaction ghi funded, held và READY
+    backend--&gt;&gt;app: Đã cấp tiền mô phỏng
+    seeker-&gt;&gt;app: Báo hoàn thành sau ca
+    app-&gt;&gt;backend: reportCompletion
+    backend-&gt;&gt;db: COMPLETION_PENDING
+    employer-&gt;&gt;app: Xác nhận kết quả
+    app-&gt;&gt;backend: confirmCompletion
+    backend-&gt;&gt;db: Quyết định phân bổ và SETTLEMENT_PENDING
+    backend-&gt;&gt;mock: Mô phỏng phân bổ
+    mock--&gt;&gt;backend: Thành công
+    backend-&gt;&gt;db: Ghi chi, phí, hoàn và hoàn tất nguyên tử
+    backend--&gt;&gt;app: Kết quả quyết toán mô phỏng</code></pre></details><p>Luồng bất đồng thay bước xác nhận kết quả bằng mở tranh chấp và quyết định admin; luồng lỗi giữ operation để tra cứu hoặc thử lại. Sequence trên là đường thành công, không có nghĩa bỏ qua ngoại lệ ở UC19/UC26.</p>
+<p><strong>Activity nên vẽ nếu cần:</strong> bắt đầu từ hai bên đủ xác minh → chốt version → kiểm tra cấp đủ tiền → thực hiện → rẽ nhánh đồng ý/tranh chấp → tính phân bổ → kiểm tra bảo toàn tiền → quyết toán. Nút hủy và quá hạn là nhánh ngoại lệ, không nối thẳng tới trả tiền vô điều kiện.</p>
+<h2 id="section-71">18. Tiêu chí nghiệm thu và kiểm thử</h2><p>Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết quả đã chạy trên ứng dụng.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mã</th>
+<th>Kịch bản</th>
+<th>Kết quả mong đợi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T01</td>
+<td>OTP thật gửi đến số thật</td>
+<td>Nhận mã, xác minh thành công, ghi đúng số</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>Sai/hết hạn mã, gửi lại nhiều</td>
+<td>Không đăng nhập sai; có thông báo và giới hạn</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>Số test trong phát triển</td>
+<td>Luồng chạy nhưng không báo đó là OTP thật</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>Google và phone của cùng người</td>
+<td>Liên kết đúng UID, không mất hồ sơ/đơn</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>Credential đã thuộc tài khoản khác</td>
+<td>Không tự gộp hoặc chiếm tài khoản</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>Client cố tự đặt admin/verified</td>
+<td>Bị từ chối ở dịch vụ/Rules</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>Danh tính mẫu được duyệt</td>
+<td>Nhãn mô phỏng; đủ điều kiện ca demo, không nhãn chính chủ thật</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Quay lại/xoay ở bước 3 tìm việc</td>
+<td>Giữ câu trả lời và bước hiện tại</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>Không có tin đáp ứng điều kiện tránh</td>
+<td>Không tự nới; có thông báo và cách sửa</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Chọn giờ rảnh không khớp</td>
+<td>Không hiển thị “khớp lịch” sai</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>TTS đang đọc rồi xoay</td>
+<td>Không đọc chồng; có dừng/nghe lại</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Font 200%, điện thoại ngang, bàn phím</td>
+<td>Chữ và nút chính vẫn tiếp cận được</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Tablet và chia đôi cửa sổ</td>
+<td>Bố cục thay đổi theo vùng ứng dụng</td>
+</tr>
+<tr>
+<td>T14</td>
+<td>Tin chưa duyệt</td>
+<td>Khách không đọc được bản riêng/chưa công khai</td>
+</tr>
+<tr>
+<td>T15</td>
+<td>Sửa tin sau khi có đơn</td>
+<td>Chờ duyệt lại; snapshot đơn cũ không đổi</td>
+</tr>
+<tr>
+<td>T16</td>
+<td>Hai lần bấm ứng tuyển</td>
+<td>Một đơn; request retry không tạo thêm</td>
+</tr>
+<tr>
+<td>T17</td>
+<td>Rút/chấp nhận đồng thời</td>
+<td>Chỉ một trạng thái cuối hợp lệ</td>
+</tr>
+<tr>
+<td>T18</td>
+<td>Chưa đủ mức xác minh, bấm xác nhận ca</td>
+<td>Chuyển hướng giải thích, không bắt đầu giao dịch</td>
+</tr>
+<tr>
+<td>T19</td>
+<td>Xác nhận version cũ của thỏa thuận</td>
+<td>Bị từ chối; yêu cầu xem lại version mới</td>
+</tr>
+<tr>
+<td>T20</td>
+<td>Ca 240.000đ, phí 10%</td>
+<td>Tổng 264.000đ; người làm 240.000đ</td>
+</tr>
+<tr>
+<td>T21</td>
+<td>Cấp tiền bấm hai lần/timeout</td>
+<td>Một funding thành công; tra cứu operation</td>
+</tr>
+<tr>
+<td>T22</td>
+<td>Chưa đủ tiền, bấm bắt đầu</td>
+<td>Không chuyển IN_PROGRESS</td>
+</tr>
+<tr>
+<td>T23</td>
+<td>Chỉ một bên xác nhận bắt đầu</td>
+<td>Giữ READY và chỉ dẫn cần xác nhận/hỗ trợ</td>
+</tr>
+<tr>
+<td>T24</td>
+<td>Hủy trước làm có đồng ý</td>
+<td>Hoàn 264.000đ, phí 0</td>
+</tr>
+<tr>
+<td>T25</td>
+<td>Funding và hủy cùng lúc</td>
+<td>Không mất tiền, không ca hủy có tiền bị bỏ quên</td>
+</tr>
+<tr>
+<td>T26</td>
+<td>Quyết toán đầy đủ</td>
+<td>240.000 + 24.000 + 0 + 0 = 264.000</td>
+</tr>
+<tr>
+<td>T27</td>
+<td>Tranh chấp duyệt 120.000đ</td>
+<td>Chi 120.000, phí 12.000, hoàn 132.000</td>
+</tr>
+<tr>
+<td>T28</td>
+<td>Settlement lỗi rồi thử lại</td>
+<td>Không chi hoặc ghi nhận phí hai lần</td>
+</tr>
+<tr>
+<td>T29</td>
+<td>Thay policy sau khi chốt ca</td>
+<td>Ca cũ giữ rate/phiên bản đã xác nhận</td>
+</tr>
+<tr>
+<td>T30</td>
+<td>Người thuê không phản hồi 24h</td>
+<td>Hàng đợi admin; chưa tự trả tiền</td>
+</tr>
+<tr>
+<td>T31</td>
+<td>Người ngoài mở ca/đơn/hồ sơ mẫu</td>
+<td>Không đọc được dữ liệu riêng</td>
+</tr>
+<tr>
+<td>T32</td>
+<td>Xem tin online rồi ngắt mạng</td>
+<td>Đọc SQLite và có nhãn dữ liệu cũ</td>
+</tr>
+<tr>
+<td>T33</td>
+<td>Offline bấm ứng tuyển/thanh toán</td>
+<td>Không tạo thành công giả, không tự gửi sau</td>
+</tr>
+<tr>
+<td>T34</td>
+<td>Đăng xuất/chuyển tài khoản</td>
+<td>Không lộ cache/ảnh/snapshot của tài khoản cũ</td>
+</tr>
+<tr>
+<td>T35</td>
+<td>Tin bị ẩn khi ca đã có tiền</td>
+<td>Chặn giao dịch mới; ca/tiền cũ còn đường xử lý</td>
+</tr>
+<tr>
+<td>T36</td>
+<td>Admin xem thống kê</td>
+<td>Không cộng tiền giữ thành doanh thu</td>
+</tr>
+</tbody></table></div>
+<p><strong>Thiết bị kiểm thử tối thiểu đề xuất:</strong> emulator/thiết bị API 29 và API 36; một điện thoại nhỏ, một điện thoại lớn và một tablet; mỗi loại dọc/ngang; font mặc định và 200%; online/offline; một thiết bị thật nhận SMS. Các trường hợp tiền/quyền/đồng thời cần kiểm thử tự động trên môi trường phù hợp và bổ sung kiểm thử đầu-cuối; không chỉ chụp màn hình thành công.</p>
+<p><strong>Thử nghiệm khả năng sử dụng:</strong> mời một số người thuộc nhóm tuổi mục tiêu thực hiện tìm một việc, ứng tuyển và xem tiền công; ghi số lần cần trợ giúp, lỗi thao tác, bước gây khó hiểu và nhận xét. Chưa đặt số liệu kết quả giả định thành kết quả thật; tiêu chí ban đầu nên điều chỉnh sau thử nghiệm.</p>
+<h2 id="section-72">19. Truy vết yêu cầu — chức năng — lớp — kiểm thử</h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Yêu cầu</th>
+<th>Use case</th>
+<th>Lớp/chức năng chính</th>
+<th>Kiểm thử</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Xác minh số thật</td>
+<td>UC01–UC02</td>
+<td>User, AuthRepository</td>
+<td>T01–T06</td>
+</tr>
+<tr>
+<td>Danh tính mẫu</td>
+<td>UC04–UC05</td>
+<td>IdentityVerificationRequest</td>
+<td>T07, T18</td>
+</tr>
+<tr>
+<td>Tìm việc dễ dùng</td>
+<td>UC06–UC07</td>
+<td>SearchPreference, JobPost, MatchingService</td>
+<td>T08–T10</td>
+</tr>
+<tr>
+<td>Giọng đọc, responsive</td>
+<td>UC28 và phi chức năng</td>
+<td>AccessibilitySettings, ViewModel</td>
+<td>T11–T13</td>
+</tr>
+<tr>
+<td>Tin có kiểm duyệt</td>
+<td>UC11–UC13</td>
+<td>JobPost, Report</td>
+<td>T14–T15, T35</td>
+</tr>
+<tr>
+<td>Ứng tuyển nhất quán</td>
+<td>UC09–UC10, UC14</td>
+<td>Application</td>
+<td>T16–T17</td>
+</tr>
+<tr>
+<td>Thỏa thuận theo ca</td>
+<td>UC17–UC18</td>
+<td>WorkSession, AgreementSnapshot</td>
+<td>T18–T19</td>
+</tr>
+<tr>
+<td>Tiền và phí duy trì</td>
+<td>UC19, UC26</td>
+<td>PaymentRecord, PaymentEvent, FeePolicy</td>
+<td>T20–T29, T36</td>
+</tr>
+<tr>
+<td>Hoàn thành/tranh chấp</td>
+<td>UC20–UC25</td>
+<td>WorkSession, Dispute</td>
+<td>T23–T30</td>
+</tr>
+<tr>
+<td>Phân quyền và riêng tư</td>
+<td>Tất cả UC riêng</td>
+<td>Rules, backend, AuditEvent</td>
+<td>T06, T31, T34</td>
+</tr>
+<tr>
+<td>SQLite ngoại tuyến</td>
+<td>UC29</td>
+<td>CachedJob, LocalSearchPreference</td>
+<td>T32–T34</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-73">20. Phạm vi còn mở và nguyên tắc thay đổi</h2><ol>
+<li><strong>Tiêu chí chính chủ của giảng viên:</strong> chưa có chỉ định đối chiếu căn cước thật. Bản hiện tại không tự tuyên bố đã đáp ứng định danh pháp lý.</li>
+<li><strong>Mẫu báo cáo chính thức:</strong> chưa được cung cấp. Tài liệu này cung cấp nội dung, chưa khẳng định đúng mẫu PDF của môn học.</li>
+<li><strong>Tham số đề xuất:</strong> điểm gợi ý, 24h phản hồi, mục tiêu admin 48h, giới hạn tin xử lý và mốc bắt đầu ca cần kiểm chứng trước nghiệm thu.</li>
+<li><strong>Mức phí 10%:</strong> là quyết định sản phẩm đã chốt để mô phỏng, không phải kết quả nghiên cứu giá hay lợi nhuận thực tế.</li>
+<li><strong>Backend tin cậy:</strong> đây là đề xuất kỹ thuật để mô hình tiền/quyền có thể được triển khai đúng; chọn runtime và môi trường khi bắt đầu code.</li>
+<li><strong>Ca dài hạn:</strong> có thể tạo nhiều ca từ một đơn ACCEPTED, nhưng chưa có lịch lặp tự động hoặc quyết toán gộp tháng.</li>
+<li><strong>Nội dung tin và nhận định phù hợp:</strong> dựa trên khai báo người đăng, không phải đánh giá y tế, chứng nhận nghề hay bảo đảm chất lượng.</li>
+</ol>
+<p>Mọi thay đổi nghiệp vụ phải cập nhật đồng thời: yêu cầu, use case, trạng thái, lớp/dữ liệu, quyền và kiểm thử. Không quay lại bản chỉ có đơn ứng tuyển khi giải thích thanh toán; một ca là đơn vị thỏa thuận và quyết toán.</p>
+<h2 id="section-74">21. Nguồn tham khảo chính thức</h2><p>Các nguồn dùng để kiểm chứng khả năng kỹ thuật và cách thu phí; quyết định thiết kế riêng của GrandMa Assist đã được nêu rõ. Tra cứu/hợp nhất đến ngày 04/10/2026.</p>
+<ul>
+<li id="source-1"><strong>[S1] Firebase Phone Authentication:</strong> OTP, giới hạn xác thực bằng số điện thoại, số kiểm thử và sự đồng ý khi dùng dịch vụ. <a href="https://firebase.google.com/docs/auth/android/phone-auth">https://firebase.google.com/docs/auth/android/phone-auth</a></li>
+<li id="source-2"><strong>[S2] Firebase Authentication Limits:</strong> SMS xác thực thật thuộc gói Blaze và có giới hạn. <a href="https://firebase.google.com/docs/auth/limits">https://firebase.google.com/docs/auth/limits</a></li>
+<li id="source-3"><strong>[S3] Firestore offline:</strong> cấu hình lưu trữ ngoại tuyến; cần phân biệt với SQLite do nhóm thiết kế. <a href="https://firebase.google.com/docs/firestore/manage-data/enable-offline">https://firebase.google.com/docs/firestore/manage-data/enable-offline</a></li>
+<li id="source-4"><strong>[S4] Callable Cloud Functions:</strong> cơ chế ứng dụng Firebase gọi lớp xử lý phía server. <a href="https://firebase.google.com/docs/functions/callable">https://firebase.google.com/docs/functions/callable</a></li>
+<li id="source-5"><strong>[S5] Android responsive/adaptive Views:</strong> bố cục theo kích thước và vùng hiển thị. <a href="https://developer.android.com/develop/ui/views/layout/responsive-adaptive-design-with-views">https://developer.android.com/develop/ui/views/layout/responsive-adaptive-design-with-views</a></li>
+<li id="source-6"><strong>[S6] W3C biểu mẫu nhiều bước:</strong> nhóm nội dung, tiến trình, bước tùy chọn. <a href="https://www.w3.org/WAI/tutorials/forms/multi-page/">https://www.w3.org/WAI/tutorials/forms/multi-page/</a></li>
+<li id="source-7"><strong>[S7] W3C độ tương phản:</strong> nguyên tắc tương phản chữ/nền. <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html</a></li>
+<li id="source-8"><strong>[S8] Android TextToSpeech và Voice:</strong> <a href="https://developer.android.com/reference/android/speech/tts/TextToSpeech">https://developer.android.com/reference/android/speech/tts/TextToSpeech</a> ; <a href="https://developer.android.com/reference/android/speech/tts/Voice">https://developer.android.com/reference/android/speech/tts/Voice</a></li>
+<li id="source-9"><strong>[S9] bTaskee, điều khoản đối tác, Phụ lục 2:</strong> <a href="https://www.btaskee.com/vi-VN/bien-ban-hop-tac-doi-tac/">https://www.btaskee.com/vi-VN/bien-ban-hop-tac-doi-tac/</a></li>
+<li id="source-10"><strong>[S10] Taskrabbit, các khoản phí trên hóa đơn:</strong> <a href="https://support.taskrabbit.com/hc/en-us/articles/46260407116955-I-d-Like-To-Understand-The-Fees-On-My-Task-s-Invoice">https://support.taskrabbit.com/hc/en-us/articles/46260407116955-I-d-Like-To-Understand-The-Fees-On-My-Task-s-Invoice</a></li>
+<li id="source-11"><strong>[S11] Airtasker Úc, phí người làm và người thuê:</strong> <a href="https://support.airtasker.com/hc/en-au/articles/200294499-What-is-the-service-fee">https://support.airtasker.com/hc/en-au/articles/200294499-What-is-the-service-fee</a> ; <a href="https://support.airtasker.com/hc/en-au/articles/360031769372-What-is-the-Connection-Fee">https://support.airtasker.com/hc/en-au/articles/360031769372-What-is-the-Connection-Fee</a></li>
+<li id="source-12"><strong>[S12] Firestore transactions:</strong> <a href="https://firebase.google.com/docs/firestore/manage-data/transactions">https://firebase.google.com/docs/firestore/manage-data/transactions</a></li>
+<li id="source-13"><strong>[S13] Firestore Security Rules:</strong> <a href="https://firebase.google.com/docs/firestore/security/get-started">https://firebase.google.com/docs/firestore/security/get-started</a></li>
+<li id="source-14"><strong>[S14] Firebase liên kết phương thức đăng nhập:</strong> <a href="https://firebase.google.com/docs/auth/android/account-linking">https://firebase.google.com/docs/auth/android/account-linking</a></li>
+<li id="source-15"><strong>[S15] Android cấu hình SDK:</strong> <a href="https://developer.android.com/build">https://developer.android.com/build</a></li>
+</ul>
+<h2 id="section-75">Phụ lục A. Cách sử dụng bộ tài liệu</h2><ul>
+<li>Bản HTML trình bày cùng nội dung, có mục lục và các sơ đồ tổng quan để đọc nhanh; có thể mở trong trình duyệt và in.</li>
+<li>Bản Markdown là nguồn để chỉnh sửa, chuyển sang Word/PDF theo mẫu báo cáo sau này.</li>
+<li>Thư mục diagrams chứa Mermaid cho các sơ đồ có trong tài liệu, PlantUML cho use case đầy đủ và nguồn DOT/SVG của hình minh họa. Nguồn UML là cơ sở để nhóm chỉnh trong công cụ vẽ, không phải ảnh chụp từ ứng dụng.</li>
+<li>Class diagram được tách thành hai phần để đọc rõ. Sơ đồ use case minh họa trong HTML là bản tổng quan; danh mục UC01–UC30 và nguồn PlantUML là bản đầy đủ.</li>
+<li>Các bảng kiểm thử là kế hoạch nghiệm thu, không phải báo cáo đã kiểm thử. Chưa có mã ứng dụng nào được triển khai trong lần soạn tài liệu này.</li>
+</ul>
+</article><footer>Tài liệu thiết kế, không phải ứng dụng đã triển khai hoặc báo cáo kiểm thử hoàn tất.</footer></main></body></html>

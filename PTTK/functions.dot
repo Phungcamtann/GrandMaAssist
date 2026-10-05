@@ -1,0 +1,7 @@
+digraph functions { graph [fontname="Arial", bgcolor="transparent", pad="0.2", nodesep="0.4", ranksep="0.65", splines=polyline]; node [fontname="Arial", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f2f8f4", color="#8caf9a", margin="0.15,0.12"]; edge [fontname="Arial", fontsize=10, color="#668071", arrowsize=0.7]; rankdir=LR; app [label="GrandMa Assist",fillcolor="#185b3e",fontcolor="white"]; account[label="Tài khoản và xác minh\nĐăng nhập · OTP thật\nHồ sơ · Danh tính mẫu"]; app->account;
+search[label="Tìm việc có hướng dẫn\n4 câu hỏi · Lựa chọn\nGợi ý · Lý do phù hợp"]; app->search;
+recruitment[label="Tin và ứng tuyển\nĐăng · Duyệt · Lọc\nGửi đơn · Chấp nhận"]; app->recruitment;
+session[label="Thỏa thuận và ca\nChốt phiên bản · Bắt đầu\nHoàn thành · Hủy ca"]; app->session;
+payment[label="Tiền và phí mô phỏng\nCấp · Giữ · Chi · Hoàn\nPhí người thuê 10%"]; app->payment;
+admin[label="Quản trị\nBáo cáo · Tranh chấp\nLịch sử · Thống kê"]; app->admin;
+support[label="Hỗ trợ sử dụng\nChữ lớn · Giọng đọc\nGọi điện · Offline"]; app->support; }

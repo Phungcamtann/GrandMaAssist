@@ -1,0 +1,96 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName Segoe UI
+actor "Khách" as Guest
+actor "Người tìm việc" as Seeker
+actor "Người thuê" as Employer
+actor "Admin" as Admin
+actor "Firebase Authentication" as Auth
+actor "Dịch vụ hệ thống" as Service
+actor "Android TTS" as TTS
+rectangle "GrandMa Assist" {
+usecase "UC01 - Đăng nhập / Đăng xuất" as UC1
+usecase "UC02 - Xác minh số / Liên kết tài khoản" as UC2
+usecase "UC03 - Vai trò và hồ sơ" as UC3
+usecase "UC04 - Gửi hồ sơ danh tính mẫu" as UC4
+usecase "UC05 - Xét duyệt hồ sơ mẫu" as UC5
+usecase "UC06 - Tìm việc có hướng dẫn" as UC6
+usecase "UC07 - Xem / Lọc / Chi tiết việc" as UC7
+usecase "UC08 - Lưu / Bỏ lưu việc" as UC8
+usecase "UC09 - Gửi đơn ứng tuyển" as UC9
+usecase "UC10 - Theo dõi / Rút đơn" as UC10
+usecase "UC11 - Đăng / Sửa / Gửi tin" as UC11
+usecase "UC12 - Đóng tin" as UC12
+usecase "UC13 - Duyệt / Từ chối / Ẩn tin" as UC13
+usecase "UC14 - Xem và xử lý ứng viên" as UC14
+usecase "UC15 - Báo cáo tin" as UC15
+usecase "UC16 - Xử lý báo cáo" as UC16
+usecase "UC17 - Đề xuất / Sửa thỏa thuận" as UC17
+usecase "UC18 - Xác nhận / Từ chối thỏa thuận" as UC18
+usecase "UC19 - Cấp tiền mô phỏng" as UC19
+usecase "UC20 - Ghi nhận bắt đầu" as UC20
+usecase "UC21 - Báo hoàn thành" as UC21
+usecase "UC22 - Xác nhận kết quả" as UC22
+usecase "UC23 - Yêu cầu / Xác nhận hủy" as UC23
+usecase "UC24 - Gửi / Trao đổi tranh chấp" as UC24
+usecase "UC25 - Xử lý tranh chấp" as UC25
+usecase "UC26 - Quyết toán / Xem lịch sử tiền" as UC26
+usecase "UC27 - Liên hệ điện thoại" as UC27
+usecase "UC28 - Nghe hướng dẫn / Cài đặt" as UC28
+usecase "UC29 - Xem offline" as UC29
+usecase "UC30 - Hàng đợi / Thống kê" as UC30
+}
+Guest -- UC1
+Guest -- UC6
+Guest -- UC7
+Guest -- UC28
+Guest -- UC29
+Seeker -- UC1
+Seeker -- UC2
+Seeker -- UC3
+Seeker -- UC4
+Seeker -- UC6
+Seeker -- UC7
+Seeker -- UC8
+Seeker -- UC9
+Seeker -- UC10
+Seeker -- UC15
+Seeker -- UC18
+Seeker -- UC20
+Seeker -- UC21
+Seeker -- UC23
+Seeker -- UC24
+Seeker -- UC26
+Seeker -- UC27
+Seeker -- UC28
+Seeker -- UC29
+Employer -- UC1
+Employer -- UC2
+Employer -- UC3
+Employer -- UC4
+Employer -- UC11
+Employer -- UC12
+Employer -- UC14
+Employer -- UC17
+Employer -- UC18
+Employer -- UC19
+Employer -- UC20
+Employer -- UC22
+Employer -- UC23
+Employer -- UC24
+Employer -- UC26
+Employer -- UC27
+Employer -- UC28
+Employer -- UC29
+Admin -- UC1
+Admin -- UC5
+Admin -- UC13
+Admin -- UC16
+Admin -- UC25
+Admin -- UC30
+Auth -- UC1
+Auth -- UC2
+Service -- UC26
+TTS -- UC28
+@enduml

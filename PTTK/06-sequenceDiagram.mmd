@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor seeker as Người tìm việc
+    participant ui as Màn hình xác nhận
+    participant backend as Dịch vụ nghiệp vụ
+    participant db as Firestore
+    seeker->>ui: Xác nhận gửi đơn
+    ui->>backend: applyToJob với requestId
+    backend->>db: Đọc user, tin và đơn theo transaction
+    alt Đủ quyền, tin mở, chưa có đơn
+        backend->>db: Tạo đơn và snapshot
+        db-->>backend: Commit thành công
+        backend-->>ui: Trả applicationId
+        ui-->>seeker: Đã ứng tuyển
+    else Không hợp lệ hoặc xung đột
+        backend-->>ui: Lỗi và trạng thái hiện tại
+        ui-->>seeker: Giải thích và cho thao tác phù hợp
+    end

@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> PROPOSED
+    PROPOSED --> AWAITING_FUNDS: Hai bên xác nhận cùng phiên bản
+    AWAITING_FUNDS --> PROPOSED: Sửa trước cấp tiền
+    AWAITING_FUNDS --> READY: Cấp đủ tiền
+    PROPOSED --> CANCELLED: Từ chối hoặc hủy
+    AWAITING_FUNDS --> CANCELLED: Hủy hoặc hết hạn khi chưa có tiền
+    READY --> IN_PROGRESS: Hai bên xác nhận bắt đầu
+    IN_PROGRESS --> COMPLETION_PENDING: Người làm báo xong
+    COMPLETION_PENDING --> SETTLEMENT_PENDING: Người thuê đồng ý
+    READY --> SETTLEMENT_PENDING: Hai bên đồng ý hủy
+    READY --> DISPUTED: Có bất đồng
+    IN_PROGRESS --> DISPUTED: Có bất đồng
+    COMPLETION_PENDING --> DISPUTED: Có bất đồng hoặc cần admin xử lý
+    DISPUTED --> SETTLEMENT_PENDING: Admin quyết định
+    SETTLEMENT_PENDING --> COMPLETED: Đã phân bổ, có tiền công được duyệt
+    SETTLEMENT_PENDING --> CANCELLED: Đã phân bổ, tiền công bằng không

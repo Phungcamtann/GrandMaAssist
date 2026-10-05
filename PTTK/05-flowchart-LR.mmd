@@ -1,0 +1,10 @@
+flowchart LR
+    ui["Android Java + XML"] --> vm["ViewModel"]
+    vm --> repo["Repository"]
+    repo --> local["SQLite: dữ liệu công khai và lựa chọn"]
+    repo --> auth["Firebase Authentication: OTP / Google"]
+    repo --> read["Firestore: truy vấn được phép"]
+    repo --> command["Dịch vụ nghiệp vụ tin cậy"]
+    command --> db["Firestore: dữ liệu và lịch sử"]
+    command --> simulator["Bộ mô phỏng thanh toán"]
+    ui --> tts["Android TTS / âm thanh cục bộ"]

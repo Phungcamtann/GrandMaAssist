@@ -1,0 +1,45 @@
+classDiagram
+    class Application
+    class WorkSession {
+        +String id
+        +int agreementVersion
+        +SessionStatus status
+        +isAgreementConfirmed() boolean
+        +canStart() boolean
+    }
+    class AgreementSnapshot {
+        +long laborAmount
+        +long serviceFee
+        +long totalDue
+        +String feePolicyVersion
+    }
+    class PaymentRecord {
+        +PaymentStatus status
+        +long totalFunded
+        +long heldAmount
+        +long workerPaid
+        +long feeRecognized
+        +long employerRefunded
+        +isBalanced() boolean
+    }
+    class PaymentEvent {
+        +String operationId
+        +PaymentEventType type
+    }
+    class FeePolicy {
+        +String version
+        +int rateBps
+        +feeFor(amount) long
+    }
+    class Dispute {
+        +DisputeStatus status
+        +String reason
+    }
+    class DisputeDecision
+    Application "1" -- "0..*" WorkSession : sinh ca
+    WorkSession "1" *-- "1" AgreementSnapshot
+    WorkSession "1" -- "1" PaymentRecord
+    PaymentRecord "1" -- "0..*" PaymentEvent
+    FeePolicy "1" -- "0..*" AgreementSnapshot : áp dụng
+    WorkSession "1" -- "0..*" Dispute
+    Dispute "1" *-- "0..1" DisputeDecision

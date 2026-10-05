@@ -1,0 +1,46 @@
+classDiagram
+    class User {
+        +String id
+        +UserRole role
+        +IdentityStatus identityStatus
+        +canConfirmSession() boolean
+    }
+    class JobSeekerProfile {
+        +String userId
+        +List skills
+        +isCompleteForApplication() boolean
+    }
+    class EmployerProfile {
+        +String userId
+        +EmployerType employerType
+    }
+    class JobPost {
+        +String id
+        +JobStatus status
+        +long payAmount
+        +canReceiveApplication(now) boolean
+    }
+    class Application {
+        +String id
+        +ApplicationStatus status
+        +canWithdraw() boolean
+    }
+    class SavedJob
+    class SearchPreference
+    class Area
+    class JobCategory
+    class IdentityVerificationRequest
+    class Report
+    User "1" -- "0..1" JobSeekerProfile : có
+    User "1" -- "0..1" EmployerProfile : có
+    User "1" -- "0..1" SearchPreference : lựa chọn
+    User "1" -- "0..*" IdentityVerificationRequest : gửi
+    EmployerProfile "1" -- "0..*" JobPost : đăng
+    JobCategory "1" -- "0..*" JobPost : phân loại
+    Area "1" -- "0..*" JobPost : khu vực
+    JobPost "1" -- "0..*" Application : nhận
+    JobSeekerProfile "1" -- "0..*" Application : gửi
+    JobSeekerProfile "1" -- "0..*" SavedJob : lưu
+    JobPost "1" -- "0..*" SavedJob : được lưu
+    User "1" -- "0..*" Report : gửi
+    JobPost "1" -- "0..*" Report : được báo cáo

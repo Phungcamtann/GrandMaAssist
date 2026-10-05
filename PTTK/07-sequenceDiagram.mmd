@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor employer as Người thuê
+    actor seeker as Người làm
+    participant app as Ứng dụng
+    participant backend as Dịch vụ nghiệp vụ
+    participant mock as Bộ mô phỏng tiền
+    participant db as Firestore
+    employer->>app: Xác nhận cấp tổng tiền
+    app->>backend: fundSession với requestId
+    backend->>db: Kiểm tra và giữ operation
+    backend->>mock: Thực hiện cấp tiền mô phỏng
+    mock-->>backend: Kết quả mô phỏng
+    backend->>db: Transaction ghi funded, held và READY
+    backend-->>app: Đã cấp tiền mô phỏng
+    seeker->>app: Báo hoàn thành sau ca
+    app->>backend: reportCompletion
+    backend->>db: COMPLETION_PENDING
+    employer->>app: Xác nhận kết quả
+    app->>backend: confirmCompletion
+    backend->>db: Quyết định phân bổ và SETTLEMENT_PENDING
+    backend->>mock: Mô phỏng phân bổ
+    mock-->>backend: Thành công
+    backend->>db: Ghi chi, phí, hoàn và hoàn tất nguyên tử
+    backend-->>app: Kết quả quyết toán mô phỏng

@@ -1,0 +1,27 @@
+digraph usecases {graph [fontname="Arial", bgcolor="transparent", pad="0.2", nodesep="0.4", ranksep="0.65", splines=polyline]; node [fontname="Arial", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f2f8f4", color="#8caf9a", margin="0.15,0.12"]; edge [fontname="Arial", fontsize=10, color="#668071", arrowsize=0.7];rankdir=LR; node[shape=ellipse];
+ seeker[shape=box,label="«actor»
+Người tìm việc",fillcolor="#e0eee4"];
+ employer[shape=box,label="«actor»
+Người thuê",fillcolor="#e0eee4"];
+ adminActor[shape=box,label="«actor»
+Admin",fillcolor="#e0eee4"];
+ subgraph clusterSystem {label="GrandMa Assist — use case tổng quan"; color="#8caf9a";style=rounded;
+ account[label="Đăng nhập / OTP
+Hồ sơ và danh tính mẫu"];
+ search[label="Tìm việc có hướng dẫn
+Xem và lưu việc"];
+ apply[label="Ứng tuyển / Theo dõi đơn"];
+ post[label="Đăng và quản lý tin"];
+ review[label="Xử lý ứng viên"];
+ agreement[label="Chốt thỏa thuận ca"];
+ fund[label="Cấp tiền mô phỏng"];
+ work[label="Bắt đầu / Hoàn thành ca"];
+ money[label="Xem quyết toán / Hủy / Tranh chấp"];
+ moderation[label="Duyệt tin và hồ sơ mẫu"];
+ resolution[label="Xử lý báo cáo / Tranh chấp"];
+ stats[label="Xem thống kê phí"];
+ }
+ edge[dir=none];seeker->account;employer->account;seeker->search;seeker->apply;employer->post;employer->review;
+ seeker->agreement;employer->agreement;employer->fund;seeker->work;employer->work;seeker->money;employer->money;
+ adminActor->moderation;adminActor->resolution;adminActor->stats;
+}
