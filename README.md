@@ -661,9 +661,9 @@ Dispute có các phản hồi bên trong subcollection Responses gồm id, autho
 
 Không dùng kế thừa SEEKER/EMPLOYER/ADMIN như ba bản sao người dùng; dùng role và profile chuyên biệt để ánh xạ Firebase UID. Các phương thức trong lớp chỉ thể hiện quy tắc, không thay thế kiểm tra quyền tại Firebase Rules.
 
+
 ### 12.7. Class diagram A — tài khoản và tuyển dụng
 
-```mermaid
 classDiagram
     class User {
         +String id
@@ -715,7 +715,7 @@ classDiagram
     JobPost "1" -- "0..*" SavedJob : được lưu
     User "1" -- "0..*" Report : gửi
     JobPost "1" -- "0..*" Report : được báo cáo
-
+    
 ### 12.8. Class diagram B — ca và thanh toán
 
 classDiagram
