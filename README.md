@@ -919,6 +919,30 @@ Không có tác vụ server chạy nền trong bản này. Khi mở app/tải l�
 
 Thông báo xét hồ sơ được ghi bền vững cùng quyết định. Người đang mở app có thể thấy cập nhật; người đóng app thấy khi quay lại. Không lấy đã tạo thông báo làm bằng chứng người dùng đã đọc. Đánh dấu readAt chỉ do chủ tài khoản thực hiện.
 
+## 15. Ma trận quyền và bảo vệ dữ liệu
+
+| Dữ liệu/hành động            | Khách | Người tìm việc                         | Người thuê                     | Admin                                           |
+| ---------------------------- | ----- | -------------------------------------- | ------------------------------ | ----------------------------------------------- |
+| Tin OPEN công khai           | Đọc   | Đọc                                    | Đọc                            | Đọc                                             |
+| Tin chưa duyệt/riêng         | Không | Chỉ snapshot đơn của mình              | Chủ tin                        | Theo quyền kiểm duyệt                           |
+| Hồ sơ và số điện thoại       | Không | Của mình                               | Của mình                       | Phần cần thiết theo nhiệm vụ                    |
+| Hồ sơ/ảnh nghỉ hưu           | Không | Của mình; không tự duyệt               | Không                          | Đọc/xét theo quyền                              |
+| Hồ sơ mẫu người thuê         | Không | Không                                  | Của mình                       | Xét theo quyền v2                               |
+| Gửi đơn mới                  | Không | Chỉ đủ OTP/hồ sơ và APPROVED hiện hành | Không                          | Không thay người tìm việc gửi                   |
+| Đơn và snapshot liên hệ      | Không | Đơn mình                               | Đơn thuộc tin mình             | Khi cần xử lý vụ liên quan                      |
+| Ca/thỏa thuận/địa chỉ riêng  | Không | Ca mình                                | Ca mình                        | Theo vụ được xử lý                              |
+| Tiền mô phỏng                | Không | Đọc ca mình; chỉ lệnh được phép        | Đọc/cấp/xác nhận theo vai trò  | Quyết định tranh chấp theo quyền                |
+| Thông báo kết quả hồ sơ      | Không | Của mình; chỉ đánh dấu đọc             | Của mình                       | Tạo kết quả đúng quyết định, không đọc tùy tiện |
+| Quyền Admin/trạng thái duyệt | Không | Không tự cấp                           | Không tự cấp                   | Chỉ trường được phép; cấp Admin qua Console     |
+| Báo cáo tin                  | Không | Báo cáo mình                           | Không thấy danh tính người báo | Theo nhiệm vụ                                   |
+
+Rules mặc định từ chối, giới hạn trường create/update và bất biến UID/owner/version. Không cho phép toàn bộ user đã login ghi vào mọi collection. Tài liệu private không đặt lẫn public rồi chỉ ẩn bằng giao diện. Người thuê không nhận căn cước, số BHXH, ảnh hoặc ghi chú xét duyệt trong snapshot ứng viên.
+
+AdminAccess cấp sẵn qua Firebase Console bởi người quản trị dự án; APK chỉ dùng Firebase client SDK với tài khoản đăng nhập. Admin không toàn quyền: cần đúng loại thao tác, đúng hồ sơ, không tự xử lý lợi ích của mình và không sửa lịch sử tiền tùy ý.
+
+Ảnh thật dùng nội bộ theo quyết định của nhóm: giải thích mục đích trước gửi, chủ hồ sơ và Admin được phép mới xem; không nhúng ảnh/số định danh thật vào repo, log, screenshot công khai hoặc SQLite. Giữ ảnh khóa theo request, hạn chế lưu đệm xuống đĩa của thư viện ảnh; dọn file tạm khi logout. Chi tiết lưu trữ tại 13.4.
+
+OTP SMS thật là yêu cầu nghiệm thu. SMS và Firebase Storage cần cấu hình thanh toán/quota phù hợp, không khẳng định toàn bộ hạ tầng miễn phí. Chưa xác nhận dự án hiện đã bật Blaze; kiểm tra cấu hình trước khi tích hợp SMS thật/upload ảnh. Số thử phục vụ phát triển không thay thế ca nghiệm thu nhận SMS thật. [S1][S2][S16][S18]
 
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
