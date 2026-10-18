@@ -768,6 +768,75 @@ classDiagram
     Dispute "1" *-- "0..1" DisputeDecision
 ```
 
+## 13. Thiết kế Firestore và SQLite
+
+### 13.1. Cấu trúc Firestore
+
+| Đường dẫn | Nội dung |
+| --- | --- |
+| users/{uid} | Tài khoản riêng, số liên hệ, quyền, trạng thái xác minh |
+| seekerProfiles/{uid} | Hồ sơ tìm việc |
+| employerProfiles/{uid} | Hồ sơ người thuê |
+| users/{uid}/preferences/search | SearchPreference |
+| users/{uid}/savedJobs/{jobId} | SavedJob |
+| areas/{code}; jobCategories/{id} | Danh mục chuẩn bị sẵn |
+| jobs/{jobId} | Tin và version hiện hành |
+| applications/{applicationId} | Đơn, snapshot và hai UID liên quan |
+| identityRequests/{requestId} | Hồ sơ danh tính mẫu của EMPLOYER, giữ v2 |
+| retirementRequests/{requestId} | Dữ liệu riêng, snapshot QR, đường dẫn ảnh, quyết định xét nghỉ hưu của SEEKER |
+| users/{uid}/notifications/{notificationId} | Kết quả xét duyệt; khóa theo requestId + decisionVersion để chống thông báo trùng |
+| adminAccess/{uid} | Quyền Admin cấp sẵn qua Console; client không tạo/sửa |
+| workSessions/{sessionId} | Ca và snapshot thỏa thuận hiện hành |
+| workSessions/{sessionId}/agreementVersions/{version} | Lịch sử phiên bản thỏa thuận |
+| payments/{sessionId} | PaymentRecord một-một với ca |
+| payments/{sessionId}/events/{eventId} | Sự kiện tiền bất biến |
+| disputes/{disputeId} | Tranh chấp và quyết định |
+| disputes/{disputeId}/responses/{responseId} | Giải trình của hai bên/admin |
+| reports/{reportId} | Báo cáo tin |
+| feePolicies/{version} | Chính sách phí có phiên bản |
+| operations/{operationId} | Khóa idempotency, actor, lệnh, fingerprint và kết quả |
+| auditEvents/{eventId} | Nhật ký hành động quan trọng |
+
+applicationId tạo nhất quán từ jobId và seekerId; quy ước ID có ranh giới rõ và Rules kiểm tra khớp các trường, không chỉ tin Java. SavedJob dùng jobId dưới đường dẫn người dùng. Không đổi UID khi bổ sung Google/phone. Trường liên kết ở Firestore không tự có tính chất khóa ngoại: transaction và Rules phải kiểm tra tài liệu đích, chủ sở hữu và trạng thái.
+
+### 13.2. Nhóm truy vấn và chỉ mục dự kiến
+
+| Màn hình | Truy vấn | Chỉ mục dự kiến |
+| --- | --- | --- |
+| Danh sách việc | status, areaCode, categoryId, hạn và thứ tự | Chỉ mục ghép theo bộ lọc thực tế |
+| Tin của tôi | employerId, status, updatedAt | employerId + status + updatedAt |
+| Đơn của tôi | seekerId, createdAt | seekerId + createdAt |
+| Ứng viên của tin | jobId, status, createdAt | jobId + status + createdAt |
+| Ca của tôi | seekerId hoặc employerId, status, agreement.startAt | Hai nhóm chỉ mục theo vai trò |
+| Hàng đợi admin | status và createdAt/submittedAt/dueAt | Chỉ mục riêng từng collection |
+
+Chỉ mục chính xác được tạo theo truy vấn triển khai và kiểm thử, không giả định Firestore tự tìm kiếm toàn văn tiếng Việt. Bản đầu ưu tiên bộ lọc cấu trúc; chưa có tìm kiếm ngữ nghĩa hay search engine ngoài.
+
+Gợi ý được Java tính trên tập dữ liệu công khai hợp lệ đã tải đầy đủ trong giới hạn demo, trước khi phân trang kết quả. Đề xuất giới hạn kiểm thử 500 tin còn hiệu lực: nếu vượt giới hạn xử lý thì trả trạng thái giới hạn rõ ràng hoặc chuyển sang danh sách lọc theo thời gian; không cắt âm thầm rồi khẳng định kết quả tốt nhất. Khi triển khai lớn cần thiết kế chỉ mục/tìm kiếm riêng.
+
+### 13.3. SQLite
+
+| Bảng | Khóa và trường quan trọng |
+| --- | --- |
+| cached_jobs | job_id PK, public fields, remote_version, cached_at |
+| cached_categories | category_id PK, name, active |
+| cached_areas | area_code PK, name, parent_code, active |
+| cached_saved_jobs | (owner_uid, job_id) PK, saved_at, last_synced_at |
+| local_search_preferences | owner_key PK, selections_json, updated_at |
+
+owner_key của khách là giá trị local riêng; khi đăng nhập không tự gán toàn bộ dữ liệu của một người trước đó cho tài khoản mới. Sử dụng SQLiteOpenHelper và lớp truy cập SQLite bằng Java để sát yêu cầu môn học. Migration schema phải có version. Truy vấn local không chạy trên main thread.
+
+### 13.4. Ảnh hồ sơ trong Firebase Storage
+
+- Đường dẫn riêng: verification/{uid}/{requestId}/{fileId}.jpg; Firestore chỉ lưu đường dẫn và metadata cần thiết, không lưu ảnh Base64.
+- Chủ hồ sơ upload vào bản nháp của mình; Admin được phân quyền đọc để xét. Storage Rules đối chiếu quyền và trạng thái yêu cầu; không dùng bucket công khai hoặc link tải có token làm cơ chế phân quyền.
+- Sau SUBMITTED, client không ghi đè/xóa ảnh của bản đang xét hoặc đã quyết định. Bổ sung dùng request/fileId mới. Chủ hồ sơ không được thay bằng đường dẫn ảnh của người khác.
+- Upload Storage và transaction Firestore không nguyên tử: dùng bản nháp kỹ thuật DRAFT trước SUBMITTED. DRAFT là trạng thái request, không phải trạng thái duyệt của User; không được ghi đè quyết định cũ hoặc tự mở quyền. Bản nháp chưa nằm trong hàng đợi xét. Chỉ gửi sau khi SDK xác nhận tải xong; Admin chưa xem được ảnh thì không duyệt.
+- Giới hạn đề xuất: JPEG/PNG, tối đa 10 MB mỗi ảnh; một ảnh căn cước chứa QR và một đến ba ảnh bằng chứng. Kiểm tra cả nội dung đọc được trên app và metadata/kích thước tại Rules. Các giới hạn là tham số triển khai để kiểm thử, không yêu cầu người dùng làm giấy tờ mới.
+- Ảnh nháp tạm giữ trong vùng riêng ứng dụng để phục hồi khi xoay; dọn khi hủy, đăng xuất hoặc gửi thành công. Không lưu giấy tờ vào SQLite/offline cache, log, Git hay ảnh chụp báo cáo công khai.
+- Không có tác vụ xóa tự động nền trong bản này. Đề xuất nhóm quản trị xóa ảnh kiểm thử và dữ liệu định danh thô sau khi nghiệm thu kết thúc; giữ bản ghi quyết định đã tối giản. Thời điểm xóa cụ thể được xác nhận với nhóm trước khi nhận dữ liệu thật.
+- Storage Rules và Firestore Rules là hai lớp riêng, cần kiểm thử cả hai. Không tuyên bố Firestore tự xác nhận một file tồn tại/đúng nội dung. 
+
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
 Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết quả đã chạy trên ứng dụng.
