@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "987228735532",
+    "project_id": "grandmaassist-a06a2",
+    "storage_bucket": "grandmaassist-a06a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987228735532:android:99f11ff7ef589d1111e989",
+        "android_client_info": {
+          "package_name": "vn.edu.ueh.nhom4.grandmaassist.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "987228735532-ek1bniop6i99u0o0ghermvu6lsjf4irq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.edu.ueh.nhom4.grandmaassist.app",
+            "certificate_hash": "a74ffe4156ebf054750d45ade9fa49c82374180d"
+          }
+        },
+        {
+          "client_id": "987228735532-o99tabf6cg96u3i829u63bg1ne1890lc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFPLVcefqGXALznLIm_nTY8YY5hLulvT0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987228735532-o99tabf6cg96u3i829u63bg1ne1890lc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
