@@ -551,6 +551,219 @@ GrandMa Assist chọn người thuê chịu 10% để người nghỉ hưu nhìn
 
 Admin xem tách biệt: tổng giao dịch, tiền đang giữ, đã trả người làm, đã hoàn, phí đã ghi nhận và số ca quyết toán. Lợi nhuận không đồng nghĩa phí thu được; cần trừ chi phí. Mô hình duy trì còn cần sao lưu, kiểm thử phân quyền, kiểm soát chi phí OTP, giới hạn truy vấn và lịch sử xử lý.
 
+## 12. Mô hình lớp nghiệp vụ và từ điển dữ liệu
+
+### 12.1. Quy ước chung
+
+- String là chuỗi; Long là số nguyên VND hoặc bộ đếm; Instant lưu timestamp server; LocalTime dùng cho lịch mẫu; dấu ? là trường tùy chọn.
+- ID là giá trị không chứa dữ liệu riêng. Không dùng số điện thoại/căn cước làm document ID công khai.
+- Mọi snapshot đã khóa giữ nguyên; thông tin hiện tại của hồ sơ không tự thay thế nội dung đã xác nhận.
+- Dữ liệu thời gian sự kiện lưu UTC, hiển thị theo Asia/Ho_Chi_Minh cho bối cảnh Việt Nam; không quyết định hết hạn bằng giờ thiết bị.
+- Các thuộc tính *By là UID/reference, *At là Instant; trường trạng thái dùng enum, không dùng chuỗi tiếng Việt tùy ý.
+
+### 12.2. Tài khoản, hồ sơ và gợi ý
+
+| Lớp | Thuộc tính chính | Trách nhiệm/phương thức |
+| --- | --- | --- |
+| User | id, displayName, role, accountStatus, phoneE164?, phoneVerifiedAt?, phoneVerificationMode, identityStatus?, identityMode?, identityRequestId?, retirementStatus?, currentRetirementRequestId?, approvedIdentityProfileVersion?, createdAt, updatedAt | canApply(), canConfirmSession(); Firestore Rules kiểm tra lại, client không tự cấp quyền |
+| JobSeekerProfile | userId, fullName, dateOfBirth, identityProfileVersion, areaCode, skills: List, experienceSummary, preferredShifts: List | isCompleteForApplication() |
+| EmployerProfile | userId, employerType, organizationName?, introduction, areaCode | isCompleteForPosting() |
+| SearchPreference | userId, categoryIds: List, areaCodes: List, availableDays: List, availableShifts: List, avoidedDemands: List, updatedAt | validate(), hasHardConstraints() |
+| AccessibilitySettings | fontScaleOption, voiceEnabled, autoReadEnabled, speechRate | Value object cục bộ; không giảm cỡ chữ hệ thống |
+| Area | code, name, parentCode?, active | Danh mục khu vực; quan hệ tự tham chiếu 0..1 cha |
+| JobCategory | id, name, iconKey, active | Danh mục việc |
+| IdentityVerificationRequest | id, userId, profileVersion, sampleEvidenceRefs: List, mode, status, submittedAt, reviewedBy?, reviewedAt?, reason? | canReview(); chỉ EMPLOYER, mode DEMO theo v2 |
+| RetirementVerificationRequest | id, userId, previousRequestId?, identityProfileVersion, identitySnapshot, identityImagePath, evidenceType, evidenceImagePaths, status: RetirementRequestStatus, submittedAt?, reviewedBy?, reviewedAt?, lookupMode, lookupResult?, reason?, decisionVersion | SEEKER; lookupMode SIMULATED; nội dung gửi được khóa theo phiên bản |
+| IdentitySnapshot | fullName, dateOfBirth, documentNumber, source: CCCD_QR, parserVersion | Thông tin riêng phục vụ xét duyệt, không đưa vào snapshot ứng tuyển |
+| InAppNotification | id, recipientUid, type, requestId, decisionVersion, title, message, createdAt, readAt? | Kết quả xét duyệt bền vững; chỉ chủ tài khoản đánh dấu đã đọc |
+
+dateOfBirth dùng ngày lịch YYYY-MM-DD; không lưu tuổi làm nguồn chuẩn vì tuổi thay đổi theo thời gian. Không đưa toàn bộ chuỗi QR, địa chỉ thường trú hoặc trường không cần thiết vào hồ sơ công khai. evidenceType là RETIREMENT_CERTIFICATE hoặc BHXH_SIMULATED; không dùng bộ phân loại BHYT/HT.
+
+Số liên hệ không lặp dưới dạng có thể sửa tùy ý trong hai profile. Lấy từ User đã được đối chiếu với Firebase Auth qua Rules để tạo contact snapshot. User là tài liệu riêng, không đọc công khai; public name/badge nếu cần dùng một bản chiếu chỉ chứa trường công khai.
+
+### 12.3. Tin, đơn và báo cáo
+
+| Lớp | Thuộc tính chính | Trách nhiệm/phương thức |
+| --- | --- | --- |
+| JobPost | id, employerId, employerDisplayName, categoryId, areaCode, title, description, requirementsText, requiredSkillTags: List, workDays: List, workShift, scheduleText, physicalDemands: List, demandsDeclared, payAmount: Long, payUnit, status, version, expiresAt, createdAt, updatedAt, reviewedBy?, reviewedAt?, reviewReason? | isExpired(now), canReceiveApplication(now), validate() |
+| Application | id, jobId, seekerId, employerId, message?, status, applicantSnapshot, jobSnapshot, employerContactSnapshot?, createdAt, updatedAt | canWithdraw(), canReview() |
+| SavedJob | seekerId, jobId, savedAt | Liên kết duy nhất theo cặp |
+| Report | id, reporterId, jobId, reason, detail?, status, resolution?, handledBy?, resolutionNote?, createdAt, resolvedAt? | isResolved() |
+| ApplicantSnapshot | displayName, verifiedPhone, skills, experienceSummary, consentAt, profileVersion | Dữ liệu người gửi đồng ý chia sẻ khi ứng tuyển |
+| JobSnapshot | title, categoryId, areaCode, scheduleText, physicalDemands, payAmount, payUnit, jobVersion | Điều kiện tin tại lúc nộp đơn |
+| ContactSnapshot | displayName, verifiedPhone, sharedAt | Liên hệ chủ tin khi chấp nhận |
+
+payUnit của tin có thể HOUR/SESSION/DAY. Tin là thông tin tham khảo; khi lập ca phải chốt tổng laborAmount cụ thể. Nếu tính từ đơn giá giờ thì hiển thị thời lượng và phép tính để hai bên xác nhận, không tự dùng số giờ GPS hoặc bộ đếm làm tiền cuối.
+
+### 12.4. Ca, tiền và tranh chấp
+
+| Lớp | Thuộc tính chính | Trách nhiệm/phương thức |
+| --- | --- | --- |
+| WorkSession | id, applicationId, jobId, seekerId, employerId, agreement, agreementVersion, employerAcceptedVersion?, seekerAcceptedVersion?, status, cancellationRequest?, employerStartedAt?, seekerStartedAt?, completionReportedAt?, completionResponseDueAt?, completionOutcome?, createdAt, updatedAt | isAgreementConfirmed(), canStart(), canReportCompletion() |
+| AgreementSnapshot | tasks, privateAddress, areaCode, startAt, endAt, laborAmount: Long, feeRateBps, serviceFee: Long, totalDue: Long, feePolicyVersion, cancellationPolicyVersion, fundingDeadline | Bản chốt có version; thay đổi tạo phiên bản mới trước funding |
+| CancelRequest | requestedBy, reason, requestedAt, respondedBy?, respondedAt?, status | Value object; PENDING/ACCEPTED/REJECTED |
+| FeePolicy | version, rateBps, payer, roundingMode, effectiveAt, active | feeFor(amount), quote(amount); không sửa policy đã được ca tham chiếu |
+| PaymentRecord | sessionId, employerId, seekerId, mode, agreementVersion, status, expectedTotal, totalFunded, heldAmount, workerPaid, feeRecognized, employerRefunded, approvedLaborAmount?, lastOperationId?, lastError?, updatedAt | allocationFor(approvedAmount), isBalanced() |
+| PaymentEvent | id, sessionId, operationId, type, status, fundingDelta, workerPaidDelta, feeDelta, refundDelta, actorId?, createdAt, errorCode? | Bất biến; chỉ sự kiện thành công thay đổi số tiền |
+| Dispute | id, sessionId, openedBy?, openedByType: USER/ADMIN, reason, description, status, responseDueAt, assignedAdminId?, decision?, createdAt, resolvedAt? | canRespond(), canResolve(); ADMIN khi Admin tiếp nhận quá hạn; không tự tạo bởi tác vụ nền |
+| DisputeDecision | approvedLaborAmount, computedFee, computedRefund, reason, decidedBy, decidedAt, version | Lý do quyết định; tiền tính theo FeePolicy snapshot |
+| AuditEvent | id, entityType, entityId, action, actorId, requestId, previousVersion?, newVersion?, createdAt | Nhật ký thay đổi quan trọng; không chứa OTP/giấy tờ thô |
+
+Dispute có các phản hồi bên trong subcollection Responses gồm id, authorId, message, createdAt. Bản đầu dùng giải trình chữ và lịch sử hệ thống; chưa bắt buộc tải ảnh nhà riêng hay ảnh người thật. Mỗi quyết định cần lý do; dữ liệu hiện có không được coi là chứng cứ tuyệt đối.
+
+### 12.5. Enum
+
+| Enum | Giá trị |
+| --- | --- |
+| UserRole | SEEKER, EMPLOYER, ADMIN |
+| AccountStatus | ACTIVE, RESTRICTED |
+| EmployerType | INDIVIDUAL, ORGANIZATION |
+| WorkShift | MORNING, AFTERNOON, EVENING, FLEXIBLE |
+| PhysicalDemand | HEAVY_LIFTING, PROLONGED_STANDING, FREQUENT_MOVEMENT |
+| PayUnit | HOUR, SESSION, DAY |
+| JobStatus | PENDING_REVIEW, OPEN, REJECTED, CLOSED, HIDDEN |
+| ApplicationStatus | PENDING, ACCEPTED, REJECTED, WITHDRAWN |
+| SessionStatus | PROPOSED, AWAITING_FUNDS, READY, IN_PROGRESS, COMPLETION_PENDING, DISPUTED, SETTLEMENT_PENDING, COMPLETED, CANCELLED |
+| PaymentStatus | UNFUNDED, FUNDING, HELD, SETTLING, SETTLED |
+| VerificationMode | REAL, TEST, DEMO; áp dụng phù hợp từng loại xác minh |
+| IdentityStatus | NOT_SUBMITTED, SUBMITTED, NEEDS_INFO, VERIFIED, REJECTED, REVERIFY_REQUIRED |
+| RetirementStatus | NOT_SUBMITTED, SUBMITTED, NEEDS_INFO, APPROVED, REJECTED, REVERIFY_REQUIRED |
+| RetirementRequestStatus | DRAFT, SUBMITTED, NEEDS_INFO, APPROVED, REJECTED; DRAFT chỉ phục vụ upload, chưa là hồ sơ gửi duyệt |
+| RetirementEvidenceType | RETIREMENT_CERTIFICATE, BHXH_SIMULATED |
+| LookupResult | MATCH, NOT_MATCH, INSUFFICIENT; luôn là kết quả tra cứu mô phỏng do Admin ghi |
+| DisputeStatus | OPEN, UNDER_REVIEW, DECIDED, RESOLVED |
+| ReportReason | MISLEADING, INAPPROPRIATE, SUSPECTED_SCAM, OTHER |
+| ReportResolution | NO_VIOLATION, JOB_HIDDEN |
+| PaymentEventType | FUNDING_SUCCEEDED, SETTLEMENT_SUCCEEDED, ATTEMPT_FAILED |
+
+### 12.6. Quan hệ và bội số
+
+| Quan hệ | Bội số và ràng buộc |
+| --- | --- |
+| User — JobSeekerProfile | 1 — 0..1, chỉ role SEEKER |
+| User — EmployerProfile | 1 — 0..1, chỉ role EMPLOYER; hai profile loại trừ nhau |
+| User — SearchPreference | 1 — 0..1; khách có bản local chưa gắn User |
+| User — IdentityVerificationRequest | EMPLOYER 1 — 0..\*; tối đa một yêu cầu đang xét hiện hành |
+| User — RetirementVerificationRequest | SEEKER 1 — 0..\*; một currentRequestId; version ảnh và hồ sơ không đổi sau gửi |
+| User — InAppNotification | 1 — 0..\*; người khác không được đọc |
+| EmployerProfile — JobPost | 1 — 0..\* |
+| JobCategory/Area — JobPost | Mỗi tin thuộc 1 category và 1 area; danh mục có 0..\* tin |
+| JobPost — Application | 1 — 0..\* |
+| JobSeekerProfile — Application | 1 — 0..\*; duy nhất cặp seekerId–jobId |
+| JobSeekerProfile/JobPost — SavedJob | Mỗi SavedJob liên kết đúng 1 người và 1 tin |
+| Application — WorkSession | 1 — 0..\*; chỉ Application ACCEPTED |
+| WorkSession — AgreementSnapshot | Composition 1 — 1 cho phiên bản hiện hành; lịch sử riêng |
+| WorkSession — PaymentRecord | 1 — 1, tạo UNFUNDED khi tạo ca |
+| PaymentRecord — PaymentEvent | 1 — 0..\* |
+| WorkSession — Dispute | 1 — 0..\* về lịch sử, tối đa một tranh chấp hoạt động |
+| FeePolicy — AgreementSnapshot | 1 — 0..\*, theo version đã chốt |
+| User — Report; JobPost — Report | Mỗi report có 1 người gửi và 1 tin; mỗi bên có 0..\* report |
+
+Không dùng kế thừa SEEKER/EMPLOYER/ADMIN như ba bản sao người dùng; dùng role và profile chuyên biệt để ánh xạ Firebase UID. Các phương thức trong lớp chỉ thể hiện quy tắc, không thay thế kiểm tra quyền tại Firebase Rules.
+
+### 12.7. Class diagram A — tài khoản và tuyển dụng
+
+```mermaid
+classDiagram
+    class User {
+        +String id
+        +UserRole role
+        +IdentityStatus identityStatus
+        +RetirementStatus retirementStatus
+        +canConfirmSession() boolean
+    }
+    class JobSeekerProfile {
+        +String userId
+        +List skills
+        +isCompleteForApplication() boolean
+    }
+    class EmployerProfile {
+        +String userId
+        +EmployerType employerType
+    }
+    class JobPost {
+        +String id
+        +JobStatus status
+        +long payAmount
+        +canReceiveApplication(now) boolean
+    }
+    class Application {
+        +String id
+        +ApplicationStatus status
+        +canWithdraw() boolean
+    }
+    class SavedJob
+    class SearchPreference
+    class Area
+    class JobCategory
+    class IdentityVerificationRequest
+    class RetirementVerificationRequest
+    class InAppNotification
+    class Report
+    User "1" -- "0..1" JobSeekerProfile : có
+    User "1" -- "0..1" EmployerProfile : có
+    User "1" -- "0..1" SearchPreference : lựa chọn
+    User "1" -- "0..*" IdentityVerificationRequest : người thuê gửi
+    User "1" -- "0..*" RetirementVerificationRequest : người tìm việc gửi
+    User "1" -- "0..*" InAppNotification : nhận
+    EmployerProfile "1" -- "0..*" JobPost : đăng
+    JobCategory "1" -- "0..*" JobPost : phân loại
+    Area "1" -- "0..*" JobPost : khu vực
+    JobPost "1" -- "0..*" Application : nhận
+    JobSeekerProfile "1" -- "0..*" Application : gửi
+    JobSeekerProfile "1" -- "0..*" SavedJob : lưu
+    JobPost "1" -- "0..*" SavedJob : được lưu
+    User "1" -- "0..*" Report : gửi
+    JobPost "1" -- "0..*" Report : được báo cáo
+
+### 12.8. Class diagram B — ca và thanh toán
+
+classDiagram
+    class Application
+    class WorkSession {
+        +String id
+        +int agreementVersion
+        +SessionStatus status
+        +isAgreementConfirmed() boolean
+        +canStart() boolean
+    }
+    class AgreementSnapshot {
+        +long laborAmount
+        +long serviceFee
+        +long totalDue
+        +String feePolicyVersion
+    }
+    class PaymentRecord {
+        +PaymentStatus status
+        +long totalFunded
+        +long heldAmount
+        +long workerPaid
+        +long feeRecognized
+        +long employerRefunded
+        +isBalanced() boolean
+    }
+    class PaymentEvent {
+        +String operationId
+        +PaymentEventType type
+    }
+    class FeePolicy {
+        +String version
+        +int rateBps
+        +feeFor(amount) long
+    }
+    class Dispute {
+        +DisputeStatus status
+        +String reason
+    }
+    class DisputeDecision
+    Application "1" -- "0..*" WorkSession : sinh ca
+    WorkSession "1" *-- "1" AgreementSnapshot
+    WorkSession "1" -- "1" PaymentRecord
+    PaymentRecord "1" -- "0..*" PaymentEvent
+    FeePolicy "1" -- "0..*" AgreementSnapshot : áp dụng
+    WorkSession "1" -- "0..*" Dispute
+    Dispute "1" *-- "0..1" DisputeDecision
+
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
 Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết quả đã chạy trên ứng dụng.
