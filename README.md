@@ -664,6 +664,7 @@ Không dùng kế thừa SEEKER/EMPLOYER/ADMIN như ba bản sao người dùng;
 
 ### 12.7. Class diagram A — tài khoản và tuyển dụng
 
+```mermaid
 classDiagram
     class User {
         +String id
@@ -715,9 +716,11 @@ classDiagram
     JobPost "1" -- "0..*" SavedJob : được lưu
     User "1" -- "0..*" Report : gửi
     JobPost "1" -- "0..*" Report : được báo cáo
+```
     
 ### 12.8. Class diagram B — ca và thanh toán
 
+```mermaid
 classDiagram
     class Application
     class WorkSession {
@@ -763,6 +766,7 @@ classDiagram
     FeePolicy "1" -- "0..*" AgreementSnapshot : áp dụng
     WorkSession "1" -- "0..*" Dispute
     Dispute "1" *-- "0..1" DisputeDecision
+```
 
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
