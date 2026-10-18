@@ -989,6 +989,66 @@ Các màn hình là nhóm chức năng, có thể triển khai bằng Fragment h
 
 **Luồng lỗi/chưa đủ điều kiện:** giải thích điều kiện còn thiếu và đưa người dùng tới đúng màn hình; sau hoàn tất quay lại thao tác ban đầu, không bắt tìm lại tin/ca. Không phát sinh giao dịch chỉ vì điều hướng quay lại.
 
+## 17. Sequence và activity bổ trợ
+
+Giảng viên hiện chưa yêu cầu thêm loại diagram; hai sequence dưới đây giúp giải thích các điểm quan trọng. Không cần thêm nhiều sơ đồ lặp lại nội dung.
+
+### 17.1. Gửi hồ sơ và nhận kết quả
+
+| Bước | Từ → đến                      | Xử lý                                                                                   |
+| ---- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| 1    | SEEKER → app                  | Chụp ảnh, đọc QR, kiểm tra thông tin và chọn bằng chứng                                 |
+| 2    | App → Storage                 | Tải ảnh vào bản nháp riêng; xác nhận tải đủ                                             |
+| 3    | App → Firestore/Rules         | Gửi SUBMITTED và currentRequest; kiểm tra UID/OTP/version                               |
+| 4    | Admin → Firestore/Storage     | Đọc hồ sơ hiện hành và ảnh theo quyền; tra cứu mô phỏng                                 |
+| 5    | Admin → Firestore transaction | Quyết định + trạng thái user + audit + notification; Rules kiểm tra vai trò và getAfter |
+| 6    | Firestore → app SEEKER        | Nhận trạng thái/notification khi mở app; đọc kết quả, bổ sung hoặc quay lại tin         |
+
+### 17.2. Sequence gửi đơn
+
+```mermaid
+sequenceDiagram
+    actor seeker as Người tìm việc
+    participant ui as Màn hình xác nhận
+    participant java as Repository Java
+    participant db as Firestore và Rules
+    seeker->>ui: Xác nhận gửi đơn
+    ui->>java: applyToJob với requestId
+    java->>db: Transaction đọc user, request duyệt, hồ sơ, tin và đơn
+    java->>db: Đề nghị tạo đơn và snapshot
+    alt OTP, APPROVED hiện hành, tin hợp lệ, chưa có đơn
+        db-->>java: Rules chấp nhận và commit
+        java-->>ui: applicationId
+        ui-->>seeker: Đã ứng tuyển
+    else Thiếu duyệt hoặc sai điều kiện
+        db-->>java: Từ chối, không tạo đơn
+        java-->>ui: Đọc lại trạng thái được phép
+        ui-->>seeker: Giải thích và mở hồ sơ/tin phù hợp
+    end
+```
+
+### 17.3. Sequence cấp tiền và quyết toán mô phỏng
+
+```mermaid
+sequenceDiagram
+    actor employer as Người thuê
+    actor seeker as Người làm
+    participant app as Java và Repository
+    participant db as Firestore và Rules
+    employer->>app: Xác nhận cấp tổng tiền mô phỏng
+    app->>db: Transaction đề nghị funding, event duy nhất và READY
+    db-->>app: Kiểm tra quyền, version, tổng và commit
+    Note over app,db: Timeout phải đọc lại kết quả, không ghi lần hai
+    seeker->>app: Báo xong sau khi ca bắt đầu hợp lệ
+    app->>db: Transaction COMPLETION_PENDING
+    employer->>app: Đồng ý kết quả
+    app->>db: Lưu xác nhận và SETTLEMENT_PENDING
+    app->>db: Transaction phân bổ, event duy nhất, trạng thái cuối
+    db-->>app: Rules kiểm tra bảo toàn tiền, commit hoặc từ chối
+```
+
+Đây là đường thành công. Hủy, bất đồng, mất mạng và retry áp dụng đúng các use case, không đổi thành tự trả tiền. Chỉ báo thành công sau server xác nhận; nếu dừng ở SETTLEMENT_PENDING thì có thao tác thử lại hợp lệ. Các transaction không gọi cổng thanh toán thật.
+
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
 Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết quả đã chạy trên ứng dụng.
