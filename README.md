@@ -944,6 +944,51 @@ AdminAccess cấp sẵn qua Firebase Console bởi người quản trị dự á
 
 OTP SMS thật là yêu cầu nghiệm thu. SMS và Firebase Storage cần cấu hình thanh toán/quota phù hợp, không khẳng định toàn bộ hạ tầng miễn phí. Chưa xác nhận dự án hiện đã bật Blaze; kiểm tra cấu hình trước khi tích hợp SMS thật/upload ảnh. Số thử phục vụ phát triển không thay thế ca nghiệm thu nhận SMS thật. [S1][S2][S16][S18]
 
+## 16. Danh sách màn hình và điều hướng
+
+| Mã   | Màn hình                     | Nội dung/hành động chính                                                                             |
+| ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| S01  | Chào và đăng nhập            | Số điện thoại, Google, tiếp tục xem việc                                                             |
+| S02  | OTP                          | Số đang xác minh, mã, sửa số, gửi lại                                                                |
+| S03  | Vai trò/hồ sơ                | Chọn vai trò lần đầu; SEEKER vào S04; EMPLOYER giữ form riêng; người quay lại không chọn vai trò lại |
+| S04  | Hồ sơ xét duyệt theo vai trò | SEEKER: các màn S04a–e dưới đây; EMPLOYER: danh tính mẫu như v2                                      |
+| S04a | Chụp căn cước                | Camera, chụp/xem lại/chụp lại, đọc QR từ ảnh, lỗi/quyền camera                                       |
+| S04b | Kiểm tra thông tin           | Họ tên/ngày sinh từ QR; bổ sung nghề nghiệp; không tự tính tuổi để mở quyền                          |
+| S04c | Đính kèm bằng chứng          | Chứng nhận nghỉ hưu hoặc ảnh BHXH mô phỏng, xem ảnh, tiến độ upload, gửi                             |
+| S04d | Trạng thái và bổ sung        | Chờ duyệt, lý do cần bổ sung/từ chối, tạo bản mới                                                    |
+| S04e | Kết quả xét duyệt            | Được duyệt/chưa đủ điều kiện; thông báo và quay lại tin quan tâm                                     |
+| S05  | Trang chính người tìm việc   | Tìm việc, việc cần chú ý, Việc của tôi, trợ giúp                                                     |
+| S06  | Câu hỏi từng bước            | Một câu hỏi, các lựa chọn, tiến trình                                                                |
+| S07  | Tóm tắt lựa chọn/kết quả     | Sửa lựa chọn, lý do gợi ý, xem thêm                                                                  |
+| S08  | Chi tiết việc                | Nhiệm vụ, khu vực, lịch, tiền công, lưu, ứng tuyển, báo cáo                                          |
+| S09  | Xác nhận ứng tuyển           | Chỉ khi hồ sơ nghỉ hưu APPROVED hiện hành; snapshot, lời nhắn, đồng ý chia sẻ liên hệ                |
+| S10  | Việc của tôi                 | Đơn và ca, trạng thái cần xử lý                                                                      |
+| S11  | Chi tiết đơn                 | Snapshot, kết quả, rút nếu chờ, liên hệ theo quyền                                                   |
+| S12  | Tin của tôi                  | Trạng thái, tạo tin, ứng viên                                                                        |
+| S13  | Tạo/sửa/xem trước tin        | Nội dung cấu trúc, gửi duyệt                                                                         |
+| S14  | Ứng viên                     | Danh sách, chi tiết đơn, chấp nhận/từ chối                                                           |
+| S15  | Thỏa thuận ca                | Nhiệm vụ, địa chỉ riêng, thời gian, tiền công, phí, xác nhận                                         |
+| S16  | Thanh toán mô phỏng          | Tổng, nhãn demo, kết quả và retry an toàn                                                            |
+| S17  | Chi tiết ca                  | Tiến trình, bắt đầu, xong, xác nhận, hủy, báo vấn đề                                                 |
+| S18  | Lịch sử tiền                 | Đã cấp/giữ/chi/hoàn/phí; nhãn mô phỏng                                                               |
+| S19  | Tranh chấp                   | Giải trình, tiến độ, quyết định                                                                      |
+| S20  | Admin hàng đợi               | Tin, hồ sơ, báo cáo, tranh chấp, quá hạn                                                             |
+| S21  | Admin xử lý                  | Nội dung liên quan, quyết định, lý do, lịch sử                                                       |
+| S21a | Admin duyệt nghỉ hưu         | Xem ảnh/QR/bằng chứng, kết quả tra cứu mô phỏng, duyệt/bổ sung/từ chối đúng version                  |
+| S24  | Thông báo trong app          | Kết quả hồ sơ, trạng thái đọc, mở chi tiết; không chứa giấy tờ riêng trong nội dung thông báo        |
+| S22  | Admin thống kê               | Doanh thu phí và các khoản tiền tách biệt                                                            |
+| S23  | Thêm/cài đặt                 | Hồ sơ, việc lưu, giọng đọc, đăng xuất                                                                |
+
+Các màn hình là nhóm chức năng, có thể triển khai bằng Fragment hoặc dialog phù hợp; không bắt buộc mỗi dòng là một Activity.
+
+**Luồng hồ sơ người tìm việc:** S01/S02 → S03 → S04a → S04b → S04c → S04d → Admin S21a → S24/S04e.
+
+**Luồng chính người tìm việc:** S05 → S06 → S07 → S08 → kiểm tra APPROVED → S09 → S10/S11 → S15 → S17 → S18. Chưa APPROVED thì từ S08 sang đúng trạng thái S04, không tạo đơn. Trong lúc chờ vẫn đi được S05–S08. Đã duyệt không phải nộp một hồ sơ mẫu thứ hai trước ca; chỉ kiểm tra quyết định còn hiệu lực.
+
+**Luồng người thuê:** S12 → S13 → admin duyệt → S14 → S04 danh tính mẫu nếu cần → S15 → S16 → S17 → S18. Không đi S04a–e xét nghỉ hưu của SEEKER.
+
+**Luồng lỗi/chưa đủ điều kiện:** giải thích điều kiện còn thiếu và đưa người dùng tới đúng màn hình; sau hoàn tất quay lại thao tác ban đầu, không bắt tìm lại tin/ca. Không phát sinh giao dịch chỉ vì điều hướng quay lại.
+
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
 Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết quả đã chạy trên ứng dụng.
