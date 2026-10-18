@@ -835,7 +835,90 @@ owner_key của khách là giá trị local riêng; khi đăng nhập không t�
 - Giới hạn đề xuất: JPEG/PNG, tối đa 10 MB mỗi ảnh; một ảnh căn cước chứa QR và một đến ba ảnh bằng chứng. Kiểm tra cả nội dung đọc được trên app và metadata/kích thước tại Rules. Các giới hạn là tham số triển khai để kiểm thử, không yêu cầu người dùng làm giấy tờ mới.
 - Ảnh nháp tạm giữ trong vùng riêng ứng dụng để phục hồi khi xoay; dọn khi hủy, đăng xuất hoặc gửi thành công. Không lưu giấy tờ vào SQLite/offline cache, log, Git hay ảnh chụp báo cáo công khai.
 - Không có tác vụ xóa tự động nền trong bản này. Đề xuất nhóm quản trị xóa ảnh kiểm thử và dữ liệu định danh thô sau khi nghiệm thu kết thúc; giữ bản ghi quyết định đã tối giản. Thời điểm xóa cụ thể được xác nhận với nhóm trước khi nhận dữ liệu thật.
-- Storage Rules và Firestore Rules là hai lớp riêng, cần kiểm thử cả hai. Không tuyên bố Firestore tự xác nhận một file tồn tại/đúng nội dung. 
+- Storage Rules và Firestore Rules là hai lớp riêng, cần kiểm thử cả hai. Không tuyên bố Firestore tự xác nhận một file tồn tại/đúng nội dung.
+
+## 14. Kiến trúc và trách nhiệm xử lý
+
+### 14.1. Kiến trúc tổng quan
+
+
+```mermaid
+flowchart LR
+    ui["Android Java + XML"] --> vm["ViewModel"]
+    vm --> repo["Repository và lệnh Java"]
+    repo --> local["SQLiteOpenHelper: tin đã xem"]
+    repo --> auth["Firebase Auth: Google / OTP thật"]
+    repo --> db["Firestore và Security Rules"]
+    repo --> storage["Storage và Security Rules: ảnh riêng"]
+    ui --> qr["Đọc QR từ ảnh bằng ML Kit"]
+    ui --> tts["Android TTS"]
+```
+
+**Phạm vi môn học:** ứng dụng Java/XML, Firebase Auth/Firestore/Storage, Security Rules và SQLiteOpenHelper. Không triển khai TypeScript, Cloud Functions, máy chủ tự viết, eKYC hay API BHXH thật. Google/OTP là tích hợp thật; QR là đọc dữ liệu; tra cứu nghỉ hưu và thanh toán là mô phỏng.
+
+Java điều phối và tính giá trị đề nghị. **Điểm kiểm soát quyền nằm tại Firebase Rules**, không nằm ở Activity, không tin role/APPROVED/số tiền do client tự khai. Rules phải kiểm tra trường được đổi, người thao tác, trạng thái cũ/mới và tài liệu liên quan; getAfter hỗ trợ kiểm tra các tài liệu ghi cùng transaction. Cần thiết kế trong giới hạn đọc/độ phức tạp Rules. [S4][S12][S13]
+
+Đây là kiến trúc cho đồ án có phạm vi giới hạn, chưa phải hệ thống thanh toán hay xác thực pháp lý. Nếu một bất biến chưa được Rules bảo vệ thì chức năng đó chưa đạt nghiệm thu; không mở toàn bộ quyền ghi để demo chạy. Thiết kế Rules chi tiết và kiểm thử đối kháng nằm trong từng chức năng trước commit.
+
+### 14.2. Tổ chức mã nguồn đề xuất
+
+```text
+app/
+  ui/                 auth, profile, verification, admin, home, jobs,
+                      guidedsearch, applications, sessions, payments
+  viewmodel/          trạng thái màn hình và khôi phục khi xoay
+  domain/model/       lớp nghiệp vụ, enum, snapshot
+  domain/service/     lệnh Java, kiểm tra form, tính phí và gợi ý
+  data/repository/    phối hợp nguồn local/remote
+  data/remote/        Firebase Auth, Firestore transaction, Storage
+  data/local/         SQLiteOpenHelper và truy vấn Java
+  verification/      camera, đọc QR, quản lý ảnh riêng
+  accessibility/     giọng đọc và trợ giúp
+  common/             tiền, thời gian, kết quả lỗi
+firebase/             firestore.rules, storage.rules, indexes, cấu hình kiểm thử
+```
+
+Package giữ `vn.edu.ueh.nhom4.grandmaassist.app`. Không cất tài khoản dịch vụ hoặc khóa quản trị trong APK. Firebase Auth quản lý credential; phone_number của token là nguồn kiểm tra số, còn retirementStatus chỉ do Admin có quyền quyết định.
+
+### 14.3. Các lệnh nghiệp vụ trọng tâm
+
+| Lệnh Java                        | Kiểm tra bắt buộc tại Firebase và hiệu ứng                                                                                              |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| syncVerifiedPhone                | Số gửi khớp claim Auth hiện hành; không nhận boolean verified tự khai; refresh token sau liên kết                                       |
+| prepare/submitRetirementRequest  | Chủ hồ sơ, OTP, đúng version, đủ ảnh/thông tin; tạo SUBMITTED và currentRequestId                                                       |
+| reviewRetirementRequest          | Admin được cấp riêng, không tự duyệt bản thân, đúng currentRequest/version, ghi tra cứu mô phỏng/lý do/quyết định + thông báo nguyên tử |
+| submitIdentity / reviewIdentity  | Luồng danh tính mẫu EMPLOYER như v2, tách hồ sơ nghỉ hưu                                                                                |
+| submitJob / reviewJob / closeJob | Vai trò, owner, trường được đổi, trạng thái, version và thời hạn                                                                        |
+| applyToJob                       | APPROVED đúng bản hiện hành + OTP + hồ sơ đủ; tin OPEN/còn hạn; ID duy nhất; snapshot và transaction                                    |
+| withdraw/reviewApplication       | Đúng chủ thể và PENDING; không sửa snapshot hoặc tự tạo ACCEPTED                                                                        |
+| propose/revise/confirmAgreement  | Application ACCEPTED, hai bên hợp lệ, version, lịch và chính sách phí bất biến                                                          |
+| fundSession                      | Người thuê, đủ xác nhận, tổng đúng snapshot, một lần funding; PaymentEvent và ca cùng transaction                                       |
+| confirmStart/reportCompletion    | Đúng bên, đúng trạng thái, đủ tiền và các xác nhận; không gửi âm thầm offline                                                           |
+| confirmCompletion/settleSession  | Quyền theo kết quả ca; tính phí/bảo toàn tiền; sự kiện quyết toán duy nhất; transaction ghi đủ tài liệu                                 |
+| cancel/dispute/decideDispute     | Điều kiện v2, Admin có lý do, một tranh chấp hiện hành, không tự sửa tiền ngoài quyết định                                              |
+| refreshOverdue/getAdminSummary   | Đọc danh sách đúng quyền, phát hiện ca cần xử lý khi mở/tải lại; không nhận đồng hồ client làm căn cứ ghi quyết định                    |
+
+Request có requestId, expectedVersion khi cần. Mã lỗi có AUTH_REQUIRED, PHONE_REQUIRED, RETIREMENT_APPROVAL_REQUIRED, PROFILE_VERSION_CHANGED, EMPLOYER_IDENTITY_REQUIRED, FORBIDDEN, INVALID_STATE, VERSION_CONFLICT, DUPLICATE_APPLICATION, JOB_EXPIRED, OPERATION_PENDING. Rules thường chỉ trả permission-denied; app đọc lại dữ liệu được phép để giải thích, không giả định Rules trả được mọi mã nghiệp vụ tùy ý. UI không hiển thị stack trace.
+
+### 14.4. Transaction và đồng thời
+
+- Đơn ứng tuyển có ID nhất quán theo tin/người tìm việc. Transaction và Rules kiểm tra APPROVED hiện hành và không tồn tại đơn; disable nút không phải cơ chế bảo vệ chính.
+- Chỉ PENDING được rút/chấp nhận/từ chối. Xác nhận thỏa thuận dùng version, không ghi đè bản người khác vừa sửa.
+- Quyết định duyệt nghỉ hưu, trạng thái user, audit và thông báo có cùng transaction; quyết định lặp không tạo thông báo hoặc quyền hai lần.
+- Funding và settlement có bản ghi thành công duy nhất theo ca/loại nghiệp vụ, không chỉ dựa vào requestId do client chọn. Retry trả kết quả đã tồn tại; không cho tạo ID mới để lách chống trùng.
+- Rules kiểm tra công thức phí số nguyên, số không âm, tổng bảo toàn, các trường bất biến và getAfter của ca/payment/event; số tiền do Java tính chỉ là đề nghị. Nếu vượt giới hạn kiểm tra, phải điều chỉnh cấu trúc trước nghiệm thu.
+- Không gọi upload, tạo thông báo bên ngoài hoặc random simulator trong callback transaction có thể chạy lại. Mô phỏng thất bại trước khi ghi hoặc mất phản hồi sau commit; khi chưa rõ kết quả, đọc lại bản ghi từ server trước thử lại.
+- Chống trùng lịch ca phải có cấu trúc đặt chỗ theo người/ngày và kiểm tra nhất quán trên Firebase trong giới hạn demo; chỉ truy vấn rồi kiểm tra trên một điện thoại là chưa đạt. Chi tiết cấu trúc phải được kiểm thử trước nghiệm thu phần ca.
+- Transaction nghiệp vụ cần mạng. Không âm thầm gửi lệnh đã thất bại khi có mạng lại. [S12]
+
+### 14.5. Thời hạn và vận hành
+
+Giữ tham số đề xuất v2: fundingDeadline không sau giờ bắt đầu; xác nhận bắt đầu từ 30 phút trước giờ hẹn đến hết ca; phản hồi hoàn thành 24 giờ; mục tiêu Admin tiếp nhận 48 giờ. Lưu chính sách áp dụng vào ca, không đổi ngược ca cũ.
+
+Không có tác vụ server chạy nền trong bản này. Khi mở app/tải lại, hiển thị các ca có hạn cần xử lý; nhãn tính từ giờ thiết bị chỉ hỗ trợ hiển thị, Rules dùng request.time và deadline đã lưu để quyết định có cho phép thao tác hay không. Admin chủ động tiếp nhận ca quá hạn, hủy ca chưa cấp tiền đủ điều kiện hoặc mở xử lý tranh chấp; không tự chốt chất lượng hay phân bổ tiền vì hết thời gian. Nếu không ai mở app, không hứa trạng thái được tự chuyển hoặc thông báo được gửi nền.
+
+Thông báo xét hồ sơ được ghi bền vững cùng quyết định. Người đang mở app có thể thấy cập nhật; người đóng app thấy khi quay lại. Không lấy đã tạo thông báo làm bằng chứng người dùng đã đọc. Đánh dấu readAt chỉ do chủ tài khoản thực hiện.
+
 
 ## 18. Tiêu chí nghiệm thu và kiểm thử
 
