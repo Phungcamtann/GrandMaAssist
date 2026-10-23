@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">GrandMaAssist</string>
+    <string name="reload">Tải lại</string>
+    <string name="connection_loading">Đang kết nối Firebase…</string>
+    <string name="connection_error">Chưa thể kết nối. Vui lòng thử tải lại.</string>
+    <string name="connection_network_error">Không kết nối được máy chủ. Kiểm tra mạng rồi nhấn Tải lại.</string>
+    <string name="connection_permission_error">Chưa được phép đọc thông báo. Vui lòng kiểm tra cấu hình Firebase Rules.</string>
+    <string name="connection_missing">Chưa có thông báo cấu hình trên Firebase.</string>
+    <string name="connection_invalid">Thông báo cấu hình chưa có nội dung hợp lệ.</string>
 </resources>

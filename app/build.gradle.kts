@@ -39,6 +39,8 @@ android {
 dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
     implementation(libs.constraintlayout)
     implementation(libs.material)
     testImplementation(libs.junit)
@@ -49,5 +51,5 @@ dependencies {
 
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-functions")
+    implementation("com.google.firebase:firebase-storage")
 }
