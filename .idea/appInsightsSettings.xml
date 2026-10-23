@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="vn.edu.ueh.nhom4.grandmaassist.app" />
-                  <option name="mobileSdkAppId" value="1:987228735532:android:99f11ff7ef589d1111e989" />
-                  <option name="projectId" value="grandmaassist-a06a2" />
-                  <option name="projectNumber" value="987228735532" />
+                  <option name="mobileSdkAppId" value="1:406780249486:android:a0373211ce4ce9ca9590df" />
+                  <option name="projectId" value="grandmaassist-a1dfa" />
+                  <option name="projectNumber" value="406780249486" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -1,5 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="brand_gradient_start">#2D6E52</color>
+    <color name="brand_gradient_end">#1A7A6E</color>
+    <color name="brand_green">#245B3F</color>
+    <color name="surface_ivory">#FAF9F5</color>
+    <color name="surface_soft_green">#EAF1E8</color>
+    <color name="text_charcoal">#2C3332</color>
+    <color name="text_error">#9C2525</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="button_disabled">#E0E4E1</color>
+    <color name="button_disabled_text">#454C49</color>
+    <color name="button_ripple">#24245B3F</color>
+    <color name="google_button_text">#1F1F1F</color>
+    <color name="google_button_border">#747775</color>
 </resources>

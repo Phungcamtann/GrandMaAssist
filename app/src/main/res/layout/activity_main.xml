@@ -1,30 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/surface_ivory"
     android:fillViewport="true">
-    <LinearLayout
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="24dp">
-        <TextView
-            android:id="@+id/txtFirebaseMessage"
-            android:layout_width="match_parent"
+        android:paddingBottom="@dimen/screen_padding">
+
+        <LinearLayout
+            android:id="@+id/authContent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:accessibilityLiveRegion="polite"
-            android:text="@string/connection_loading"
-            android:textSize="24sp" />
-        <Button
-            android:id="@+id/btnReload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="56dp"
-            android:layout_marginTop="24dp"
-            android:textSize="20sp"
-            android:text="@string/reload" />
-    </LinearLayout>
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_max="@dimen/content_max_width">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/brand_bar_min_height"
+                android:padding="@dimen/brand_bar_padding"
+                android:background="@drawable/brand_bar"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="@dimen/brand_logo_width"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:padding="@dimen/brand_logo_padding"
+                    android:background="@drawable/brand_logo_surface"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/grandma_primary_logo"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/loginContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_small"
+                    android:layout_marginBottom="@dimen/space_medium"
+                    android:clipToOutline="true"
+                    app:cardCornerRadius="@dimen/button_corner"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/surface_ivory"
+                    app:cardUseCompatPadding="false"
+                    app:cardPreventCornerOverlap="false"
+                    app:strokeWidth="0dp">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/grandma_banner"
+                        android:importantForAccessibility="no" />
+                </com.google.android.material.card.MaterialCardView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/screen_padding"
+                    android:paddingEnd="@dimen/screen_padding"
+                    android:orientation="vertical">
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:accessibilityHeading="true"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:text="@string/auth_welcome" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_small"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:text="@string/auth_intro" />
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnGoogle"
+                        style="@style/Widget.GrandMa.Button.Google"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/auth_action_gap"
+                        android:drawablePadding="@dimen/google_icon_gap"
+                        android:text="@string/auth_continue_google" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accountContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_medium"
+                android:paddingStart="@dimen/screen_padding"
+                android:paddingEnd="@dimen/screen_padding"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:accessibilityHeading="true"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                    android:text="@string/auth_account_title" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_large"
+                    android:padding="@dimen/space_large"
+                    android:background="@drawable/account_card"
+                    android:orientation="vertical">
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/accountName"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:text="@string/auth_name_label" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/accountName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:saveEnabled="false"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_large"
+                        android:labelFor="@id/accountEmail"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:text="@string/auth_email_label" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/accountEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:saveEnabled="false"
+                        android:breakStrategy="simple"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_large"
+                        android:labelFor="@id/accountProvider"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:text="@string/auth_provider_label" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/accountProvider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                </LinearLayout>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSignOut"
+                    style="@style/Widget.GrandMa.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_large"
+                    android:text="@string/auth_sign_out" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/authProgress"
+                android:layout_width="@dimen/progress_size"
+                android:layout_height="@dimen/progress_size"
+                android:layout_marginTop="@dimen/space_large"
+                android:layout_gravity="center_horizontal"
+                android:indeterminateTint="@color/brand_green"
+                android:importantForAccessibility="no"
+                android:visibility="gone" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/authStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_medium"
+                android:layout_marginStart="@dimen/screen_padding"
+                android:layout_marginEnd="@dimen/screen_padding"
+                android:accessibilityLiveRegion="polite"
+                android:saveEnabled="false"
+                android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                android:visibility="gone" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnRetry"
+                style="@style/Widget.GrandMa.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_medium"
+                android:layout_marginStart="@dimen/screen_padding"
+                android:layout_marginEnd="@dimen/screen_padding"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

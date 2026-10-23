@@ -1108,7 +1108,7 @@ Các dòng dưới là ca kiểm thử cần thực hiện, chưa phải kết q
 | T51 | Đăng xuất/chuyển tài khoản trong upload hoặc xem ảnh                                      | Không hiện/ghi ảnh hoặc kết quả vào UID mới; dọn file tạm                                              |
 | T52 | Đủ 60 tuổi hoặc ảnh BHYT có HT nhưng chưa được duyệt                                      | Không có nhánh tự mở quyền; bằng chứng đúng luồng mới là chứng nhận nghỉ hưu/BHXH mô phỏng             |
 
-**Thiết bị kiểm thử tối thiểu đề xuất:** emulator/thiết bị API 29 và API 36; một điện thoại nhỏ, một điện thoại lớn và một tablet; mỗi loại dọc/ngang; font mặc định và 200%; online/offline; một thiết bị thật nhận SMS. Các trường hợp tiền/quyền/đồng thời cần kiểm thử tự động trên môi trường phù hợp và bổ sung kiểm thử đầu-cuối; không chỉ chụp màn hình thành công.
+**Thiết bị kiểm thử tối thiểu đề xuất:** emulator/thiết bị API 29 và API 36; một điện thoại nhỏ, một điện thoại lớn và một tablet; mỗi loại dọc/ngang; font mặc định và 200%; online/offline; một thiết bị thật nhận SMS. Các trường hợp tiền/quyền/đồng thời cần nhóm/người dùng thực hiện kiểm thử tự động trên môi trường phù hợp và bổ sung kiểm thử đầu-cuối; không chỉ chụp màn hình thành công. Codex không tự chạy các kiểm thử này theo quy trình hiện hành ở 22.3.
 
 **Thử nghiệm khả năng sử dụng:** mời một số người thuộc nhóm tuổi mục tiêu thực hiện tìm một việc, ứng tuyển và xem tiền công; ghi số lần cần trợ giúp, lỗi thao tác, bước gây khó hiểu và nhận xét. Chưa đặt số liệu kết quả giả định thành kết quả thật; tiêu chí ban đầu nên điều chỉnh sau thử nghiệm.
 
@@ -1170,7 +1170,9 @@ Các nguồn dùng để kiểm chứng khả năng kỹ thuật và cách thu p
 
 ### 22.1. Căn cứ Figma và phần cần bổ sung
 
-File GRANDMA-ASSIST, Page 1 là nguồn giao diện. Page 2 và 3 trống theo xác nhận người dùng. Bản đối chiếu đã kiểm kê 56 màn hình/trạng thái; không có nghĩa mọi luồng đã đủ. Bản v3 này cập nhật tài liệu và sơ đồ cục bộ, **chưa sửa Figma hoặc code app**.
+File GRANDMA-ASSIST, Page 1 là nguồn tham khảo giao diện. Page 2 và 3 trống theo xác nhận người dùng. Bản đối chiếu đã kiểm kê 56 màn hình/trạng thái; không có nghĩa mọi luồng đã đủ. Bản thiết kế v3 đã được người dùng duyệt. C00 đã được người dùng chạy và xác nhận; người dùng cũng đã kiểm tra thành công đăng nhập Google, đăng xuất, hủy đăng nhập và khôi phục phiên C01. Giao diện mới đã được duyệt; bản sửa đăng xuất dùng worker đã được người dùng xác nhận hết treo và có Logcat provider confirmed. Các nhánh timeout/thử lại và biến thể chưa xác nhận cụ thể không tự được đánh dấu đạt. Xem [SETUP](docs/SETUP.md) và [danh sách kiểm tra C01](docs/C01-CHECKLIST.md).
+
+Riêng C01, quy tắc thiết kế người dùng bổ sung ngày 23/10/2026 là căn cứ triển khai: chỉ Google → khôi phục phiên → tài khoản → đăng xuất, giao diện sáng, logo gốc và font đóng gói. Chưa hiển thị OTP, xem việc hoặc các điều hướng tương lai; giọng đọc và toàn bộ điều khiển nghe/dừng/nghe lại để C22. Dùng ảnh tham chiếu người dùng cung cấp, chưa đối chiếu Figma trực tiếp trong lần triển khai C01.
 
 | Khu vực           | Giữ / bổ sung                                                                                                                |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -1219,13 +1221,13 @@ Responsive và offline được đưa vào từng chức năng liên quan, khôn
 
 ### 22.3. Quy trình làm việc sau khi được duyệt
 
-Codex có thể sửa cùng thư mục dự án mà Android Studio đang mở; Android Studio dùng build/run, thiết bị, Logcat và kiểm tra giao diện. Chỉ một agent sửa code tại một thời điểm. Mỗi chức năng: chốt màn hình và tiêu chí → code Java/XML + dữ liệu/Rules → kiểm thử phù hợp → review diff và kết quả → một commit có nội dung rõ. Không tự push/merge.
+Codex sửa cùng thư mục dự án mà Android Studio đang mở. Chỉ một agent sửa code tại một thời điểm. Mỗi chức năng: chốt màn hình và tiêu chí → code Java/XML + dữ liệu/Rules cần thiết → Codex review tĩnh và bàn giao → người dùng Sync/build/chạy/kiểm tra trong Android Studio → người dùng review và tự stage/commit riêng đúng file của luồng. Codex không tự chạy build, test, lint, emulator hoặc kiểm thử tự động; không stage, commit, push, merge, deploy hoặc thay đổi Firebase Console. Không ghi đè hay đưa thay đổi .idea không liên quan vào phạm vi công việc. Đây là quy trình mới thay thế chỉ dẫn tự kiểm thử/commit trước đây; các tiêu chí nghiệm thu trong tài liệu vẫn là yêu cầu để người dùng kiểm tra.
 
-Báo cáo bàn giao phải ghi file thay đổi, hành vi, kiểm tra đã chạy và kết quả thật, ảnh màn hình không lộ giấy tờ, giới hạn còn tồn tại. Không gọi hoàn tất nếu chỉ build được mà chưa thử luồng chính/lỗi/quyền liên quan. Không tạo commit chức năng trong lần cập nhật thiết kế này.
+Báo cáo bàn giao phải ghi file thay đổi, hành vi, review tĩnh đã thực hiện, phần chưa xác minh và hướng dẫn người dùng kiểm tra. Không ghi token, credential, API key hoặc dữ liệu tài khoản vào log/báo cáo. Không gọi đã nghiệm thu nếu người dùng chưa kiểm tra luồng chính/lỗi/quyền liên quan. Codex không stage hoặc tạo commit chức năng.
 
 ### 22.4. Trạng thái phê duyệt
 
-**Chờ duyệt bản v3.** Quyết định “duyệt trước ứng tuyển” đã chốt; không hỏi lại. Người dùng duyệt tài liệu hoặc ghi các điểm cần sửa, rồi mới tiến hành chức năng đầu tiên. Bản v2 giữ nguyên để đối chiếu; bản v3 chưa phải xác nhận hệ thống đã triển khai.
+**Người dùng đã duyệt bản v3, xác nhận C00 và duyệt giao diện C01 mới.** Quyết định “duyệt trước ứng tuyển” đã chốt; không hỏi lại. Người dùng đã xác nhận đăng nhập Google/hủy/khôi phục phiên; bản sửa đăng xuất dùng worker đã được kiểm tra hết treo với callback provider thành công. Không suy ra các nhánh timeout/thử lại đã đạt hoặc toàn bộ hệ thống đã nghiệm thu. Không tự chuyển sang C02.
 
 ## Phụ lục A. Cách sử dụng bộ tài liệu
 
@@ -1233,4 +1235,4 @@ Báo cáo bàn giao phải ghi file thay đổi, hành vi, kiểm tra đã chạ
 - Bản Markdown là nguồn để chỉnh sửa, chuyển sang Word/PDF theo mẫu báo cáo sau này.
 - Thư mục diagrams chứa Mermaid cho các sơ đồ có trong tài liệu, PlantUML cho use case đầy đủ và nguồn DOT/SVG của hình minh họa. Nguồn UML là cơ sở để nhóm chỉnh trong công cụ vẽ, không phải ảnh chụp từ ứng dụng.
 - Class diagram được tách thành hai phần để đọc rõ. Sơ đồ use case minh họa trong HTML là bản tổng quan; danh mục UC01–UC30 và nguồn PlantUML là bản đầy đủ.
-- Các bảng kiểm thử là kế hoạch nghiệm thu, không phải báo cáo đã kiểm thử. Chưa có mã ứng dụng nào được triển khai trong lần soạn tài liệu này.
+- Các bảng kiểm thử là kế hoạch nghiệm thu, không phải báo cáo đã kiểm thử. Khi soạn bản phân tích ban đầu chưa triển khai mã ứng dụng; hiện trạng C00/C01 được cập nhật tại 22.4 và docs/SETUP.md.
