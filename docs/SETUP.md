@@ -1,4 +1,4 @@
-# Bàn giao nền tảng và C01 — 23/10/2026
+# Bàn giao nền tảng, C01 và C02 — 24/10/2026
 
 ## Trạng thái được xác nhận
 
@@ -9,7 +9,37 @@
 - Codex chỉ đọc, sửa mã/tài liệu và review tĩnh; không chạy build, test, lint, emulator hoặc kiểm thử tự động; không stage, commit, push, merge, deploy hoặc thay đổi Console.
 - Thay đổi `.idea` có sẵn, kể cả file đã staged, thuộc người dùng và được giữ nguyên.
 
-## Cấu hình dự án
+## C02 — đăng nhập điện thoại/OTP
+
+**Đã triển khai, chờ người dùng kiểm tra; chưa nghiệm thu.** Khi bắt đầu C02, Git working tree sạch; commit C01 thực tế là `ffcc6a2` — “Đăng nhập Google”. C01 đã được người dùng duyệt và commit; giữ nguyên kết quả cùng danh sách C01-F01–F09 trong [C01-CHECKLIST](C01-CHECKLIST.md), không tự đánh dấu các nhánh còn mở là đạt.
+
+C02 dùng lại nhận diện/logo/banner/font/spacing và nút Google C01, bổ sung hai lựa chọn Số điện thoại/Google, form số, bước xem lại E.164 và đồng ý gửi số đến Google, form một trường OTP 6 chữ số. Không có nút nghe/TTS (C22), liên kết tài khoản/đổi số (C03), Firestore profile, role hoặc nới Rules. Không thay Gradle, Firebase JSON hoặc Console.
+
+### Tổ chức và vòng đời
+
+- `PhoneSignInFlow`: trạng thái và challenge tạm trong bộ nhớ, không giữ Activity. Chuẩn hóa số di động VN dạng `0…`/`+84…`, bỏ khoảng trắng/dấu phân cách thông thường; không chấp nhận `+840…` hoặc suy ra số tồn tại/nhà mạng/chủ sở hữu từ format. Không lưu số vào SQLite, preferences, log hoặc tài liệu bàn giao.
+- `MainActivity`: chỉ gọi `PhoneAuthProvider.verifyPhoneNumber` khi người dùng xác nhận gửi/gửi lại, hoặc gắn lại callback theo cơ chế reentrant được Firebase mô tả trong cửa sổ yêu cầu gốc. Activity chỉ nằm trong PhoneAuthOptions do SDK quản lý; không chuyển Activity vào ViewModel/repository. Có Activity để hỗ trợ reCAPTCHA.
+- SDK tự tháo callback khi Activity dừng. Khi `onStart`, chỉ reattach nếu challenge còn active và trước mốc bảo thủ 55 giây từ yêu cầu 60 giây gốc, không dùng ForceResendingToken. Không reattach sau khi SDK đã báo timeout/failed, khi đã bắt đầu sign-in, hoặc ngoài cửa sổ này; không tự gửi SMS mới khi quay lại muộn. Cần kiểm tra reentrant/auto-retrieval thực tế trên thiết bị và khi reCAPTCHA làm app đổi foreground.
+- Countdown gửi lại dựa `SystemClock.elapsedRealtime`, ít nhất 60 giây từ yêu cầu/onCodeSent; không reset khi render/xoay/tab/sửa số. Đây chỉ là UX; Firebase vẫn có thể giới hạn thêm. Gửi lại do người dùng bấm, dùng ForceResendingToken khi có. Không tự retry khi có mạng lại hoặc chưa rõ kết quả.
+- Có watchdog 90 giây cho trạng thái đang gửi mà chưa có kết quả; báo chưa rõ kết quả và để người dùng chủ động xử lý. Chỉ onCodeSent mới báo Firebase đã xác nhận gửi. Timeout tự nhận mã không đồng nghĩa OTP hết hạn; vẫn cho nhập mã nếu có verification id.
+- `AuthRepository` vẫn là nguồn phiên duy nhất. Callback tự động và nhập tay đi qua cùng cổng sign-in, chặn thao tác kép. Chỉ thành công Firebase mới mở màn tài khoản. Mỗi thế hệ gửi lại/sửa số/đổi phương thức/hủy vô hiệu kết quả cũ trước khi chúng có thể gọi sign-in.
+- Nếu hủy sau khi Task Firebase sign-in đã bắt đầu (không có API hủy Task), app giữ trạng thái giải thích chờ hủy và không cho tác vụ Auth mới chạy song song. Khi Task cũ hoàn tất, đăng xuất kết quả cũ rồi mới cho đăng nhập tiếp. Chỉ lưu một cờ boolean `cancelled_phone_exchange` trong `auth_recovery` để không phục hồi một phiên đã yêu cầu hủy nếu process chết trước callback; không lưu số, UID, OTP hoặc token trong cờ này.
+- Giữ số đang nhập, phương thức, bước, verification id/resend token và deadline trong bộ nhớ qua xoay. Không lưu OTP đã gõ, verification id hoặc token vào saved state/file/preferences/log. Form không được lưu trong view hierarchy; OTP được xóa khi submit/đổi thế hệ/rời màn và không khôi phục qua xoay. Saved state chỉ có cờ boolean báo từng có form phone; nếu process chết, challenge không được khôi phục bằng dữ liệu nhạy cảm, về nhập số với hướng dẫn, không tự gửi mã.
+- Số và provider trên màn tài khoản lấy từ FirebaseUser. Phone-only có tên/email thay thế nếu thiếu; hỗ trợ hiển thị tài khoản có sẵn cả Google/phone theo provider thực tế. Khôi phục phiên dùng Firebase như C01. Đăng xuất phone-only không gọi dọn Google; tài khoản có provider Google vẫn dùng bản dọn credential worker/timeout của C01.
+
+### Phân biệt với C03
+
+Chỉ đăng nhập phone từ trạng thái đã đăng xuất. Không dùng signInWithCredential để thêm số cho một phiên Google đang mở, không tự link/merge/xóa/chuyển dữ liệu giữa UID. Số đã thuộc tài khoản nào thì đăng nhập tài khoản đó theo Firebase; không hứa UID Google chưa liên kết được giữ nguyên. C03 mới làm liên kết/đổi số và kiểm tra quyền liên quan.
+
+### Cấu hình và kiểm tra C02
+
+Đối chiếu Phone provider trong `grandmaassist-a1dfa`, SHA-1/SHA-256 bản ký đang chạy, app verification/Play Integrity/reCAPTCHA, SMS region policy Việt Nam và billing/quota gửi SMS thật. Không tự thay Console hoặc yêu cầu làm lại cấu hình đang hoạt động nếu không có lỗi/bằng chứng thiếu. Số test có thể dùng phát triển nhưng không thay ca nghiệm thu nhận SMS thật trên thiết bị thật.
+
+Đối chiếu API theo [Firebase Android Phone Auth](https://firebase.google.com/docs/auth/android/phone-auth) và [PhoneAuthOptions.Builder](https://firebase.google.com/docs/reference/android/com/google/firebase/auth/PhoneAuthOptions.Builder). Không dùng mã mẫu ghi credential/id/OTP ra log, không tắt app verification để demo.
+
+Người dùng Sync/Run theo [C02-CHECKLIST](C02-CHECKLIST.md); danh sách file tại [C02-FILES](C02-FILES.md). Chưa có kết quả chạy, SMS thật, reCAPTCHA, mạng/quota, vòng đời, autofill hoặc hồi quy C01 của bản C02. Codex chỉ review tĩnh, không build/test/lint/emulator hay gửi SMS; không stage/commit/push/deploy. Không tự chuyển C03.
+
+## Cấu hình nền C00/C01
 
 Android Java/XML; package `vn.edu.ueh.nhom4.grandmaassist.app`.
 minSdk 29, compileSdk 36.1, targetSdk 36, Java 11. Giữ nguyên các phiên bản build, Firebase BoM 35.0.1 và Lifecycle 2.10.0.
@@ -80,3 +110,28 @@ Danh sách file C01 để review/tự commit ở [C01-FILES](C01-FILES.md). Khô
 - [Firebase: quản lý người dùng/phiên](https://firebase.google.com/docs/auth/android/manage-users).
 
 Codex chỉ review tĩnh, chưa tự build/chạy/kiểm thử. Người dùng đã xác nhận bốn trường hợp cơ bản, duyệt giao diện và kiểm tra bản sửa đăng xuất hết treo, có callback provider thành công. Các nhánh timeout/thử lại/callback trễ và biến thể chưa được xác nhận cụ thể vẫn chưa được đánh dấu đạt.
+
+## Cập nhật nghiệm thu C02 — 24/10/2026
+
+Người dùng đã duyệt luồng chính C02 sau khi thử trên Android thật: CAPTCHA quay về app, nhận SMS thật, tự xác minh, nhận SMS trên thiết bị khác và nhập mã thủ công sai/đúng, đăng xuất. Nội dung này thay thế các câu chờ kiểm tra SMS/luồng chính ở lịch sử phía trên.
+
+Ngôn ngữ SMS còn tiếng Anh và tên “Your Firebase App” dù đã cấu hình tiếng Việt: ghi theo dõi C02-F01 tại docs/C02-CHECKLIST.md. Chưa xác định nguyên nhân hoặc đánh dấu đã khắc phục. Các ca gửi lại, vòng đời, mạng, hồi quy Google và các biến thể chưa xác nhận riêng được liệt kê ở mục cập nhật cuối checklist; không tự đánh dấu toàn bộ đạt. Không sửa code, chạy kiểm thử hoặc stage/commit/push trong lần ghi nhận này.
+
+## Chốt C02 — người dùng xác nhận ngày 24/10/2026
+
+**C02 đã được người dùng kiểm tra và phê duyệt, chờ người dùng tự commit.** Mục này là cập nhật hiện hành, thay thế trạng thái chờ xác nhận của năm nhóm kiểm tra được liệt kê trong lần rà soát trước.
+
+Ngoài các kết quả SMS thật/tự xác minh/OTP sai-đúng/đăng xuất đã ghi nhận, người dùng đã xác nhận kiểm tra và duyệt:
+1. Gửi lại mã sau countdown.
+2. Sửa số, Back và đổi sang Google khi chờ OTP.
+3. Xoay màn hình, Home và quay lại trong lúc chờ mã.
+4. Đóng/mở app khôi phục phiên phone; Back sau đăng xuất; đăng nhập Google trở lại.
+5. Mất mạng/phục hồi và số thiếu/thừa/sai định dạng.
+
+Xác nhận trên áp dụng cho các nhóm người dùng vừa kiểm tra; không tự suy ra mọi biến thể thiết bị hoặc mọi callback đều đã được tái hiện.
+
+Tiếp tục theo dõi riêng:
+- C02-F01: SMS vẫn tiếng Anh và tên “Your Firebase App” dù cấu hình tiếng Việt; chưa xác định nguyên nhân, không cản chốt luồng chức năng theo quyết định người dùng.
+- Các nhánh khó tái hiện còn ghi trong checklist: mã thực sự hết hiệu lực/mã cũ sau resend, timeout, callback đồng thời/trễ, hủy đúng lúc Firebase sign-in, process bị hủy, CAPTCHA bị hủy và các biến thể font 200%/TalkBack/tablet/thiết bị khác, trừ khi có xác nhận cụ thể sau này.
+
+Không còn mục chờ xác nhận trong năm nhóm cơ bản nêu trên. Codex chỉ cập nhật tài liệu, không chạy kiểm thử và không stage/commit/push. Liên kết/đổi số thuộc C03; TTS thuộc C22.

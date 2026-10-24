@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+        android:accessibilityHeading="true" android:text="@string/phone_code_title" />
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/codeDestination"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_code_destination" />
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/codePhoneNumber"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:saveEnabled="false" android:textAppearance="@style/TextAppearance.GrandMa.Label" />
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/inputOtp" style="@style/Widget.GrandMa.Input"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_medium"
+        android:gravity="center" android:letterSpacing="0.12"
+        android:inputType="number" android:digits="0123456789" android:maxLength="6"
+        android:autofillHints="smsOTPCode" android:importantForAutofill="yes"
+        android:imeOptions="actionDone" android:saveEnabled="false"
+        android:singleLine="true" android:hint="@string/phone_code_hint" />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small" android:labelFor="@id/inputOtp"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_code_label" />
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/codeStatus"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small" android:saveEnabled="false"
+        android:accessibilityLiveRegion="polite"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:visibility="gone" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnVerifyOtp" style="@style/Widget.GrandMa.Button"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/auth_action_gap" android:text="@string/phone_verify" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnResendOtp" style="@style/Widget.GrandMa.Button.Secondary"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small" android:text="@string/phone_resend" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnEditCodePhone" style="@style/Widget.GrandMa.Button.Secondary"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:layout_marginTop="@dimen/space_small" android:text="@string/phone_edit" />
+</LinearLayout>

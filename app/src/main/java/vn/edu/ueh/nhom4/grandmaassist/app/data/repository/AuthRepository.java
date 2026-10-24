@@ -1,6 +1,7 @@
 package vn.edu.ueh.nhom4.grandmaassist.app.data.repository;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
@@ -36,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 
-/** Application-scoped owner of Auth operations. Never retains an Activity or a token.
+/** Application-scoped owner of Auth operations. No Activity or persisted app credentials.
  * State transitions run on main; credential-provider calls run on bounded workers.
  * Request versions discard stale results.
  */
@@ -44,19 +47,24 @@ import vn.edu.ueh.nhom4.grandmaassist.app.R;
 public final class AuthRepository {
     private static final long CLEAR_CREDENTIAL_TIMEOUT_MS = 10_000L;
     private static final String LOG_TAG = "GrandMaAuth";
-    public enum Phase { READY, PICKING_GOOGLE, SIGNING_IN, ACCOUNT, CLEARING_CREDENTIALS }
+    public enum Phase { READY, PICKING_GOOGLE, SIGNING_IN, CANCELLING_SIGN_IN, ACCOUNT, CLEARING_CREDENTIALS }
     public enum Retry { NONE, CHECK_SESSION, CLEAR_CREDENTIALS }
 
     public static final class Account {
         public final String name;
         public final String email;
         public final boolean google;
+        public final boolean phone;
+        public final String phoneNumber;
 
         private Account(FirebaseUser user) {
             name = user.getDisplayName();
             email = user.getEmail();
             google = user.getProviderData().stream()
                     .anyMatch(provider -> GoogleAuthProvider.PROVIDER_ID.equals(provider.getProviderId()));
+            phone = user.getProviderData().stream()
+                    .anyMatch(provider -> PhoneAuthProvider.PROVIDER_ID.equals(provider.getProviderId()));
+            phoneNumber = user.getPhoneNumber();
         }
     }
 
@@ -80,13 +88,14 @@ public final class AuthRepository {
 
         public boolean isBusy() {
             return phase == Phase.PICKING_GOOGLE || phase == Phase.SIGNING_IN
-                    || phase == Phase.CLEARING_CREDENTIALS || checkingSession;
+                    || phase == Phase.CANCELLING_SIGN_IN || phase == Phase.CLEARING_CREDENTIALS || checkingSession;
         }
     }
 
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final CredentialManager credentialManager;
     private final Executor mainExecutor;
+    private final SharedPreferences recoveryFlags;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     // No queued work: a stuck system/provider call cannot build up cleanup requests that
     // execute later against a newly signed-in session. At most two workers may be blocked.
@@ -95,11 +104,22 @@ public final class AuthRepository {
     private final MutableLiveData<State> state;
     private long version;
     private boolean initialAuthObserved;
+    private boolean exchangeInFlight;
+    private boolean phoneExchange;
+    private final PhoneSignInFlow phoneFlow = new PhoneSignInFlow(this::signInWithPhone);
 
     public AuthRepository(Context applicationContext) {
         Context app = applicationContext.getApplicationContext();
         credentialManager = CredentialManager.create(app);
         mainExecutor = ContextCompat.getMainExecutor(app);
+        recoveryFlags = app.getSharedPreferences("auth_recovery", Context.MODE_PRIVATE);
+        // An opaque cancellation intent only: no phone, OTP, UID, token or credential.
+        // If the process died after Firebase persisted a cancelled sign-in but before its
+        // completion callback cleaned up, do not restore that unwanted session.
+        if (recoveryFlags.getBoolean("cancelled_phone_exchange", false)) {
+            auth.signOut();
+            recoveryFlags.edit().remove("cancelled_phone_exchange").apply();
+        }
         FirebaseUser user = auth.getCurrentUser();
         state = new MutableLiveData<>(user == null
                 ? ready(0, false, Retry.NONE)
@@ -124,9 +144,91 @@ public final class AuthRepository {
     }
 
     public LiveData<State> getState() { return state; }
+    public LiveData<PhoneSignInFlow.State> getPhoneState() { return phoneFlow.getState(); }
+
+    public void selectLoginMethod(PhoneSignInFlow.Method method) {
+        if (state.getValue().phase != Phase.READY || exchangeInFlight) return;
+        ++version;
+        phoneFlow.select(method);
+        state.setValue(ready(0, false, Retry.NONE));
+    }
+
+    public void updatePhoneInput(String value) {
+        if (state.getValue().phase == Phase.READY) phoneFlow.updateInput(value);
+    }
+
+    public void reviewPhone() { if (canUsePhone()) phoneFlow.review(); }
+    public PhoneSignInFlow.Request sendPhone(boolean resend) {
+        return canUsePhone() ? phoneFlow.send(resend) : null;
+    }
+    public PhoneSignInFlow.Request reattachPhone() {
+        return canUsePhone() ? phoneFlow.reattach() : null;
+    }
+    public void verifyPhone(String code) { if (canUsePhone()) phoneFlow.verify(code); }
+    public void restorePhoneProcess(boolean active) {
+        if (state.getValue().account == null) phoneFlow.processRestored(active);
+    }
+
+    private boolean canUsePhone() {
+        return state.getValue().phase == Phase.READY && !exchangeInFlight
+                && auth.getCurrentUser() == null;
+    }
+
+    public void cancelPhone() {
+        if (state.getValue().account != null) return;
+        if (exchangeInFlight && !phoneExchange) return;
+        if (exchangeInFlight) recoveryFlags.edit().putBoolean("cancelled_phone_exchange", true).apply();
+        phoneFlow.cancel(false);
+        ++version;
+        if (exchangeInFlight) {
+            // Firebase Tasks cannot be cancelled. Serialize auth: do not start a new sign-in
+            // until this task finishes and its possibly persisted user is signed out.
+            state.setValue(new State(Phase.CANCELLING_SIGN_IN, null,
+                    R.string.phone_cancelling, false, false, Retry.NONE));
+        } else if (state.getValue().phase == Phase.READY) {
+            state.setValue(ready(0, false, Retry.NONE));
+        }
+    }
+
+    private boolean signInWithPhone(long generation, PhoneAuthCredential credential) {
+        if (!canUsePhone()) return false;
+        long request = ++version;
+        exchangeInFlight = true;
+        phoneExchange = true;
+        state.setValue(new State(Phase.SIGNING_IN, null, R.string.phone_verifying,
+                false, false, Retry.NONE));
+        auth.signInWithCredential(credential).addOnCompleteListener(mainExecutor, task -> {
+            if (!task.isSuccessful()) {
+                PhoneSignInFlow.logPhoneFailure("signInWithCredential", task.getException());
+            }
+            exchangeInFlight = false;
+            phoneExchange = false;
+            if (!isCurrent(request, Phase.SIGNING_IN)) {
+                // No new auth exchange was allowed while this cancelled task was in flight.
+                auth.signOut();
+                recoveryFlags.edit().remove("cancelled_phone_exchange").apply();
+                if (state.getValue().phase == Phase.CANCELLING_SIGN_IN) {
+                    state.setValue(ready(R.string.phone_cancelled, false, Retry.NONE));
+                }
+                return;
+            }
+            FirebaseUser user = auth.getCurrentUser();
+            if (task.isSuccessful() && user != null) {
+                phoneFlow.cancel(true);
+                state.setValue(account(user, R.string.auth_session_checked, false, false, Retry.NONE));
+            } else {
+                auth.signOut();
+                phoneFlow.signInFailed(generation, task.getException());
+                state.setValue(ready(0, false, Retry.NONE));
+            }
+        });
+        return true;
+    }
 
     public long beginGooglePicker() {
-        if (state.getValue().phase != Phase.READY) return 0;
+        if (state.getValue().phase != Phase.READY || exchangeInFlight
+                || auth.getCurrentUser() != null
+                || phoneFlow.getState().getValue().method != PhoneSignInFlow.Method.GOOGLE) return 0;
         long request = ++version;
         state.setValue(new State(Phase.PICKING_GOOGLE, null, R.string.auth_choosing,
                 false, false, Retry.NONE));
@@ -163,9 +265,11 @@ public final class AuthRepository {
         }
         state.setValue(new State(Phase.SIGNING_IN, null, R.string.auth_signing_in,
                 false, false, Retry.NONE));
+        exchangeInFlight = true;
         // Firebase verifies the Google token. It is never copied to saved state, disk or logs.
         auth.signInWithCredential(GoogleAuthProvider.getCredential(google.getIdToken(), null))
                 .addOnCompleteListener(mainExecutor, task -> {
+                    exchangeInFlight = false;
                     if (!isCurrent(request, Phase.SIGNING_IN)) {
                         // An obsolete completion must not restore a signed-out session.
                         if (state.getValue().account == null) auth.signOut();
@@ -173,6 +277,7 @@ public final class AuthRepository {
                     }
                     FirebaseUser user = auth.getCurrentUser();
                     if (task.isSuccessful() && user != null) {
+                        phoneFlow.cancel(true);
                         state.setValue(account(user, R.string.auth_session_checked,
                                 false, false, Retry.NONE));
                     } else {
@@ -237,12 +342,17 @@ public final class AuthRepository {
     }
 
     private void finishSession(int message) {
+        State current = state.getValue();
+        boolean clearGoogle = current.account != null && current.account.google;
         long request = ++version;
+        phoneFlow.cancel(true);
         // Drop UI account data before Firebase notifies listeners or clearCredentialState returns.
         state.setValue(new State(Phase.CLEARING_CREDENTIALS, null,
-                R.string.auth_signing_out, false, false, Retry.NONE));
+                clearGoogle ? R.string.auth_signing_out : R.string.phone_signing_out,
+                false, false, Retry.NONE));
         auth.signOut();
-        clearCredentialState(request, message);
+        if (clearGoogle) clearCredentialState(request, message);
+        else state.setValue(ready(message, false, Retry.NONE));
     }
 
     public void retry() {

@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 
 import vn.edu.ueh.nhom4.grandmaassist.app.GrandMaAssistApp;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AuthRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PhoneSignInFlow;
 
 /** Retains no screen context, credential, or account data in saved instance state. */
 public final class AuthViewModel extends AndroidViewModel {
@@ -29,4 +30,13 @@ public final class AuthViewModel extends AndroidViewModel {
     public void onForeground() { repository.checkSession(); }
     public void retry() { repository.retry(); }
     public void signOut() { repository.signOut(); }
+    public LiveData<PhoneSignInFlow.State> getPhoneState() { return repository.getPhoneState(); }
+    public void selectMethod(PhoneSignInFlow.Method method) { repository.selectLoginMethod(method); }
+    public void updatePhoneInput(String value) { repository.updatePhoneInput(value); }
+    public void reviewPhone() { repository.reviewPhone(); }
+    public PhoneSignInFlow.Request sendPhone(boolean resend) { return repository.sendPhone(resend); }
+    public PhoneSignInFlow.Request reattachPhone() { return repository.reattachPhone(); }
+    public void verifyPhone(String code) { repository.verifyPhone(code); }
+    public void cancelPhone() { repository.cancelPhone(); }
+    public void restorePhoneProcess(boolean active) { repository.restorePhoneProcess(active); }
 }

@@ -1,5 +1,7 @@
 # File thuộc phạm vi C01
 
+Ghi nhận khi bắt đầu C02: người dùng đã duyệt và commit C01 tại `ffcc6a2`. Các nhãn “mới/chưa tracked” và trạng thái IDE trong bảng dưới là lịch sử bàn giao C01, không phải Git status hiện tại. Phạm vi C02 được liệt kê riêng trong [C02-FILES](C02-FILES.md); không sửa kết quả các nhánh theo dõi C01 khi chưa được người dùng xác nhận.
+
 Danh sách để người dùng review và tự stage/commit. Codex chưa stage/commit và chưa chạy build/test/lint/emulator. Người dùng đã xác nhận đăng nhập Google, hủy đăng nhập, khôi phục phiên và duyệt giao diện mới; bản sửa đăng xuất dùng worker đã được người dùng xác nhận hết treo, Logcat có provider xác nhận thành công. Không tự đánh dấu đạt các nhánh timeout/thử lại hoặc biến thể chưa được xác nhận riêng.
 
 Không bao gồm `.idea/appInsightsSettings.xml`, `.idea/misc.xml` và `.idea/deviceManager.xml` có sẵn; file cuối đã staged trước C01. Không dùng stage tất cả.

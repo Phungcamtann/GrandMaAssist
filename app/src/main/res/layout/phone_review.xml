@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"
+        android:text="@string/phone_review_title" />
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/reviewPhoneNumber"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small" android:saveEnabled="false"
+        android:textAppearance="@style/TextAppearance.GrandMa.Label" />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_medium"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_consent" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnSendSms" style="@style/Widget.GrandMa.Button"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/auth_action_gap" android:text="@string/phone_confirm_send" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnEditReviewPhone" style="@style/Widget.GrandMa.Button.Secondary"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small" android:text="@string/phone_edit_short" />
+</LinearLayout>

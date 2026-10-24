@@ -74,6 +74,22 @@
                     android:paddingStart="@dimen/screen_padding"
                     android:paddingEnd="@dimen/screen_padding"
                     android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/space_medium" android:orientation="horizontal">
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/tabPhone" style="@style/Widget.GrandMa.Button.Secondary"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:background="@drawable/button_method" android:text="@string/phone_method" />
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/tabGoogle" style="@style/Widget.GrandMa.Button.Secondary"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:layout_marginStart="@dimen/space_small"
+                            android:background="@drawable/button_method" android:text="@string/phone_method_google" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/googleContent"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:visibility="gone">
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -94,6 +110,16 @@
                         android:layout_marginTop="@dimen/auth_action_gap"
                         android:drawablePadding="@dimen/google_icon_gap"
                         android:text="@string/auth_continue_google" />
+                    </LinearLayout>
+                    <include android:id="@+id/phoneEntry" layout="@layout/phone_entry" />
+                    <include android:id="@+id/phoneReview" layout="@layout/phone_review" android:visibility="gone" />
+                    <include android:id="@+id/phoneCode" layout="@layout/phone_code" android:visibility="gone" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/phoneStatus"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_medium" android:saveEnabled="false"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -145,6 +171,15 @@
                         android:saveEnabled="false"
                         android:breakStrategy="simple"
                         android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/accountPhoneLabel"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_large" android:labelFor="@id/accountPhone"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/phone_number_label" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/accountPhone"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:saveEnabled="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" />
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

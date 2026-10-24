@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+        android:accessibilityHeading="true" android:text="@string/phone_welcome" />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_intro" />
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/inputPhone" style="@style/Widget.GrandMa.Input"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:contentDescription="@string/phone_number_label"
+        android:inputType="phone" android:autofillHints="phoneNumberNational"
+        android:importantForAutofill="yes" android:imeOptions="actionDone"
+        android:maxLength="32" android:saveEnabled="false" android:singleLine="true"
+        android:hint="@string/phone_number_hint" />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_small"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_sms_hint" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnReviewPhone" style="@style/Widget.GrandMa.Button"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/auth_action_gap" android:text="@string/phone_send" />
+</LinearLayout>

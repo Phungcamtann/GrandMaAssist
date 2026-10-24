@@ -1174,6 +1174,8 @@ File GRANDMA-ASSIST, Page 1 là nguồn tham khảo giao diện. Page 2 và 3 tr
 
 Riêng C01, quy tắc thiết kế người dùng bổ sung ngày 23/10/2026 là căn cứ triển khai: chỉ Google → khôi phục phiên → tài khoản → đăng xuất, giao diện sáng, logo gốc và font đóng gói. Chưa hiển thị OTP, xem việc hoặc các điều hướng tương lai; giọng đọc và toàn bộ điều khiển nghe/dừng/nghe lại để C22. Dùng ảnh tham chiếu người dùng cung cấp, chưa đối chiếu Figma trực tiếp trong lần triển khai C01.
 
+Cập nhật C02 ngày 24/10/2026 theo yêu cầu và ảnh tham chiếu người dùng: tái sử dụng giao diện C01, thêm chọn điện thoại/Google → nhập số VN → xem lại E.164/đồng ý gửi → Firebase OTP thật, nhập tay hoặc xác minh tự động → tài khoản/đăng xuất. C02 đã triển khai, chờ người dùng kiểm tra; chưa nghiệm thu. Không đổi nghiệp vụ v3, không link/merge UID (C03), không thêm TTS (C22), Firestore profile/role hoặc mở Rules. Xem [C02-CHECKLIST](docs/C02-CHECKLIST.md) và [C02-FILES](docs/C02-FILES.md).
+
 | Khu vực           | Giữ / bổ sung                                                                                                                |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Nhận diện         | Giữ màu xanh, nền sáng, chữ lớn, font và bố cục tham chiếu Figma; kiểm tra tương phản khi triển khai                         |
@@ -1227,7 +1229,7 @@ Báo cáo bàn giao phải ghi file thay đổi, hành vi, review tĩnh đã th�
 
 ### 22.4. Trạng thái phê duyệt
 
-**Người dùng đã duyệt bản v3, xác nhận C00 và duyệt giao diện C01 mới.** Quyết định “duyệt trước ứng tuyển” đã chốt; không hỏi lại. Người dùng đã xác nhận đăng nhập Google/hủy/khôi phục phiên; bản sửa đăng xuất dùng worker đã được kiểm tra hết treo với callback provider thành công. Không suy ra các nhánh timeout/thử lại đã đạt hoặc toàn bộ hệ thống đã nghiệm thu. Không tự chuyển sang C02.
+**Người dùng đã duyệt bản v3, xác nhận C00 và duyệt/commit C01 tại `ffcc6a2`.** Quyết định “duyệt trước ứng tuyển” đã chốt; không hỏi lại. Kết quả C01 và các nhánh theo dõi còn mở được giữ trong docs/C01-CHECKLIST.md. C02 được người dùng yêu cầu triển khai và hiện đã triển khai, chờ người dùng kiểm tra bằng Android Studio, bao gồm nhận SMS thật; chưa nghiệm thu. Không tự chuyển sang C03, không tự build/test/stage/commit/push/deploy.
 
 ## Phụ lục A. Cách sử dụng bộ tài liệu
 
@@ -1236,3 +1238,7 @@ Báo cáo bàn giao phải ghi file thay đổi, hành vi, review tĩnh đã th�
 - Thư mục diagrams chứa Mermaid cho các sơ đồ có trong tài liệu, PlantUML cho use case đầy đủ và nguồn DOT/SVG của hình minh họa. Nguồn UML là cơ sở để nhóm chỉnh trong công cụ vẽ, không phải ảnh chụp từ ứng dụng.
 - Class diagram được tách thành hai phần để đọc rõ. Sơ đồ use case minh họa trong HTML là bản tổng quan; danh mục UC01–UC30 và nguồn PlantUML là bản đầy đủ.
 - Các bảng kiểm thử là kế hoạch nghiệm thu, không phải báo cáo đã kiểm thử. Khi soạn bản phân tích ban đầu chưa triển khai mã ứng dụng; hiện trạng C00/C01 được cập nhật tại 22.4 và docs/SETUP.md.
+
+### Cập nhật chốt C02 — 24/10/2026
+
+Người dùng đã kiểm tra và duyệt C02: SMS thật, CAPTCHA quay về app, tự xác minh và nhập OTP thủ công sai/đúng, gửi lại mã, sửa số/Back/đổi phương thức, xoay/Home/quay lại, khôi phục phiên phone, đăng xuất, hồi quy Google, mất mạng/phục hồi và định dạng số. Báo cáo hiện hành tại docs/C02-CHECKLIST.md, docs/C02-FILES.md và docs/SETUP.md; các trạng thái chờ kiểm tra C02 ở phần lịch sử không còn áp dụng cho các nhóm cơ bản vừa được duyệt. Ngôn ngữ/tên SMS (C02-F01) và các nhánh khó tái hiện tiếp tục theo dõi riêng, không được tự đánh dấu đã giải quyết. Người dùng tự commit trước khi triển khai C03; Codex không tự thao tác Git.

@@ -3,12 +3,19 @@ package vn.edu.ueh.nhom4.grandmaassist.app;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -27,8 +34,14 @@ import androidx.credentials.exceptions.NoCredentialException;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.auth.PhoneAuthProvider;
+
+import java.util.concurrent.TimeUnit;
 
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AuthRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PhoneSignInFlow;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.AuthViewModel;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,6 +59,22 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton signOutButton;
     private AppCompatButton retryButton;
     private Boolean showingAccount;
+    private AppCompatEditText phoneInput;
+    private AppCompatEditText otpInput;
+    private AppCompatButton phoneTab;
+    private AppCompatButton googleTab;
+    private TextView phoneStatus;
+    private TextView codeStatus;
+    private OnBackPressedCallback phoneBack;
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private long renderedPhoneGeneration = -1;
+    private boolean renderedOtpStep;
+    private final Runnable countdown = new Runnable() {
+        @Override public void run() {
+            if (model != null) renderPhone();
+            uiHandler.postDelayed(this, 1_000L);
+        }
+    };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
         ViewCompat.requestApplyInsets(root);
 
         loginContent = findViewById(R.id.loginContent);
+        // Sensitive form values are never restored from the Android view hierarchy.
+        loginContent.setSaveFromParentEnabled(false);
         accountContent = findViewById(R.id.accountContent);
         accountContent.setSaveFromParentEnabled(false);
         accountName = findViewById(R.id.accountName);
@@ -85,15 +116,110 @@ public class MainActivity extends AppCompatActivity {
             googleButton.setCompoundDrawablesRelative(googleIcon, null, null, null);
         }
         model = new ViewModelProvider(this).get(AuthViewModel.class);
+        bindPhoneViews();
+        model.restorePhoneProcess(savedInstanceState != null
+                && savedInstanceState.getBoolean("phone_flow_was_active", false));
+        if (savedInstanceState == null && model.getState().getValue().phase == AuthRepository.Phase.READY
+                && model.getPhoneState().getValue().step == PhoneSignInFlow.Step.ENTRY
+                && model.getPhoneState().getValue().method != PhoneSignInFlow.Method.PHONE) {
+            model.selectMethod(PhoneSignInFlow.Method.PHONE);
+        }
         googleButton.setOnClickListener(view -> launchGooglePicker());
         signOutButton.setOnClickListener(view -> model.signOut());
         retryButton.setOnClickListener(view -> model.retry());
         model.getState().observe(this, this::render);
+        model.getPhoneState().observe(this, ignored -> render(model.getState().getValue()));
     }
 
     @Override protected void onStart() {
         super.onStart();
         model.onForeground();
+        // SDK callbacks detach onStop. Re-enter only the known original window without a
+        // force token; outside that window, never send automatically on foreground/rotation.
+        launchPhoneRequest(model.reattachPhone());
+        uiHandler.post(countdown);
+    }
+
+    @Override protected void onStop() {
+        uiHandler.removeCallbacks(countdown);
+        super.onStop();
+    }
+
+    private void bindPhoneViews() {
+        phoneInput = findViewById(R.id.inputPhone);
+        otpInput = findViewById(R.id.inputOtp);
+        phoneTab = findViewById(R.id.tabPhone);
+        googleTab = findViewById(R.id.tabGoogle);
+        phoneStatus = findViewById(R.id.phoneStatus);
+        codeStatus = findViewById(R.id.codeStatus);
+        phoneTab.setOnClickListener(view -> changeMethod(PhoneSignInFlow.Method.PHONE));
+        googleTab.setOnClickListener(view -> changeMethod(PhoneSignInFlow.Method.GOOGLE));
+        phoneInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                model.updatePhoneInput(s.toString());
+            }
+            @Override public void afterTextChanged(Editable text) { }
+        });
+        findViewById(R.id.btnReviewPhone).setOnClickListener(view -> {
+            hideKeyboard();
+            model.reviewPhone();
+        });
+        findViewById(R.id.btnSendSms).setOnClickListener(view -> {
+            hideKeyboard();
+            launchPhoneRequest(model.sendPhone(false));
+        });
+        findViewById(R.id.btnResendOtp).setOnClickListener(view -> {
+            otpInput.setText("");
+            launchPhoneRequest(model.sendPhone(true));
+        });
+        findViewById(R.id.btnVerifyOtp).setOnClickListener(view -> {
+            hideKeyboard();
+            String code = otpInput.getText() == null ? "" : otpInput.getText().toString();
+            otpInput.setText("");
+            model.verifyPhone(code);
+        });
+        View.OnClickListener edit = view -> {
+            hideKeyboard();
+            otpInput.setText("");
+            model.cancelPhone();
+        };
+        findViewById(R.id.btnEditReviewPhone).setOnClickListener(edit);
+        findViewById(R.id.btnEditCodePhone).setOnClickListener(edit);
+        phoneBack = new OnBackPressedCallback(false) {
+            @Override public void handleOnBackPressed() {
+                hideKeyboard();
+                otpInput.setText("");
+                model.cancelPhone();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, phoneBack);
+    }
+
+    private void changeMethod(PhoneSignInFlow.Method method) {
+        hideKeyboard();
+        otpInput.setText("");
+        model.selectMethod(method);
+    }
+
+    private void launchPhoneRequest(PhoneSignInFlow.Request request) {
+        if (request == null) return;
+        try {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            auth.setLanguageCode("vi");
+            PhoneAuthOptions.Builder options = PhoneAuthOptions.newBuilder(auth)
+                    .setPhoneNumber(request.number).setTimeout(60L, TimeUnit.SECONDS)
+                    .setActivity(this).setCallbacks(request.callbacks);
+            if (request.resendToken != null) options.setForceResendingToken(request.resendToken);
+            PhoneAuthProvider.verifyPhoneNumber(options.build());
+        } catch (RuntimeException error) {
+            request.failedToStart();
+        }
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (keyboard != null) keyboard.hideSoftInputFromWindow(findViewById(R.id.main).getWindowToken(), 0);
     }
 
     private void launchGooglePicker() {
@@ -160,8 +286,18 @@ public class MainActivity extends AppCompatActivity {
         // Clear old values even when the account group is hidden.
         accountName.setText(hasAccount ? valueOrFallback(state.account.name, R.string.auth_name_missing) : "");
         accountEmail.setText(hasAccount ? valueOrFallback(state.account.email, R.string.auth_email_missing) : "");
-        accountProvider.setText(hasAccount && state.account.google
-                ? R.string.auth_provider_google : R.string.auth_provider_unknown);
+        int provider = R.string.auth_provider_unknown;
+        if (hasAccount) {
+            if (state.account.google && state.account.phone) provider = R.string.phone_and_google_provider;
+            else if (state.account.google) provider = R.string.auth_provider_google;
+            else if (state.account.phone) provider = R.string.phone_provider;
+        }
+        accountProvider.setText(provider);
+        boolean hasPhone = hasAccount && state.account.phone;
+        findViewById(R.id.accountPhoneLabel).setVisibility(hasPhone ? View.VISIBLE : View.GONE);
+        TextView accountPhone = findViewById(R.id.accountPhone);
+        accountPhone.setVisibility(hasPhone ? View.VISIBLE : View.GONE);
+        accountPhone.setText(hasPhone ? valueOrFallback(state.account.phoneNumber, R.string.phone_number_missing) : "");
         googleButton.setEnabled(state.phase == AuthRepository.Phase.READY);
         signOutButton.setEnabled(state.phase == AuthRepository.Phase.ACCOUNT);
         progress.setVisibility(state.isBusy() ? View.VISIBLE : View.GONE);
@@ -177,6 +313,75 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.main).scrollTo(0, 0);
         }
         showingAccount = hasAccount;
+        renderPhone();
+    }
+
+    private void renderPhone() {
+        if (model == null || phoneInput == null) return;
+        PhoneSignInFlow.State phone = model.getPhoneState().getValue();
+        AuthRepository.State auth = model.getState().getValue();
+        boolean visible = auth.account == null;
+        boolean selected = phone.method == PhoneSignInFlow.Method.PHONE;
+        boolean ready = auth.phase == AuthRepository.Phase.READY;
+        phoneTab.setSelected(selected);
+        googleTab.setSelected(!selected);
+        ViewCompat.setStateDescription(phoneTab, selected ? getString(R.string.phone_selected) : null);
+        ViewCompat.setStateDescription(googleTab, !selected ? getString(R.string.phone_selected) : null);
+        phoneTab.setEnabled(ready);
+        googleTab.setEnabled(ready);
+        findViewById(R.id.googleContent).setVisibility(!selected ? View.VISIBLE : View.GONE);
+        findViewById(R.id.phoneEntry).setVisibility(selected && phone.step == PhoneSignInFlow.Step.ENTRY ? View.VISIBLE : View.GONE);
+        findViewById(R.id.phoneReview).setVisibility(selected && phone.step == PhoneSignInFlow.Step.REVIEW ? View.VISIBLE : View.GONE);
+        boolean codeStep = selected && (phone.step == PhoneSignInFlow.Step.SENDING
+                || phone.step == PhoneSignInFlow.Step.CODE || phone.step == PhoneSignInFlow.Step.VERIFYING);
+        findViewById(R.id.phoneCode).setVisibility(codeStep ? View.VISIBLE : View.GONE);
+        if (!phoneInput.getText().toString().equals(phone.input)) phoneInput.setText(phone.input);
+        if (renderedPhoneGeneration != phone.generation || renderedOtpStep != codeStep || !visible
+                || phone.step == PhoneSignInFlow.Step.VERIFYING) {
+            otpInput.setText("");
+        }
+        renderedPhoneGeneration = phone.generation;
+        renderedOtpStep = codeStep;
+        ((TextView) findViewById(R.id.reviewPhoneNumber)).setText(phone.number);
+        ((TextView) findViewById(R.id.codePhoneNumber)).setText(phone.number);
+        ((TextView) findViewById(R.id.codeDestination)).setText(phone.codeSent
+                ? R.string.phone_code_destination_sent : R.string.phone_code_destination);
+        phoneInput.setEnabled(ready);
+        findViewById(R.id.btnReviewPhone).setEnabled(ready);
+        long wait = phone.waitSeconds();
+        AppCompatButton send = findViewById(R.id.btnSendSms);
+        send.setEnabled(ready && wait == 0);
+        send.setText(wait == 0 ? getString(R.string.phone_confirm_send) : getString(R.string.phone_wait_send, wait));
+        AppCompatButton resend = findViewById(R.id.btnResendOtp);
+        resend.setEnabled(ready && phone.step == PhoneSignInFlow.Step.CODE && wait == 0);
+        resend.setText(wait == 0 ? getString(R.string.phone_resend) : getString(R.string.phone_wait_resend, wait));
+        boolean canVerify = ready && phone.step == PhoneSignInFlow.Step.CODE && phone.canVerify;
+        otpInput.setEnabled(canVerify);
+        findViewById(R.id.btnVerifyOtp).setEnabled(canVerify);
+        boolean edit = ready || (auth.phase == AuthRepository.Phase.SIGNING_IN && selected);
+        findViewById(R.id.btnEditReviewPhone).setEnabled(edit);
+        findViewById(R.id.btnEditCodePhone).setEnabled(edit);
+        phoneBack.setEnabled(visible && selected && phone.step != PhoneSignInFlow.Step.ENTRY);
+        // The normal OTP instructions are separate from transient status/errors.
+        int phoneMessage = phone.message == R.string.phone_code_sent ? 0 : phone.message;
+        phoneStatus.setVisibility(selected && !codeStep && phoneMessage != 0 ? View.VISIBLE : View.GONE);
+        codeStatus.setVisibility(selected && codeStep && phoneMessage != 0 ? View.VISIBLE : View.GONE);
+        String text = phoneMessage == 0 ? "" : getString(phoneMessage);
+        TextView activeStatus = codeStep ? codeStatus : phoneStatus;
+        TextView inactiveStatus = codeStep ? phoneStatus : codeStatus;
+        inactiveStatus.setText("");
+        if (!activeStatus.getText().toString().equals(text)) activeStatus.setText(text);
+        activeStatus.setTextColor(ContextCompat.getColor(this, phone.error ? R.color.text_error : R.color.text_charcoal));
+        progress.setVisibility(auth.isBusy() || (visible && selected && phone.step == PhoneSignInFlow.Step.SENDING)
+                ? View.VISIBLE : View.GONE);
+    }
+
+    @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
+        PhoneSignInFlow.State phone = model.getPhoneState().getValue();
+        // Only an opaque non-sensitive recovery flag, never input/OTP/id/resend token.
+        outState.putBoolean("phone_flow_was_active", phone.method == PhoneSignInFlow.Method.PHONE
+                && (phone.step != PhoneSignInFlow.Step.ENTRY || !phone.input.isEmpty()));
+        super.onSaveInstanceState(outState);
     }
 
     private String valueOrFallback(String value, int fallback) {
@@ -184,6 +389,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override protected void onDestroy() {
+        uiHandler.removeCallbacks(countdown);
+        if (model != null && isFinishing()
+                && model.getPhoneState().getValue().step != PhoneSignInFlow.Step.ENTRY) model.cancelPhone();
         if (pickerRequest != 0) {
             // Cancel only the Activity-owned picker. A Firebase exchange already accepted by
             // the repository continues across rotation without retaining this Activity.
