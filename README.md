@@ -1259,3 +1259,20 @@ Phạm vi được duyệt: liên kết Google/phone vào cùng UID, đăng nh�
 Giữ nguyên các mục theo dõi riêng từ C01/C02, đặc biệt C02-F01 về ngôn ngữ SMS và tên “Your Firebase App”; việc duyệt C03 không có nghĩa các mục đó đã được sửa. Đồng bộ số vào hồ sơ/claim và Rules tích hợp C04 vẫn thuộc bước sau; TTS thuộc C22.
 
 Người dùng tự review và commit C03 trước khi triển khai luồng tiếp theo. Lần ghi nhận này chỉ sửa tài liệu; Codex không sửa code, build/test, stage, commit, push hoặc deploy.
+
+### Cập nhật C04 — 25/10/2026
+
+C03 đã duyệt và commit tại 211730a. C04 đã thêm chọn vai trò cố định, User/profile riêng theo UID và đồng bộ số Auth; **chờ người dùng Publish Rules/seed, Sync/build/chạy/kiểm tra, chưa nghiệm thu**.
+Nghiệp vụ/thiết kế bổ sung được chốt: hai thẻ chọn SEEKER/EMPLOYER sau login, xác nhận trước ghi; hai hồ sơ cùng cấu trúc, tên hiển thị riêng với thông tin pháp lý. Chưa quét CCCD/QR hoặc tự nhập ngày sinh/giới tính/sức khỏe; identity C05 bổ sung sau. TTS C22 chưa hiển thị.
+
+Save và phone sync là transaction online có version/claim. Rules mặc định từ chối, chỉ owner đọc/sửa trường được phép; không đổi role/trạng thái hệ thống hoặc cấp Admin. Khu vực là danh mục DEMO nhỏ, không tuyên bố hành chính hiện hành. Admin bootstrap Console, không có lựa chọn Admin hoặc dashboard giả.
+
+Thiết lập trước khi chạy: [C04 Console/schema](docs/C04-CONSOLE-SCHEMA.md). Bàn giao [C04 files](docs/C04-FILES.md), [C04 checklist](docs/C04-CHECKLIST.md).
+Codex không tự build/test/lint/emulator/kiểm thử Rules hoặc stage/commit/push/deploy; người dùng làm trong Android Studio và Console. Các trạng thái chờ triển khai C04 ở phần lịch sử được thay thế bằng cập nhật này.
+
+## Xác nhận nghiệm thu C04 — 25/10/2026
+
+**Trạng thái hiện hành: C04 đã được người dùng kiểm tra và phê duyệt; phần commit do người dùng thực hiện.**
+Người dùng xác nhận đã sửa dữ liệu khu vực và thử lại các yêu cầu trong checklist, tất cả hoạt động ổn. Các mục C04-01 đến C04-23 và C04-R01 đến C04-R08 được ghi nhận đạt theo xác nhận tổng thể này. Không có thêm thông tin thiết bị/API hoặc bằng chứng từng ca được cung cấp; không tự bổ sung kết quả chi tiết hay khẳng định Codex đã kiểm thử độc lập.
+Xác nhận này thay thế các trạng thái chờ kiểm tra/chưa nghiệm thu C04 trong phần lịch sử phía trên. Lỗi danh mục khu vực và đợt rút gọn giao diện đã được người dùng kiểm tra lại và duyệt.
+Codex chỉ cập nhật báo cáo; không chạy build/test/lint/emulator/SMS, không sửa Console/deploy hoặc stage/commit/push. C02-F01 và các mục theo dõi từ luồng trước vẫn giữ nguyên. CCCD/QR thuộc C05; giọng đọc thuộc C22, chưa được tính là đã triển khai trong C04.

@@ -1,12 +1,141 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /appConfig/public {
-      allow get: if true;
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function seekerPath(uid) { return /databases/$(database)/documents/jobSeekerProfiles/$(uid); }
+    function employerPath(uid) { return /databases/$(database)/documents/employerProfiles/$(uid); }
+    function adminPath(uid) { return /databases/$(database)/documents/adminAccess/$(uid); }
+    function clientRole(role) { return role in ['SEEKER', 'EMPLOYER']; }
+    function noAdmin(uid) {
+      return !exists(adminPath(uid)) || get(adminPath(uid)).data.get('enabled', false) != true;
+    }
+    function authPhone() { return request.auth.token.get('phone_number', ''); }
+    function contact(d) {
+      return d.phoneE164 is string && d.phoneE164 == authPhone()
+        && ((d.phoneE164 == '' && d.phoneVerificationMode == 'NONE' && d.phoneVerifiedAt == null)
+          || (d.phoneE164 != '' && d.phoneVerificationMode == 'FIREBASE_AUTH'
+            && d.phoneVerifiedAt is timestamp && d.phoneVerifiedAt <= request.time));
+    }
+    function userShape(d, uid) {
+      return d.keys().hasAll(['id', 'role', 'accountStatus', 'displayName', 'phoneE164',
+          'phoneVerificationMode', 'phoneVerifiedAt', 'version', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['id', 'role', 'accountStatus', 'displayName', 'phoneE164',
+          'phoneVerificationMode', 'phoneVerifiedAt', 'version', 'createdAt', 'updatedAt',
+          'retirementStatus', 'identityStatus'])
+        && d.id == uid && clientRole(d.role)
+        && d.displayName is string && d.displayName.size() <= 100
+        && d.version is int && d.version >= 1
+        && d.createdAt is timestamp && d.updatedAt == request.time
+        && ((d.role == 'SEEKER' && d.keys().hasAll(['retirementStatus'])
+            && !('identityStatus' in d) && d.retirementStatus == 'NOT_SUBMITTED')
+          || (d.role == 'EMPLOYER' && d.keys().hasAll(['identityStatus'])
+            && !('retirementStatus' in d) && d.identityStatus == 'NOT_SUBMITTED'));
+    }
+    function validArea(code) {
+      return code is string && code.size() <= 80
+        && (code == '' || (exists(/databases/$(database)/documents/areas/$(code))
+          && get(/databases/$(database)/documents/areas/$(code)).data.active == true));
+    }
+    function skillAt(items, index) {
+      return items.size() <= index || (items[index] is string
+        && items[index].size() > 0 && items[index].size() <= 60);
+    }
+    function skills(items) {
+      return items is list && items.size() <= 8
+        && items.toSet().size() == items.size()
+        && skillAt(items, 0) && skillAt(items, 1) && skillAt(items, 2) && skillAt(items, 3)
+        && skillAt(items, 4) && skillAt(items, 5) && skillAt(items, 6) && skillAt(items, 7);
+    }
+    function commonProfile(d, uid) {
+      return d.userId == uid && validArea(d.areaCode)
+        && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    function seeker(d, uid) {
+      return d.keys().hasAll(['userId', 'areaCode', 'skills', 'experienceSummary',
+          'preferredShifts', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['userId', 'areaCode', 'skills', 'experienceSummary',
+          'preferredShifts', 'createdAt', 'updatedAt'])
+        && commonProfile(d, uid) && skills(d.skills)
+        && d.experienceSummary is string && d.experienceSummary.size() <= 1000
+        && d.preferredShifts is list && d.preferredShifts.size() <= 3
+        && d.preferredShifts.hasOnly(['MORNING', 'AFTERNOON', 'EVENING'])
+        && d.preferredShifts.toSet().size() == d.preferredShifts.size();
+    }
+    function employer(d, uid) {
+      return d.keys().hasAll(['userId', 'areaCode', 'employerType', 'organizationName',
+          'introduction', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['userId', 'areaCode', 'employerType', 'organizationName',
+          'introduction', 'createdAt', 'updatedAt'])
+        && commonProfile(d, uid) && d.employerType in ['INDIVIDUAL', 'ORGANIZATION']
+        && d.organizationName is string && d.organizationName.size() <= 150
+        && (d.employerType != 'ORGANIZATION' || d.organizationName.size() > 0)
+        && (d.employerType != 'INDIVIDUAL' || d.organizationName == '')
+        && d.introduction is string && d.introduction.size() <= 1000;
+    }
+    function profileOwnerAfter(uid, role) {
+      let after = getAfter(userPath(uid)).data;
+      return owner(uid) && noAdmin(uid) && after.id == uid && after.role == role
+        && after.accountStatus == 'ACTIVE' && after.updatedAt == request.time;
+    }
+    function profileUpdate(uid, role) {
+      let before = get(userPath(uid)).data;
+      let after = getAfter(userPath(uid)).data;
+      return profileOwnerAfter(uid, role) && before.role == role && before.accountStatus == 'ACTIVE'
+        && after.version == before.version + 1
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /appConfig/public { allow get: if true; allow list, write: if false; }
+    match /areas/{code} {
+      allow get, list: if request.auth != null && resource.data.active == true;
+      allow write: if false;
+    }
+    match /adminAccess/{uid} {
+      allow get: if owner(uid);
       allow list, write: if false;
     }
-    match /{document=**} {
-      allow read, write: if false;
+    match /users/{uid} {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      allow create: if owner(uid) && noAdmin(uid) && userShape(request.resource.data, uid)
+        && request.resource.data.accountStatus == 'ACTIVE'
+        && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
+        && contact(request.resource.data)
+        && (request.resource.data.phoneE164 == '' || request.resource.data.phoneVerifiedAt == request.time)
+        && ((request.resource.data.role == 'SEEKER' && !exists(employerPath(uid))
+              && getAfter(seekerPath(uid)).data.userId == uid)
+          || (request.resource.data.role == 'EMPLOYER' && !exists(seekerPath(uid))
+              && getAfter(employerPath(uid)).data.userId == uid));
+      allow update: if owner(uid) && noAdmin(uid) && resource.data.accountStatus == 'ACTIVE'
+        && userShape(request.resource.data, uid) && contact(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'phoneE164', 'phoneVerificationMode', 'phoneVerifiedAt', 'updatedAt', 'version'])
+        && request.resource.data.version == resource.data.version + 1
+        && (request.resource.data.phoneE164 == resource.data.phoneE164
+          ? request.resource.data.phoneVerifiedAt == resource.data.phoneVerifiedAt
+          : (request.resource.data.phoneE164 == '' || request.resource.data.phoneVerifiedAt == request.time));
     }
+    match /jobSeekerProfiles/{uid} {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      allow create: if profileOwnerAfter(uid, 'SEEKER') && !exists(userPath(uid))
+        && !exists(employerPath(uid)) && seeker(request.resource.data, uid)
+        && request.resource.data.createdAt == request.time;
+      allow update: if profileUpdate(uid, 'SEEKER') && seeker(request.resource.data, uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'areaCode', 'skills', 'experienceSummary', 'preferredShifts', 'updatedAt']);
+    }
+    match /employerProfiles/{uid} {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      allow create: if profileOwnerAfter(uid, 'EMPLOYER') && !exists(userPath(uid))
+        && !exists(seekerPath(uid)) && employer(request.resource.data, uid)
+        && request.resource.data.createdAt == request.time;
+      allow update: if profileUpdate(uid, 'EMPLOYER') && employer(request.resource.data, uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'areaCode', 'employerType', 'organizationName', 'introduction', 'updatedAt']);
+    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

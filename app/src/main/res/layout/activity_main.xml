@@ -114,6 +114,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <include layout="@layout/profile_content"/>
             <LinearLayout
                 android:id="@+id/accountContent"
                 android:layout_width="match_parent"
@@ -129,6 +130,13 @@
                     android:accessibilityHeading="true"
                     android:textAppearance="@style/TextAppearance.GrandMa.Title"
                     android:text="@string/auth_account_title" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnReturnProfile"
+                    style="@style/Widget.GrandMa.Button.Secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/p_return" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

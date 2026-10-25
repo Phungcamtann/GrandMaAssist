@@ -1,0 +1,9 @@
+{
+  "notice": "DEMO: nhãn khu vực phục vụ đồ án, không phải danh mục hành chính hiện hành hoặc đầy đủ.",
+  "collection": "areas",
+  "documents": [
+    {"id": "DEMO_AREA_01", "fields": {"name": "Khu vực A (DEMO)", "active": true}},
+    {"id": "DEMO_AREA_02", "fields": {"name": "Khu vực B (DEMO)", "active": true}},
+    {"id": "DEMO_AREA_03", "fields": {"name": "Khu vực C (DEMO)", "active": true}}
+  ]
+}

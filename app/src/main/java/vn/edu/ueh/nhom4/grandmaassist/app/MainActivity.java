@@ -44,9 +44,12 @@ import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AuthRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AccountMethodsFlow;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PhoneSignInFlow;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.AuthViewModel;
+import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ProfileViewModel;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.profile.ProfilePanel;
 
 public class MainActivity extends AppCompatActivity {
     private AuthViewModel model;
+    private ProfilePanel profilePanel;
     private CancellationSignal pickerCancellation;
     private long pickerRequest;
     private View loginContent;
@@ -138,7 +141,9 @@ public class MainActivity extends AppCompatActivity {
             model.selectMethod(PhoneSignInFlow.Method.PHONE);
         }
         googleButton.setOnClickListener(view -> launchGooglePicker());
-        signOutButton.setOnClickListener(view -> model.signOut());
+        ProfileViewModel profiles = new ViewModelProvider(this).get(ProfileViewModel.class);
+        profilePanel = new ProfilePanel(this, profiles, model);
+        profiles.changes().observe(this, ignored -> render(model.getState().getValue()));
         retryButton.setOnClickListener(view -> model.retry());
         model.methods().getState().observe(this, ignored -> render(model.getState().getValue()));
         model.methods().getPhoneState().observe(this, ignored -> render(model.getState().getValue()));
@@ -331,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
         showingAccount = hasAccount;
         renderMethods(state);
         renderPhone();
+        if (profilePanel != null) profilePanel.render(state);
     }
 
     private void renderPhone() {
