@@ -1,6 +1,6 @@
 # File thuộc phạm vi C04
 
-25/10/2026 — **nền C04 đã được người dùng duyệt và commit `fce2c26`; phần trang chính/điều hướng bổ sung mới đang chờ kiểm tra.** Các mục bàn giao ban đầu và xác nhận bên dưới được giữ làm lịch sử.
+25/10/2026 — **người dùng đã duyệt toàn bộ bản hiện tại**, gồm điều hướng/Hồ sơ thống nhất và sửa sau pull; nền local/GitHub hiện ở `11fcdeb`. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md). Các mục bàn giao ban đầu và trạng thái chờ phía dưới được giữ làm lịch sử, không thay thế chốt mới.
 Nền: commit 211730a (C03), working tree sạch trước khi triển khai. C01/C02/C03 đã được người dùng duyệt.
 Lần này người dùng đính kèm yêu cầu triển khai trực tiếp; Codex thực hiện trong repo, không chuyển sang C05.
 

@@ -105,6 +105,6 @@ App ghi quyết định, cập nhật User và thông báo cùng transaction; h�
 - Lỗi quyền xem ảnh: đối chiếu grant/User Admin, Storage Rules và quyền kết nối Storage–Firestore đã cấp khi Publish.
 - Lỗi xung đột: có thể bản hiện hành đã đổi hoặc Admin khác đã xử lý; tải lại để đọc kết quả. Không ép trạng thái bằng Console hoặc tự gửi quyết định lại nhiều lần.
 
-Người dùng đã xác nhận sửa hai document cấp quyền, đăng nhập Admin/tải hồ sơ chờ thành công và test lại các case sau bản sửa quyết định đều đạt. Kết quả này do người dùng thực hiện, không phải Codex kiểm thử. Đợt cải tiến mới gộp Hồ sơ/xác minh vẫn cần kiểm tra riêng theo C04-P01–P06; các ca Rules/timeout/thiết bị chưa tái hiện không tự đóng.
+Người dùng đã xác nhận sửa quyền, đăng nhập Admin/xét duyệt và nay chốt tất cả bản hiện tại, gồm Hồ sơ thống nhất/sửa sau pull. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md). Kết quả do người dùng thực hiện, không phải Codex kiểm thử; các ca Rules/timeout/thiết bị chưa tái hiện vẫn tiếp tục theo dõi riêng.
 
 Nếu còn lỗi lưu trên bản debug, lấy các dòng tag **GrandMaReview**: DECISION_START, DECISION_SAVED hoặc DECISION_FAILED kèm mã như PERMISSION_DENIED/UNAVAILABLE. Log chỉ có giai đoạn/mã lỗi, không có UID, ảnh, số căn cước, lý do hay nội dung exception. Nếu chỉ có DECISION_START thì chưa có xác nhận lưu; không suy ra đã duyệt.

@@ -320,6 +320,11 @@ service cloud.firestore {
       allow get, list: if request.auth != null && resource.data.active == true;
       allow write: if false;
     }
+    match /jobCategories/{id} {
+      allow get: if request.auth != null && resource.data.active == true;
+      allow list: if request.auth != null && resource.data.active == true && request.query.limit <= 100;
+      allow write: if false;
+    }
     match /adminAccess/{uid} {
       allow get: if owner(uid);
       allow list, write: if false;

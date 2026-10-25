@@ -1,6 +1,6 @@
 # C05 — hồ sơ xác minh, QR, ảnh riêng và xét duyệt
 
-25/10/2026 — triển khai trên nền C04 `fce2c26`. Người dùng xác nhận QR/ảnh/gửi, vào Admin/tải hàng đợi và test lại các ca sau bản sửa quyết định đều đạt. **Đợt cải tiến Hồ sơ thống nhất mới đang chờ kiểm tra**; không tự coi các biến thể Rules/timeout/thiết bị chưa tái hiện đã đạt.
+25/10/2026 — **người dùng đã chốt toàn bộ bản hiện tại**, gồm C05/Hồ sơ thống nhất và sửa sau pull. Nền đối chiếu local/GitHub là `11fcdeb`, bản sửa cấu hình/resource nằm trong `a63734e`. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md); các trạng thái chờ trong lịch sử được thay bằng xác nhận mới, không tự coi các biến thể kỹ thuật chưa tái hiện đã đạt.
 
 ## Kết quả triển khai
 

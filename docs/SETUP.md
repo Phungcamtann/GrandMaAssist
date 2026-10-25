@@ -1,3 +1,9 @@
+# Chốt bản hiện tại và chuẩn bị C06 — 25/10/2026
+
+Người dùng đã duyệt hết bản C04/C05/Hồ sơ thống nhất/sửa sau pull. Đã đối chiếu local/GitHub main cùng `11fcdeb`, working tree sạch trước cập nhật tài liệu; bản sửa Gradle/resource đầy đủ trong `a63734e`, commit cuối chỉ chỉnh JDK jbr-21 của Android Studio. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md). Không tự chạy kiểm thử hoặc tự commit để xác minh.
+
+C06 đã được người dùng duyệt kế hoạch và đã triển khai mã nguồn nháp tin tuyển/xem trước, chờ nghiệm thu mới. Giữ nháp đã lưu cho đúng UID đăng nhập lại, không hiện cho tài khoản khác. Người dùng làm [C06-CONSOLE-SCHEMA](C06-CONSOLE-SCHEMA.md): Publish Firestore Rules đọc jobCategories và seed bốn danh mục, giữ areas/C05/Storage/Auth đang đúng; Sync/Run rồi kiểm [C06-CHECKLIST](C06-CHECKLIST.md). Chưa có kết quả runtime do Codex chạy hoặc thay đổi Console/deploy/commit. Chi tiết [C06-FILES](C06-FILES.md). Các mục chờ trong lịch sử không thay thế xác nhận mới; ca kỹ thuật khó chưa tái hiện/C02-F01 vẫn theo dõi riêng.
+
 # Cập nhật cấu hình sau nhận commit C05 — 25/10/2026
 
 Đã đối chiếu commit `2552a04` trùng local/GitHub main. Trong commit, nội dung module app bị đặt vào build.gradle.kts gốc; app/build.gradle.kts thiếu thư viện QR, profile_strings.xml/profile_styles.xml thiếu phần bổ sung đã được Java/layout tham chiếu. Đã sửa bốn file tại working tree, giữ nguyên phiên bản và thay đổi IDE có sẵn. Chi tiết [C05-COMMIT-REPAIR](C05-COMMIT-REPAIR.md).

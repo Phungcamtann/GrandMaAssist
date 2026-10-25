@@ -71,7 +71,7 @@ public final class RoleNavigationBar {
                 :new int[]{R.drawable.ic_nav_home,R.drawable.ic_role_work,R.drawable.ic_nav_search,R.drawable.ic_nav_account};
         for(int i=0;i<4;i++){
             Action action=routes[i];actions[i]=action;
-            boolean live=i==0 || i==3 || (admin && i==1);AppCompatButton b=buttons[i];
+            boolean live=i==0 || i==3 || ((admin || "EMPLOYER".equals(role)) && i==1);AppCompatButton b=buttons[i];
             String title=activity.getString(labels[i]);String value=title+(live?"":"\n"+activity.getString(R.string.n_soon));
             if(!b.getText().toString().equals(value))b.setText(value);
             b.setEnabled(enabled && live);b.setSelected(live && selected==action);

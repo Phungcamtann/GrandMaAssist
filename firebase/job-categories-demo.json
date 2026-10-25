@@ -1,0 +1,10 @@
+{
+  "notice": "Danh mục mẫu phục vụ đồ án; không phải tin tuyển đã đăng hoặc danh mục nghề đầy đủ.",
+  "collection": "jobCategories",
+  "documents": [
+    {"id": "GARDEN_CARE", "fields": {"name": "Chăm sóc cây", "iconKey": "garden", "active": true}},
+    {"id": "KITCHEN_HELP", "fields": {"name": "Phụ bếp", "iconKey": "kitchen", "active": true}},
+    {"id": "LIBRARY_HELP", "fields": {"name": "Hỗ trợ thư viện", "iconKey": "library", "active": true}},
+    {"id": "SHOP_HELP", "fields": {"name": "Phụ giúp cửa hàng", "iconKey": "shop", "active": true}}
+  ]
+}

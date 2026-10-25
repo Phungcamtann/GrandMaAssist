@@ -1,6 +1,6 @@
 # C04/C05 — bổ sung trang chính và điều hướng theo vai trò
 
-25/10/2026 — C04 tại commit `fce2c26` là nền đã duyệt. Người dùng xác nhận C05 đọc QR/gửi, vào Admin/tải hàng đợi và test lại các ca sau bản sửa quyết định đều đạt; D01–D06 ghi nhận theo xác nhận người dùng. **Phần cải tiến mới gộp lối vào Hồ sơ/xác minh đang chờ nghiệm thu**; không tự xác nhận các nhánh/biến thể chưa tái hiện đã đạt.
+25/10/2026 — người dùng đã chốt tất cả bản hiện tại, gồm điều hướng và Hồ sơ thống nhất. Local/GitHub cùng `11fcdeb`; bản sửa sau pull đã ở `a63734e`. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md) cho nghiệm thu hiện hành; trạng thái chờ trong lịch sử được thay bằng chốt mới, các biến thể kỹ thuật chưa tái hiện tiếp tục theo dõi riêng.
 
 ## Đối chiếu phạm vi và thiết kế v3
 
@@ -13,7 +13,7 @@ Yêu cầu bổ sung hiện hành: dùng bốn ảnh người dùng gửi làm t
 | Vai trò | Sau đăng nhập/khôi phục phiên hoặc chọn vai trò thành công | Thanh điều hướng |
 |---|---|---|
 | SEEKER | Trang chủ, lời chào và các thẻ việc theo mẫu; Xem hồ sơ vào trang Hồ sơ thống nhất | Trang chủ; Việc của tôi — Sắp có; Việc khác — Sắp có; Hồ sơ |
-| EMPLOYER | Trang chủ người thuê, đường vào Hồ sơ thống nhất | Trang chủ; Tin của tôi — Sắp có; Ca làm — Sắp có; Tài khoản |
+| EMPLOYER | Trang chủ người thuê, đường vào Hồ sơ thống nhất; C06 thêm Soạn tin tuyển/Tin của tôi với nháp local | Trang chủ; Tin của tôi — nháp C06; Ca làm — Sắp có; Tài khoản |
 | ADMIN | Tổng quan hàng đợi, thẻ Kiểm tra hồ sơ với số liệu server | Tổng quan; Xử lý; Thống kê — Sắp có; Tài khoản |
 
 Tài khoản chưa có vai trò vẫn ở màn chọn vai trò, phải chọn và xác nhận mới tiếp tục. Vai trò cố định và grant Admin giữ nguyên. Có **Kiểm tra lại tài khoản** tại màn chọn vai trò để đọc lại quyền vừa được quản lý cấp. Nếu grant và User ADMIN không khớp, app báo chưa được cấp đủ quyền, không tự chuyển thành Admin hoặc mở trình chọn vai trò để thay quyền.

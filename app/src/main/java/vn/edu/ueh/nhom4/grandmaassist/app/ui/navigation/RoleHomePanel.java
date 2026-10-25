@@ -17,12 +17,14 @@ public final class RoleHomePanel {
     private final ProfileViewModel vm;
     private final RoleNavigationBar navigation;
     public RoleHomePanel(AppCompatActivity activity,ProfileViewModel vm,Consumer<RoleNavigationBar.Action> navigate,
-                         Runnable verify,Runnable security,Runnable signOut){
+                         Runnable verify,Runnable security,Runnable signOut,Runnable createDraft){
         this.activity=activity;this.vm=vm;navigation=new RoleNavigationBar(activity,navigate);
         activity.findViewById(R.id.roleHomeContent).setSaveFromParentEnabled(false);
         activity.findViewById(R.id.roleAccountContent).setSaveFromParentEnabled(false);
         click(R.id.homeOpenProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
         click(R.id.homeReviewProfiles,verify);click(R.id.homeRefreshCounts,vm::loadCounts);
+        click(R.id.homeMainFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))createDraft.run();});
+        click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))navigate.accept(RoleNavigationBar.Action.WORK);});
         click(R.id.accountHubBack,()->navigate.accept(RoleNavigationBar.Action.HOME));
         click(R.id.accountHubProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
         click(R.id.accountHubVerification,verify);click(R.id.accountHubSecurity,security);click(R.id.accountHubSignOut,signOut);
@@ -49,6 +51,15 @@ public final class RoleHomePanel {
         future(R.id.homeMainFuture,seeker?R.string.n_find_jobs:R.string.n_create_post);
         future(R.id.homeAttentionFuture,R.string.n_attention);future(R.id.homeWorkFuture,seeker?R.string.n_my_jobs:R.string.n_my_posts);
         future(R.id.homeOtherFuture,seeker?R.string.n_other_jobs:R.string.n_sessions);future(R.id.homeHelpFuture,R.string.n_help);
+        boolean employer="EMPLOYER".equals(role);
+        if(employer){text(R.id.homeMainFuture,activity.getString(R.string.jd_create));text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));}
+        activity.findViewById(R.id.homeMainFuture).setEnabled(employer && active && !vm.busy && !auth.isBusy());
+        activity.findViewById(R.id.homeMainFuture).setBackgroundResource(employer?R.drawable.button_primary:R.drawable.verification_section);
+        ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,
+                employer?R.color.button_primary_text:R.color.button_disabled_text));
+        activity.findViewById(R.id.homeWorkFuture).setEnabled(employer && active && !vm.busy && !auth.isBusy());
+        ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,
+                employer?R.color.brand_green:R.color.button_disabled_text));
         future(R.id.homePostsFuture,R.string.n_admin_posts);future(R.id.homeReportsFuture,R.string.n_admin_reports);
         future(R.id.homeDisputesFuture,R.string.n_admin_disputes);future(R.id.homeOverdueFuture,R.string.n_admin_overdue);
         future(R.id.accountHubSettings,R.string.n_settings);future(R.id.accountHubHelp,R.string.n_help);

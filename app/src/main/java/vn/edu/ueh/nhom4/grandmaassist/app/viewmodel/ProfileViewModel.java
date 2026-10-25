@@ -28,6 +28,7 @@ public final class ProfileViewModel extends AndroidViewModel {
     private long countsRequest;
     public String verificationStatus="UNKNOWN";
     public boolean verificationLoading,verificationFailed;
+    public boolean offlineDraftAvailable;
     private long verificationRequest;
     public ProfileRepository.Snapshot snapshot;
     public ProfileDraft draft = new ProfileDraft();
@@ -59,6 +60,7 @@ public final class ProfileViewModel extends AndroidViewModel {
                 currentPhone = ""; screen = Screen.LOADING; message = areaMessage = 0;
                 destination=Destination.HOME;adminCounts=null;countsLoading=false;countsMessage=0;++countsRequest;
                 acceptVerification(null);
+                offlineDraftAvailable=false;
             }
             return;
         }
@@ -70,6 +72,7 @@ public final class ProfileViewModel extends AndroidViewModel {
             selectedRole = ""; areas = new ArrayList<>(); message = areaMessage = 0;
             destination=Destination.HOME;adminCounts=null;countsLoading=false;countsMessage=0;++countsRequest;
             acceptVerification(null);
+            offlineDraftAvailable=false;
             load(); return;
         }
         currentPhone = phone;
@@ -97,13 +100,19 @@ public final class ProfileViewModel extends AndroidViewModel {
         String owner = uid; long request = ++generation;
         ++countsRequest;countsLoading=false;adminCounts=null;
         acceptVerification(null);
+        offlineDraftAvailable=false;
         busy = true; screen = Screen.LOADING; message = 0; notifyChange();
+        new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobDraftRepository(getApplication()).offlineOwner(owner).addOnCompleteListener(local->{
+            if(!current(request,owner) || !(screen==Screen.LOADING || (screen==Screen.ERROR && message==R.string.p_network)))return;
+            offlineDraftAvailable=local.isSuccessful() && Boolean.TRUE.equals(local.getResult());notifyChange();
+        });
         repository.load(owner).addOnCompleteListener(task -> {
             if (!current(request, owner)) return;
             busy = false;
             if (!task.isSuccessful()) { screen = Screen.ERROR; message = error(task.getException());
+                if(message!=R.string.p_network)offlineDraftAvailable=false;
                 adminCounts=null;countsLoading=false;++countsRequest;notifyChange(); return; }
-            snapshot = task.getResult(); acceptVerification(snapshot);readRequired = false; dirty = false;
+            offlineDraftAvailable=false;snapshot = task.getResult(); acceptVerification(snapshot);readRequired = false; dirty = false;
             if (snapshot == null) { screen = Screen.ROLE; notifyChange(); return; }
             if ("ADMIN".equals(snapshot.role)) { screen = Screen.ADMIN; draft=snapshot.draft.copy();notifyChange();loadCounts();return; }
             screen = Screen.PROFILE; draft = snapshot.draft.copy();
@@ -238,6 +247,7 @@ public final class ProfileViewModel extends AndroidViewModel {
         super.onCleared();
     }
     private int error(Exception exception) {
+        if(vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobDraftRepository.network(exception))return R.string.p_network;
         Throwable cause = exception;
         for (int i = 0; cause != null && i < 8; i++, cause = cause.getCause()) {
             if (cause instanceof ProfileRepository.Failure) {

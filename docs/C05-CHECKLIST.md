@@ -1,6 +1,6 @@
 # C05 — checklist người dùng
 
-25/10/2026 — người dùng xác nhận QR/gửi, vào Admin/tải hàng đợi và đã kiểm tra lại các ca sau bản sửa quyết định, tất cả đạt. C05-D01–D06 ghi nhận đạt theo xác nhận tổng thể này. **Đợt hợp nhất giao diện Hồ sơ/xác minh mới đang chờ kiểm tra**; không tự mở rộng xác nhận sang các ca Rules/cạnh tranh/thiết bị chưa tái hiện. Không có kết quả runtime/Rules do Codex chạy.
+25/10/2026 — người dùng đã xác nhận QR/gửi, Admin/xét duyệt và nay chốt **đã duyệt hết tất cả bản hiện tại**, gồm Hồ sơ thống nhất và sửa Gradle sau pull. Nghiệm thu theo xác nhận người dùng trong [C05-ACCEPTANCE](C05-ACCEPTANCE.md); các ca Rules/cạnh tranh/thiết bị chưa tái hiện tiếp tục theo dõi riêng. Không có kết quả runtime/Rules do Codex chạy.
 Làm thiết lập theo C05-CONSOLE-SCHEMA.md trước. Ghi thiết bị/API và kết quả riêng tư; không ghi UID, số căn cước, OTP, raw QR, ảnh hoặc token vào báo cáo chia sẻ.
 
 ## Chụp/đọc/chuẩn bị
@@ -158,12 +158,12 @@ Các ca hồi quy/Rules/cạnh tranh/timeout/thiết bị không tự được c
 
 ## Điều hướng Admin/C05 bổ sung — chờ người dùng kiểm tra
 
-- [ ] C05-N01 Đăng nhập UID riêng có enabled=true, User ADMIN/ACTIVE → Tổng quan hàng đợi, topbar Admin. Nếu vừa cấp khi đang ở màn chọn vai trò, Kiểm tra lại tài khoản đọc đúng quyền; grant thiếu/User không khớp báo chưa đủ quyền, không tự chọn ADMIN.
-- [ ] C05-N02 Tổng quan hiển thị số SUBMITTED đúng mỗi loại và tổng; danh sách trống thật hiện 0. Lỗi mạng/quyền có báo chưa tải được và thử lại, không hiện 0 giả. Nếu số lượng chạm giới hạn 50 thì nhãn 50+/tổng+; các thẻ còn lại và Thống kê khóa/Sắp có.
-- [ ] C05-N03 Tổng quan → Kiểm tra hồ sơ và tab Xử lý đều tới hàng đợi, hai loại đúng nội dung. Chọn một hồ sơ → chỉ thấy chi tiết/ảnh/quyết định, không lẫn danh sách; Quay lại/tab Xử lý về danh sách. Bỏ nhận xét chưa lưu có hỏi, hủy thao tác thì còn nội dung.
-- [ ] C05-N04 Thực hiện C05-18–23 (ảnh, chấp thuận, bổ sung, từ chối, thu hồi, kết quả chủ hồ sơ) trên bản mới. Sau xử lý trở về Tổng quan số đếm đọc lại; mở Tài khoản/đăng xuất rồi Back không khôi phục ảnh hoặc quyền của UID cũ. Cấp Admin theo C05-ADMIN-GUIDE, không cần sửa grant đúng đang có.
-- [ ] C05-N05 SEEKER/EMPLOYER → Hồ sơ → vùng xác minh → nút theo trạng thái. Xem lại/Xem hồ sơ đã gửi mở trực tiếp bản hiện hành, Quay lại về Hồ sơ; từ wizard xác minh mở chi tiết rồi Quay lại vẫn về wizard. Tab Trang chủ/Hồ sơ/Tài khoản về đúng trang Main và đọc lại version; có nháp thì hỏi trước khi bỏ. Chụp/đọc QR/nhận bằng chứng/gửi vẫn như phần đã người dùng duyệt.
-- [ ] C05-N06 Xoay khi đang ở hàng đợi/chi tiết/upload không lặp thao tác; font 200%/màn hẹp/TalkBack và bàn phím dùng được topbar/nav/quyết định. Grant bị thu hồi/UID đổi trong khi tải vẫn bị kiểm quyền, không cập nhật dữ liệu callback của tài khoản trước.
+- [x] C05-N01 Đăng nhập UID riêng có enabled=true, User ADMIN/ACTIVE → Tổng quan hàng đợi, topbar Admin. Nếu vừa cấp khi đang ở màn chọn vai trò, Kiểm tra lại tài khoản đọc đúng quyền; grant thiếu/User không khớp báo chưa đủ quyền, không tự chọn ADMIN.
+- [x] C05-N02 Tổng quan hiển thị số SUBMITTED đúng mỗi loại và tổng; danh sách trống thật hiện 0. Lỗi mạng/quyền có báo chưa tải được và thử lại, không hiện 0 giả. Nếu số lượng chạm giới hạn 50 thì nhãn 50+/tổng+; các thẻ còn lại và Thống kê khóa/Sắp có.
+- [x] C05-N03 Tổng quan → Kiểm tra hồ sơ và tab Xử lý đều tới hàng đợi, hai loại đúng nội dung. Chọn một hồ sơ → chỉ thấy chi tiết/ảnh/quyết định, không lẫn danh sách; Quay lại/tab Xử lý về danh sách. Bỏ nhận xét chưa lưu có hỏi, hủy thao tác thì còn nội dung.
+- [x] C05-N04 Thực hiện C05-18–23 (ảnh, chấp thuận, bổ sung, từ chối, thu hồi, kết quả chủ hồ sơ) trên bản mới. Sau xử lý trở về Tổng quan số đếm đọc lại; mở Tài khoản/đăng xuất rồi Back không khôi phục ảnh hoặc quyền của UID cũ. Cấp Admin theo C05-ADMIN-GUIDE, không cần sửa grant đúng đang có.
+- [x] C05-N05 SEEKER/EMPLOYER → Hồ sơ → vùng xác minh → nút theo trạng thái. Xem lại/Xem hồ sơ đã gửi mở trực tiếp bản hiện hành, Quay lại về Hồ sơ; từ wizard xác minh mở chi tiết rồi Quay lại vẫn về wizard. Tab Trang chủ/Hồ sơ/Tài khoản về đúng trang Main và đọc lại version; có nháp thì hỏi trước khi bỏ. Chụp/đọc QR/nhận bằng chứng/gửi vẫn như phần đã người dùng duyệt.
+- [x] C05-N06 Xoay khi đang ở hàng đợi/chi tiết/upload không lặp thao tác; font 200%/màn hẹp/TalkBack và bàn phím dùng được topbar/nav/quyết định. Grant bị thu hồi/UID đổi trong khi tải vẫn bị kiểm quyền, không cập nhật dữ liệu callback của tài khoản trước.
 
 Chi tiết phạm vi trong [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md). Codex chưa chạy build/test/app hoặc tự xác nhận các mục này đạt.
 

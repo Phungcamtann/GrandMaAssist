@@ -1,8 +1,10 @@
-## Bàn giao C05 và sửa cấu hình sau pull — 25/10/2026
+## Chốt C04/C05 và chuẩn bị C06 — 25/10/2026
 
-Commit GitHub/main đã đối chiếu là `2552a04` — SCAN_QR_và_Luồng_Duyệt_Hồ_Sơ. Có mã C05, điều hướng theo vai trò và giao diện Hồ sơ thống nhất. Người dùng đã duyệt các ca C05-D01–D06 sau bản sửa quyết định; phần giao diện Hồ sơ mới C04-P01–P06 còn chờ kiểm tra. Không tự coi các ca Rules/timeout/thiết bị chưa tái hiện đã đạt.
+Local/main/origin/main và GitHub main đã đối chiếu cùng `11fcdeb`. `a63734e` chứa bản sửa Gradle/resource; `11fcdeb` chỉ cập nhật cấu hình JDK jbr-21 của Android Studio. Working tree sạch trước lần cập nhật tài liệu này. Người dùng đã duyệt hết tất cả bản hiện tại, gồm C04/C05, điều hướng/Hồ sơ thống nhất và sửa sau pull; xem [bản chốt nghiệm thu](docs/C05-ACCEPTANCE.md). Không tự coi các ca kỹ thuật chưa tái hiện đã được Codex kiểm thử.
 
-Sau pull phát hiện cấu hình module app nằm nhầm trong build.gradle.kts gốc, thiếu thư viện QR tại app/build.gradle.kts và thiếu 19 chuỗi/hai style của Hồ sơ thống nhất. Đã sửa tại working tree, giữ nguyên các phiên bản, không build/test/Sync hoặc commit/push. Xem [báo cáo sửa commit](docs/C05-COMMIT-REPAIR.md) trước khi Sync/Run.
+Lỗi cấu hình sau pull (module app nằm nhầm file gốc, thiếu ML Kit trong app và 19 chuỗi/hai style) đã được sửa, commit trong `a63734e` và được người dùng duyệt. Giữ [báo cáo sửa commit](docs/C05-COMMIT-REPAIR.md) làm lịch sử đối chiếu; không tự áp lại bản sửa lên code đang đúng.
+
+**C06 đã triển khai mã nguồn, chờ người dùng nghiệm thu:** nháp tin tuyển lưu SQLite theo UID, tạo/sửa/xóa/xem trước; gửi/duyệt tin thuộc C07. Người dùng chốt giữ nháp đã lưu cho đúng tài khoản đăng nhập lại, tài khoản khác không thấy; nháp này tách khỏi cache theo tài khoản phải dọn khi đăng xuất. Có danh mục server/cache, vào nháp local khi offline sau lần xác nhận EMPLOYER đầu tiên, form phân vùng và kiểm dữ liệu trước xem trước. Người dùng làm [C06 Console/schema](docs/C06-CONSOLE-SCHEMA.md) để Publish Rules đọc danh mục/seed, rồi [C06 checklist](docs/C06-CHECKLIST.md); file/phạm vi/giới hạn trong [C06-FILES](docs/C06-FILES.md). Codex không build/test/app/Console/deploy/stage/commit/push.
 
 Tài liệu hiện hành: [C05 files](docs/C05-FILES.md), [C05 checklist](docs/C05-CHECKLIST.md), [cấp Admin và duyệt](docs/C05-ADMIN-GUIDE.md), [điều hướng và Hồ sơ thống nhất](docs/C04-C05-NAVIGATION.md). SEEKER/EMPLOYER chỉ mở Hồ sơ từ Trang chủ/Tài khoản; khối xác minh bên trong có trạng thái/nút theo tiến trình. Admin có Tổng quan/Xử lý riêng; các mục nghiệp vụ chưa có khóa/Sắp có. TTS vẫn ở C22. Các phần bàn giao cũ bên dưới giữ làm lịch sử; cập nhật hiện hành này và xác nhận người dùng mới nhất là căn cứ trạng thái.
 

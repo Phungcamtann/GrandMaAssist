@@ -40,6 +40,7 @@ public final class ProfilePanel {
     private final OnBackPressedCallback back;
     private final RoleHomePanel homePanel;
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> verification;
+    private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> jobDrafts;
 
     public ProfilePanel(AppCompatActivity activity, ProfileViewModel vm, AuthViewModel auth) {
         this.activity = activity; this.vm = vm; this.auth = auth;
@@ -49,10 +50,21 @@ public final class ProfilePanel {
             if(data!=null && vm.snapshot!=null && com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser()!=null
                     && vm.snapshot.uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid())){
                 String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if("WORK".equals(route) && "EMPLOYER".equals(vm.snapshot.role)){openDrafts(false);return;}
                 if("HOME".equals(route))vm.showHome();else if("ACCOUNT".equals(route))vm.showAccount();
                 else if("PROFILE".equals(route))vm.showProfile();
             }
             vm.load();
+        });
+        jobDrafts=activity.registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),result->{
+            if(vm.dirty || auth.getState().getValue().account==null)return;
+            android.content.Intent data=result.getData();
+            if(data!=null && result.getResultCode()==android.app.Activity.RESULT_OK){
+                String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if("HOME".equals(route))vm.showHome();
+                else if("ACCOUNT".equals(route)){if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();}
+            }
+            if(!vm.busy)vm.load();
         });
         view(R.id.profileContent).setSaveFromParentEnabled(false);
         edit(R.id.profileDisplayName, value -> vm.draft.displayName = value);
@@ -89,6 +101,7 @@ public final class ProfilePanel {
         });
         click(R.id.btnProfileSave, vm::save);
         click(R.id.btnProfileReload, () -> discardThen(vm::load));
+        click(R.id.btnOfflineDrafts,()->openDrafts(false));
         click(R.id.btnAreasReload, vm::loadAreas);
         click(R.id.btnProfileSync, () -> discardThen(() -> { vm.dirty = false; vm.syncPhone(); }));
         click(R.id.btnProfileAccount,()->{if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();scrollTop();});
@@ -111,7 +124,7 @@ public final class ProfilePanel {
             }
         };
         activity.getOnBackPressedDispatcher().addCallback(activity, back);
-        homePanel=new RoleHomePanel(activity,vm,this::navigate,this::openVerification,()->{vm.showSecurity();scrollTop();},this::signOut);
+        homePanel=new RoleHomePanel(activity,vm,this::navigate,this::openVerification,()->{vm.showSecurity();scrollTop();},this::signOut,()->openDrafts(true));
     }
     private void scrollTop(){activity.findViewById(R.id.main).scrollTo(0,0);}
     private void navigate(RoleNavigationBar.Action action){
@@ -124,8 +137,26 @@ public final class ProfilePanel {
                 scrollTop();break;
             case ACCOUNT:vm.showAccount();scrollTop();break;
             case PROCESS:openVerification();break;
+            case WORK:openDrafts(false);break;
             default:break;
         }
+    }
+    private void openDrafts(boolean create){
+        AuthRepository.State state=auth.getState().getValue();
+        if(state.phase!=AuthRepository.Phase.ACCOUNT || state.account==null || auth.methods().active())return;
+        boolean offline=(vm.screen==ProfileViewModel.Screen.ERROR || vm.screen==ProfileViewModel.Screen.LOADING)
+                && vm.offlineDraftAvailable && state.phase==AuthRepository.Phase.ACCOUNT && !auth.methods().active() && !vm.dirty;
+        if(!offline && vm.busy)return;
+        boolean online=vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role) && "ACTIVE".equals(vm.snapshot.status);
+        if(!online && !offline){
+            if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))new AlertDialog.Builder(activity)
+                    .setMessage(R.string.p_inactive).setPositiveButton(android.R.string.ok,null).show();
+            return;
+        }
+        Runnable launch=()->jobDrafts.launch(new android.content.Intent(activity,
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.JobDraftActivity.class)
+                .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.JobDraftActivity.CREATE_NEW,create));
+        if(offline)launch.run();else discardThen(launch);
     }
     private void openVerification(){
         if(vm.busy || auth.getState().getValue().isBusy() || vm.snapshot==null)return;
@@ -216,6 +247,8 @@ public final class ProfilePanel {
         show(R.id.profileMessage, message != 0);
         ViewCompat.setAccessibilityLiveRegion(view(R.id.profileMessage), ViewCompat.ACCESSIBILITY_LIVE_REGION_POLITE);
         show(R.id.btnProfileReload, vm.screen == ProfileViewModel.Screen.ERROR || vm.screen==ProfileViewModel.Screen.ROLE || vm.readRequired);
+        show(R.id.btnOfflineDrafts,account && (vm.screen==ProfileViewModel.Screen.ERROR || vm.screen==ProfileViewModel.Screen.LOADING) && vm.offlineDraftAvailable && !methods);
+        view(R.id.btnOfflineDrafts).setEnabled(state.phase==AuthRepository.Phase.ACCOUNT && !methods && !vm.dirty);
         text(R.id.btnProfileReload,vm.screen==ProfileViewModel.Screen.ROLE?R.string.n_check_account:R.string.p_reload);
         enable(view(R.id.rolePicker), !vm.busy);
         for (int id : new int[]{R.id.btnRoleSeeker, R.id.btnRoleEmployer}) {

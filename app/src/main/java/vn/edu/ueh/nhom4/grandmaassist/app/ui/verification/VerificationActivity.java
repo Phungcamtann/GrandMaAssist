@@ -239,6 +239,7 @@ public final class VerificationActivity extends AppCompatActivity {
             return;
         }
         String route=action==RoleNavigationBar.Action.HOME?"HOME":action==RoleNavigationBar.Action.ACCOUNT?"ACCOUNT":
+                action==RoleNavigationBar.Action.WORK && vm.home!=null && "EMPLOYER".equals(vm.home.role)?"WORK":
                 action==RoleNavigationBar.Action.PROFILE?"PROFILE":null;
         if(route==null)return;
         discardThen(()->{setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,route));finish();});

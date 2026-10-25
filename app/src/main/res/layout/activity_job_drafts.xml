@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/jdRoot" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/surface_ivory">
+    <include layout="@layout/role_topbar"/>
+    <ScrollView android:id="@+id/jdScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
+        <LinearLayout android:id="@+id/jdContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp" android:orientation="vertical" android:saveEnabled="false">
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdBack" style="@style/Widget.GrandMa.BackLink" android:text="@string/n_back"/>
+            <TextView android:id="@+id/jdTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/jd_title" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"/>
+            <TextView android:id="@+id/jdAccessNote" style="@style/Widget.GrandMa.VerificationMessage" android:text="@string/jd_offline"/>
+            <ProgressBar android:id="@+id/jdProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="12dp" android:visibility="gone" android:importantForAccessibility="no"/>
+            <TextView android:id="@+id/jdMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdRetryAccess" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_retry" android:visibility="gone"/>
+            <LinearLayout android:id="@+id/jdListSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCreate" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/jd_create"/>
+                <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_saved_drafts" android:accessibilityHeading="true"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdListReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
+                <LinearLayout android:id="@+id/jdList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/jdEditorSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/jdCatalogStatus" style="@style/Widget.GrandMa.VerificationMessage"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCatalogRefresh" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_catalog_reload"/>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection">
+                    <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_info"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_name" android:labelFor="@id/jdName"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdName" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="120" android:inputType="textCapSentences"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_category" android:labelFor="@id/jdCategory"/>
+                    <Spinner android:id="@+id/jdCategory" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_category"/>
+                    <TextView android:id="@+id/jdCategoryError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_description" android:labelFor="@id/jdDescription"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdDescription" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="3000" android:inputType="textCapSentences|textMultiLine" android:minLines="3"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_requirements" android:labelFor="@id/jdRequirements"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdRequirements" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="1000" android:inputType="textCapSentences|textMultiLine"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_skills" android:labelFor="@id/jdSkills"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdSkills" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="500" android:inputType="textCapSentences|textMultiLine"/>
+                </LinearLayout>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection">
+                    <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_schedule"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_area" android:labelFor="@id/jdArea"/>
+                    <Spinner android:id="@+id/jdArea" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_area"/>
+                    <TextView android:id="@+id/jdAreaError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_days"/>
+                    <CheckBox android:id="@+id/jdMonday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Hai"/>
+                    <CheckBox android:id="@+id/jdTuesday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Ba"/>
+                    <CheckBox android:id="@+id/jdWednesday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Tư"/>
+                    <CheckBox android:id="@+id/jdThursday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Năm"/>
+                    <CheckBox android:id="@+id/jdFriday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Sáu"/>
+                    <CheckBox android:id="@+id/jdSaturday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Bảy"/>
+                    <CheckBox android:id="@+id/jdSunday" style="@style/Widget.GrandMa.DraftCheck" android:text="Chủ Nhật"/>
+                    <TextView android:id="@+id/jdDaysError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_shift" android:labelFor="@id/jdShift"/>
+                    <Spinner android:id="@+id/jdShift" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_shift"/>
+                    <TextView android:id="@+id/jdShiftError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_schedule_text" android:labelFor="@id/jdScheduleText"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdScheduleText" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="500" android:inputType="textCapSentences|textMultiLine" android:hint="@string/jd_schedule_hint"/>
+                </LinearLayout>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection">
+                    <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_demands"/>
+                    <RadioGroup android:id="@+id/jdDemandMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
+                        <RadioButton android:id="@+id/jdNoDemands" style="@style/Widget.GrandMa.DraftRadio" android:text="@string/jd_no_demands"/>
+                        <RadioButton android:id="@+id/jdSomeDemands" style="@style/Widget.GrandMa.DraftRadio" android:text="@string/jd_some_demands"/>
+                    </RadioGroup>
+                    <LinearLayout android:id="@+id/jdDemandChoices" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <CheckBox android:id="@+id/jdLifting" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_lifting"/>
+                        <CheckBox android:id="@+id/jdStanding" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_standing"/>
+                        <CheckBox android:id="@+id/jdMoving" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_moving"/>
+                    </LinearLayout>
+                    <TextView android:id="@+id/jdDemandsError" style="@style/Widget.GrandMa.DraftError"/>
+                </LinearLayout>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection">
+                    <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_payment"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_pay" android:labelFor="@id/jdPay"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdPay" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="24" android:inputType="numberSigned|numberDecimal" android:digits="0123456789., +-"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_unit" android:labelFor="@id/jdUnit"/>
+                    <Spinner android:id="@+id/jdUnit" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_unit"/>
+                    <TextView android:id="@+id/jdUnitError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_expiry" android:labelFor="@id/jdExpiry"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdExpiry" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_pick_expiry"/>
+                    <TextView android:id="@+id/jdExpiryError" style="@style/Widget.GrandMa.DraftError"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/jdPreviewSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/jd_badge" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:textColor="@color/brand_green"/>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection"><TextView android:id="@+id/jdPreviewWork" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/></LinearLayout>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection"><TextView android:id="@+id/jdPreviewSchedule" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/></LinearLayout>
+                <LinearLayout style="@style/Widget.GrandMa.ProfileSection"><TextView android:id="@+id/jdPreviewPay" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/></LinearLayout>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdEdit" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_edit"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/jdActions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <ProgressBar android:id="@+id/jdActionProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="12dp" android:visibility="gone" android:importantForAccessibility="no"/>
+                <TextView android:id="@+id/jdActionMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSave" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/jd_save"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdPreview" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_preview"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdFormReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_reload" android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <include layout="@layout/role_navigation"/>
+</LinearLayout>

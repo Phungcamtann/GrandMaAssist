@@ -28,4 +28,4 @@ Codex chỉ rà tĩnh XML, ID/string/style tham chiếu và diff; không chạy 
 
 Người dùng: Sync Project with Gradle Files rồi Run. Nếu còn lỗi, lấy đoạn từ `What went wrong`/`Caused by` hoặc lỗi đầu tiên trong Sync/Build Output; dòng `Build file ... line: 1` chỉ là vị trí báo lỗi. Bản sửa này không cần Publish lại Firebase Rules.
 
-Các ca quyết định C05-D01–D06 đã được người dùng duyệt trước đó vẫn được ghi nhận. Phần Hồ sơ thống nhất C04-P01–P06 và kiểm tra bản sửa sau pull cần người dùng xác nhận riêng.
+Các ca quyết định C05-D01–D06 đã được người dùng duyệt trước đó. Cập nhật chốt 25/10: người dùng nay đã duyệt hết tất cả, gồm Hồ sơ thống nhất và sửa sau pull. Bản sửa đã có trong `a63734e`; HEAD/GitHub main là `11fcdeb`. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md). Phần mô tả chờ xác minh phía trên giữ làm lịch sử, Codex không tự chạy lại.
