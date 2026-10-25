@@ -1,5 +1,9 @@
 # C05 — hồ sơ xác minh, QR, ảnh riêng và xét duyệt
 
+**26/10/2026 — cập nhật theo phản hồi mới nhất:** đã gỡ bố cục ghim nút, đưa về khối Gửi hồ sơ cũ. Nút đang soạn bấm được để báo đúng điều kiện thiếu, chỉ khóa khi đang sending; không bỏ kiểm tra thực sự trước upload/submit. Giữ nút Sửa ảnh căn cước sau đọc QR. Xem EF09–EF11 trong [báo cáo sửa EMPLOYER](C05-EMPLOYER-SUBMISSION-FIX.md), đang chờ người dùng kiểm lại.
+
+**26/10/2026 — sửa xác minh EMPLOYER, chờ kiểm tra lại:** nút gửi trước đó dùng chung consent và thiếu giải thích khi bị khóa. Đã tách hộp đồng ý gửi danh tính riêng, bỏ phần hướng dẫn nghỉ hưu khỏi màn Người thuê và thống nhất lý do chặn nút. Backend vốn chỉ đòi CCCD cho EMPLOYER; không cần đổi Rules/Console. Xem [C05-EMPLOYER-SUBMISSION-FIX](C05-EMPLOYER-SUBMISSION-FIX.md). Nghiệm thu trước đây bên dưới không tự xác nhận bản sửa mới.
+
 25/10/2026 — **người dùng đã chốt toàn bộ bản hiện tại**, gồm C05/Hồ sơ thống nhất và sửa sau pull. Nền đối chiếu local/GitHub là `11fcdeb`, bản sửa cấu hình/resource nằm trong `a63734e`. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md); các trạng thái chờ trong lịch sử được thay bằng xác nhận mới, không tự coi các biến thể kỹ thuật chưa tái hiện đã đạt.
 
 ## Kết quả triển khai

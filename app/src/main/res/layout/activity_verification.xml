@@ -14,7 +14,6 @@
         <LinearLayout android:id="@+id/vFeedbackSection" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
             <TextView android:id="@+id/vMessage" style="@style/Widget.GrandMa.VerificationMessage" android:layout_marginTop="0dp"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vCancelUpload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_cancel_upload" android:visibility="gone"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/vOwner" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
             <LinearLayout style="@style/Widget.GrandMa.VerificationSection">
@@ -28,6 +27,7 @@
                     <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_identity_section"/>
                     <androidx.appcompat.widget.AppCompatButton android:id="@+id/vCapture" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_capture"/>
                     <androidx.appcompat.widget.AppCompatButton android:id="@+id/vPickCard" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_pick_card"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vEditCard" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_edit_card" android:visibility="gone"/>
                     <TextView android:id="@+id/vIdentityMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
                     <LinearLayout android:id="@+id/vCandidate" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
                         android:padding="12dp" android:background="@color/surface_soft_green" android:orientation="vertical" android:visibility="gone">
@@ -55,11 +55,14 @@
                 </LinearLayout>
                 <LinearLayout android:id="@+id/vSubmitSection" style="@style/Widget.GrandMa.VerificationSection">
                     <TextView android:id="@+id/vSubmitHeading" style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_submit_section"/>
-                    <TextView android:id="@+id/vSubmitMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                    <TextView android:id="@+id/vEmployerIdentityNote" style="@style/Widget.GrandMa.VerificationMessage" android:text="@string/v_employer_identity_note" android:visibility="gone"/>
                     <androidx.appcompat.widget.AppCompatButton android:id="@+id/vProcess" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_process"/>
                     <CheckBox android:id="@+id/vConsent" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
                         android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_consent"/>
+                    <ProgressBar android:id="@+id/vSubmitProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginTop="12dp" android:visibility="gone" android:importantForAccessibility="no"/>
+                    <TextView android:id="@+id/vSubmitMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
                     <androidx.appcompat.widget.AppCompatButton android:id="@+id/vSend" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_send"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vCancelUpload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_cancel_upload" android:visibility="gone"/>
                     <androidx.appcompat.widget.AppCompatButton android:id="@+id/vClear" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_clear"/>
                 </LinearLayout>
             </LinearLayout>

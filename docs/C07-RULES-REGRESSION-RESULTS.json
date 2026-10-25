@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-26",
+  "emulator": "Firestore Emulator 1.22.0",
+  "java": "Android Studio JBR 21.0.10",
+  "host": "127.0.0.1:8088",
+  "project": "demo-grandmaassist-c07",
+  "data": "synthetic only",
+  "production_access": false,
+  "total": 24,
+  "passed": 24,
+  "cases": [
+    {
+      "case": "standard submission with atomic history",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "other account cannot read pending post",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "admin cannot reject without reason",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "admin rejects v1 to v2 with history",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "owner resubmits v2 to v3 with history",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "admin approves v3 to v4 with history",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "guest can read approved post",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "guest cannot read private history",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "maximum content, 8 skill tags, 7 days, 3 demands",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "maximum content admin rejection",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "maximum content resubmission",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "maximum content admin approval",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "Vietnamese Unicode and multiline content",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "case": "missing history",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "owner cannot publish OPEN directly",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "negative pay rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "blank title rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "title over maximum rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "non-string optional text rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "duplicate skill tags rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "non-string skill tag rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "missing required field rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "history content mismatch rejected",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "case": "different owner cannot create post",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    }
+  ]
+}

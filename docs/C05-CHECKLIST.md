@@ -1,5 +1,7 @@
 # C05 — checklist người dùng
 
+**26/10/2026:** bổ sung EF01–EF05 trong [checklist sửa gửi EMPLOYER](C05-EMPLOYER-SUBMISSION-FIX.md), chờ người dùng kiểm lại. EMPLOYER xác nhận đồng ý trong hộp Gửi danh tính, không tick phần nghỉ hưu; SEEKER giữ điều kiện bằng chứng/đồng ý. Không tự đánh dấu ca mới dựa trên nghiệm thu C05 cũ.
+
 25/10/2026 — người dùng đã xác nhận QR/gửi, Admin/xét duyệt và nay chốt **đã duyệt hết tất cả bản hiện tại**, gồm Hồ sơ thống nhất và sửa Gradle sau pull. Nghiệm thu theo xác nhận người dùng trong [C05-ACCEPTANCE](C05-ACCEPTANCE.md); các ca Rules/cạnh tranh/thiết bị chưa tái hiện tiếp tục theo dõi riêng. Không có kết quả runtime/Rules do Codex chạy.
 Làm thiết lập theo C05-CONSOLE-SCHEMA.md trước. Ghi thiết bị/API và kết quả riêng tư; không ghi UID, số căn cước, OTP, raw QR, ảnh hoặc token vào báo cáo chia sẻ.
 

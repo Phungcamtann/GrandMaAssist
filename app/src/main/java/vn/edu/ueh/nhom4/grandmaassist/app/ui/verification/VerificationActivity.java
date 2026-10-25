@@ -77,6 +77,7 @@ public final class VerificationActivity extends AppCompatActivity {
             android.widget.FrameLayout.LayoutParams params=(android.widget.FrameLayout.LayoutParams)root.getLayoutParams();
             int width=Math.min(available,getResources().getDimensionPixelSize(R.dimen.content_max_width));
             if(params.width!=width){params.width=width;params.gravity=Gravity.TOP|Gravity.CENTER_HORIZONTAL;root.setLayoutParams(params);}
+
         });
         vm=new ViewModelProvider(this).get(VerificationViewModel.class);
         if(saved==null || !vm.loaded)vm.openCurrentOnLoad=getIntent().getBooleanExtra(OPEN_CURRENT,false);
@@ -94,16 +95,39 @@ public final class VerificationActivity extends AppCompatActivity {
         click(R.id.vReload,()->discardThen(()->{ vm.clearDraft(); vm.load(); }));
         click(R.id.vProcess,()->new AlertDialog.Builder(this).setTitle(R.string.v_process)
                 .setMessage(R.string.v_explanation).setPositiveButton("Đã hiểu",null).show());
-        click(R.id.vCapture,()->{
-            if(!vm.beginImageRequest(ImageTarget.IDENTITY))return;
-            if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED)launchCamera();
-            else permission.launch(Manifest.permission.CAMERA);
+        click(R.id.vCapture,this::captureIdentity);
+        click(R.id.vEditCard,()->{
+            if(vm.busy || vm.externalPending || vm.frozen() || vm.identity==null || vm.home==null || !vm.home.active)return;
+            new AlertDialog.Builder(this).setTitle(R.string.v_edit_card)
+                .setItems(new String[]{getString(R.string.v_capture),getString(R.string.v_pick_card)},(d,w)->{
+                    if(w==0)captureIdentity();else pick(true);
+                }).setNegativeButton("Giữ ảnh hiện tại",null).show();
         });
         click(R.id.vPickCard,()->pick(true)); click(R.id.vAddEvidence,()->pick(false));
         click(R.id.vUseImage,vm::acceptCandidate); click(R.id.vDiscardImage,vm::discardCandidate);
         click(R.id.vClear,()->discardThen(()->{vm.clearDraft();vm.load();}));
-        click(R.id.vSend,()->new AlertDialog.Builder(this).setMessage("Gửi bản hồ sơ này để xét duyệt?")
-                .setNegativeButton("Quay lại",null).setPositiveButton("Gửi hồ sơ",(d,w)->vm.send()).show());
+        click(R.id.vSend,()->{
+            if(vm.home==null || vm.sessionEnded)return;
+            if(vm.busy || vm.externalPending){
+                new AlertDialog.Builder(this).setMessage(vm.sending?"Đang gửi hồ sơ. Vui lòng chờ hoặc chọn Dừng chờ gửi.":
+                    vm.externalPending?"Hoàn tất hoặc hủy chọn ảnh để tiếp tục.":"Đang xử lý ảnh hoặc tải hồ sơ. Vui lòng chờ.")
+                    .setPositiveButton("Đã hiểu",null).show();return;
+            }
+            boolean employer="EMPLOYER".equals(vm.home.role);
+            String requirement=vm.submissionRequirement(!employer);
+            if(!requirement.isEmpty()){
+                vm.message="";vm.emit();
+                new AlertDialog.Builder(this).setTitle("Chưa thể gửi hồ sơ").setMessage(requirement)
+                    .setPositiveButton("Đã hiểu",null).show();return;
+            }
+            Object identity=vm.identity;String role=vm.home.role;
+            new AlertDialog.Builder(this).setTitle(employer?R.string.v_employer_confirm_title:R.string.v_send)
+                .setMessage(employer?getString(R.string.v_employer_confirm):"Gửi bản hồ sơ này để xét duyệt?")
+                .setNegativeButton("Quay lại",null).setPositiveButton(employer?"Đồng ý và gửi":"Gửi hồ sơ",(d,w)->{
+                    if(vm.home==null || !role.equals(vm.home.role) || vm.identity!=identity)return;
+                    if(employer)vm.confirmEmployerAndSend();else vm.send();
+                }).show();
+        });
         ((CheckBox)findViewById(R.id.vConsent)).setOnCheckedChangeListener((b,checked)->{
             if(!rendering){vm.consent=checked;vm.emit();}
         });
@@ -252,6 +276,11 @@ public final class VerificationActivity extends AppCompatActivity {
         discardThen(()->{setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,route));finish();});
     }
     private void click(int id,Runnable action){findViewById(id).setOnClickListener(v->action.run());}
+    private void captureIdentity(){
+        if(!vm.beginImageRequest(ImageTarget.IDENTITY))return;
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED)launchCamera();
+        else permission.launch(Manifest.permission.CAMERA);
+    }
     private void show(int id,boolean visible){findViewById(id).setVisibility(visible?View.VISIBLE:View.GONE);}
     private void set(int id,String value){TextView t=findViewById(id);if(!t.getText().toString().equals(value))t.setText(value);}
     private void enabled(View v,boolean enabled){v.setEnabled(enabled);if(v instanceof ViewGroup)
@@ -261,6 +290,7 @@ public final class VerificationActivity extends AppCompatActivity {
         rendering=true;
         boolean ready=vm.loaded && vm.home!=null;
         boolean admin=ready && "ADMIN".equals(vm.home.role);
+        boolean ownerEditing=ready && !admin && vm.selected==null && !"SUBMITTED".equals(vm.home.status);
         RoleNavigationBar.topbar(this,ready?vm.home.role:"");
         set(R.id.vPageTitle,getString(admin?(vm.selected!=null?R.string.n_review_title:R.string.n_processing_title):
                 vm.selected!=null?R.string.v_review_section:R.string.v_title));
@@ -289,7 +319,13 @@ public final class VerificationActivity extends AppCompatActivity {
                 for(int id:new int[]{R.id.vCapture,R.id.vPickCard,R.id.vAddEvidence,R.id.vEvidenceType,R.id.vConsent})enabled(findViewById(id),false);
             }
             boolean seeker="SEEKER".equals(vm.home.role);
+            boolean acceptedCard=vm.identity!=null && vm.identityImage!=null;
+            show(R.id.vCapture,!acceptedCard && vm.candidate==null);show(R.id.vPickCard,!acceptedCard && vm.candidate==null);
+            show(R.id.vEditCard,acceptedCard && vm.candidate==null);
+            findViewById(R.id.vEditCard).setEnabled(editable && !vm.frozen());
             show(R.id.vEvidenceSection,seeker);
+            show(R.id.vProcess,seeker);show(R.id.vConsent,seeker);
+            show(R.id.vEmployerIdentityNote,!seeker);
             set(R.id.vSubmitHeading,getString(seeker?R.string.v_submit_section:R.string.v_submit_employer_section));
             ((RadioGroup)findViewById(R.id.vEvidenceType)).check("BHXH_SIMULATED".equals(vm.evidenceType)?R.id.vBhxh:R.id.vRetirement);
             ((CheckBox)findViewById(R.id.vConsent)).setChecked(vm.consent);
@@ -299,12 +335,14 @@ public final class VerificationActivity extends AppCompatActivity {
             set(R.id.vIdentityMessage,vm.identityMessage);show(R.id.vIdentityMessage,!vm.identityMessage.isEmpty());
             set(R.id.vEvidenceMessage,vm.evidenceMessage);show(R.id.vEvidenceMessage,!vm.evidenceMessage.isEmpty());
             set(R.id.vEvidenceCount,getString(R.string.v_evidence_count,vm.evidence.size()));
-            findViewById(R.id.vSend).setEnabled(editable && !vm.readRequired && vm.home.phone
-                    && vm.home.complete && vm.identity!=null && vm.consent && vm.candidate==null
-                    && (!seeker||!vm.evidence.isEmpty()));
-            String requirement=!vm.home.phone?"Thêm số điện thoại đã xác minh trước khi gửi.":
-                    !vm.home.complete?"Hoàn thiện và lưu thông tin hồ sơ trước khi gửi.":"";
-            set(R.id.vSubmitMessage,requirement);show(R.id.vSubmitMessage,!requirement.isEmpty());
+            String requirement=vm.submissionRequirement(seeker);
+            show(R.id.vSubmitSection,!submitted);show(R.id.vSend,ownerEditing);
+            // Missing form data is explained on tap; only an actual submission locks this action.
+            findViewById(R.id.vDraft).setEnabled(true);findViewById(R.id.vSubmitSection).setEnabled(true);
+            findViewById(R.id.vSend).setEnabled(ownerEditing && !vm.sending);
+            findViewById(R.id.vCancelUpload).setEnabled(vm.sending);
+            String feedback=vm.sending?"Đang gửi hồ sơ…":vm.busy?"Đang xử lý ảnh…":vm.externalPending?"Hoàn tất hoặc hủy chọn ảnh để tiếp tục.":!requirement.isEmpty()?requirement:vm.message;
+            set(R.id.vSubmitMessage,feedback);show(R.id.vSubmitMessage,!feedback.isEmpty());show(R.id.vSubmitProgress,vm.busy);
             show(R.id.vClear,vm.dirty() || vm.frozen());
             findViewById(R.id.vAddEvidence).setEnabled(editable && !vm.frozen() && vm.evidence.size()<3);
             show(R.id.vCandidate,vm.candidate!=null);

@@ -4,6 +4,12 @@
 
 ## 1. Publish Rules
 
+**r4 — bản hiện hành:** đã tái hiện lỗi giới hạn 1.000 biểu thức và kiểm tra bản sửa đạt 24/24 ca bằng Emulator, theo ngoại lệ người dùng cho phép. Publish **toàn bộ file có mốc `2026-10-26 r4`**, rồi gửi lại nháp cũ trên app hiện có. Không cần Sync/Run hoặc tạo thêm index cho r4. Xem [C07-EXPRESSION-LIMIT-FIX](C07-EXPRESSION-LIMIT-FIX.md). Hướng dẫn/giả thuyết r3 phía dưới là lịch sử; C07 vẫn chờ người dùng nghiệm thu thật.
+
+**r3 — trạng thái mới nhất:** lỗi C07_SUBMIT_TRANSACTION vẫn tái hiện sau bản giảm đọc; cập nhật cả app và toàn bộ Rules có mốc `2026-10-26 r3`. Bản này thêm các endpoint chỉ đọc cho chính chủ để khoanh vùng quyền/phone/profile/hạn server, không cần tạo tài liệu và không mở quyền ghi. Xem phần r3 trong [báo cáo điều tra](C07-PERMISSION-DIAGNOSTICS.md). Hướng dẫn bản giảm đọc phía dưới là lịch sử và chưa giải quyết được lỗi người dùng.
+
+**Sửa 26/10/2026 sau lỗi C07_SUBMIT_TRANSACTION:** Publish lại toàn bộ file mới có mốc `C07 Rules revision 2026-10-26`. Bản này giảm đọc lặp ở các điều kiện jobs/history; không đổi schema, index hoặc yêu cầu duyệt hồ sơ. Xem [báo cáo điều tra](C07-PERMISSION-DIAGNOSTICS.md); chờ người dùng thử lại, chưa ghi nhận runtime thành công.
+
 Mở đúng dự án → Firestore Database → Rules. Thay bằng **toàn bộ** nội dung `firebase/firestore.rules` trong repo rồi Publish. File gồm cả C04/C05/C06 và C07; không chỉ dán khối jobs đè mất Rules cũ. Không sửa Storage Rules, JSON, SHA hoặc provider để làm C07.
 
 Nếu Console báo lỗi cú pháp/đánh giá Rules, giữ nguyên thông báo và vị trí dòng để kiểm tra; không mở `allow read, write: if true` để vượt lỗi.

@@ -1,5 +1,7 @@
 ## C07 đã triển khai, chờ nghiệm thu — 25/10/2026
 
+**26/10/2026 — sửa lỗi gửi tin:** với ngoại lệ kiểm tra Rules cục bộ được người dùng cho phép, đã tái hiện lỗi vượt 1.000 biểu thức và xác nhận Rules r4 đạt 24/24 ca bằng dữ liệu giả. Publish toàn bộ `firebase/firestore.rules` có mốc r4 rồi gửi lại nháp cũ; không cần Sync/Run mới chỉ cho bản Rules này. Xem [báo cáo nguyên nhân/bản sửa](docs/C07-EXPRESSION-LIMIT-FIX.md). Chưa chạy app Android hoặc thay đổi Firebase thật; C07 vẫn chờ người dùng nghiệm thu trên thiết bị. Phát biểu chưa kiểm thử Rules trong các bàn giao cũ dưới đây là lịch sử trước ngoại lệ này.
+
 C06 đã được người dùng duyệt và commit trong `afd7891`, đã đối chiếu local/GitHub main. C07 đã được duyệt bố cục và triển khai: địa chỉ làm việc khi soạn tin, gửi PENDING_REVIEW, Tin đã gửi, Admin chấp thuận/từ chối, sửa gửi lại REJECTED cùng ID/version và lịch sử bất biến. Thực hiện [Console/index/schema C07](docs/C07-CONSOLE-SCHEMA.md) rồi Sync/Run và [checklist C07](docs/C07-CHECKLIST.md); chi tiết file/giới hạn trong [C07-FILES](docs/C07-FILES.md). Chưa có kết quả build/test/runtime do Codex thực hiện, chưa sửa Console/deploy/stage/commit/push. Màn tin công khai thuộc C08, sửa OPEN/đóng/ẩn thuộc C11. Các bàn giao cũ dưới đây giữ làm lịch sử; trạng thái này và xác nhận mới của người dùng được ưu tiên.
 
 ## Chốt C04/C05 và chuẩn bị C06 — 25/10/2026

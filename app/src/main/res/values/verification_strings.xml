@@ -7,6 +7,7 @@
     <string name="v_update_identity">Cập nhật giấy tờ</string>
     <string name="v_capture">Chụp căn cước có QR</string>
     <string name="v_pick_card">Chọn ảnh căn cước</string>
+    <string name="v_edit_card">Sửa ảnh căn cước</string>
     <string name="v_evidence">Bằng chứng nghỉ hưu · 1–3 ảnh</string>
     <string name="v_retirement">Giấy chứng nhận nghỉ hưu</string>
     <string name="v_bhxh">BHXH mô phỏng</string>
@@ -44,6 +45,9 @@
     <string name="v_evidence_count">Đã chọn %1$d/3 ảnh</string>
     <string name="v_submit_section">3. Gửi hồ sơ</string>
     <string name="v_submit_employer_section">2. Gửi hồ sơ</string>
+    <string name="v_employer_identity_note">Chỉ xác minh danh tính người thuê, không cần giấy tờ nghỉ hưu.</string>
+    <string name="v_employer_confirm_title">Gửi xác minh danh tính</string>
+    <string name="v_employer_confirm">Tôi đồng ý gửi thông tin đã đọc và ảnh căn cước để Admin xét danh tính trong đồ án. Chỉ tôi và Admin được xem ảnh. Đây không phải xác thực với cơ quan nhà nước.</string>
     <string name="v_admin_section">Danh sách chờ duyệt</string>
     <string name="v_review_section">Chi tiết hồ sơ</string>
     <string name="v_decision_section">Quyết định xét duyệt</string>

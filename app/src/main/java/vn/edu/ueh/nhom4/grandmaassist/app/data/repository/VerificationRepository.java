@@ -45,17 +45,27 @@ public final class VerificationRepository {
         public final String uid, role, status, currentId;
         public final long userVersion, identityVersion;
         public final boolean active, phone, complete;
+        public final String profileRequirement;
         public final Record request;
         Home(String uid, String role, DocumentSnapshot u, DocumentSnapshot p, Record r, boolean phone) {
             this.uid=uid; this.role=role; active="ACTIVE".equals(u.getString("accountStatus"));
             status=text(u, statusField(role)); currentId=text(u, pointer(role));
             userVersion=number(u,"version"); identityVersion=p==null?0:number(p,"identityProfileVersion");
             request=r; this.phone=phone;
-            complete=p!=null && !text(u,"displayName").isEmpty() && !text(p,"areaCode").isEmpty()
-                    && ("SEEKER".equals(role)? p.get("skills") instanceof List && !((List<?>)p.get("skills")).isEmpty()
-                        && !text(p,"experienceSummary").isEmpty() && p.get("preferredShifts") instanceof List && !((List<?>)p.get("preferredShifts")).isEmpty()
-                        : !text(p,"introduction").isEmpty());
+            profileRequirement=missingProfileDetail(role,u,p);
+            complete=profileRequirement.isEmpty();
         }
+    }
+    private static String missingProfileDetail(String role,DocumentSnapshot u,DocumentSnapshot p){
+        if(p==null)return "Mở Hồ sơ và lưu thông tin trước khi gửi xác minh.";
+        if(text(u,"displayName").trim().isEmpty())return "Bổ sung tên hiển thị trong Hồ sơ rồi bấm Lưu.";
+        if(text(p,"areaCode").isEmpty())return "Chọn khu vực trong Hồ sơ rồi bấm Lưu.";
+        if("SEEKER".equals(role)){
+            if(!(p.get("skills") instanceof List) || ((List<?>)p.get("skills")).isEmpty())return "Bổ sung kỹ năng trong Hồ sơ rồi bấm Lưu.";
+            if(text(p,"experienceSummary").trim().isEmpty())return "Bổ sung kinh nghiệm trong Hồ sơ rồi bấm Lưu.";
+            if(!(p.get("preferredShifts") instanceof List) || ((List<?>)p.get("preferredShifts")).isEmpty())return "Chọn buổi làm phù hợp trong Hồ sơ rồi bấm Lưu.";
+        }else if(text(p,"introduction").trim().isEmpty())return "Bổ sung giới thiệu trong Hồ sơ người thuê rồi bấm Lưu.";
+        return "";
     }
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -117,7 +127,11 @@ public final class VerificationRepository {
     }
     /** Stage is immutable. Retry the same ID only for the same frozen form and image bytes. */
     public Task<Void> stage(Home base,String id,CardIdentity identity,String evidence,int imageCount) {
-        if(identity==null || imageCount<1 || imageCount>4) return Tasks.forException(new Problem("FORM"));
+        boolean seeker="SEEKER".equals(base.role),employer="EMPLOYER".equals(base.role);
+        if(identity==null || (!seeker && !employer)
+                || (seeker && (imageCount<2 || imageCount>4 || !Arrays.asList("RETIREMENT_CERTIFICATE","BHXH_SIMULATED").contains(evidence)))
+                || (employer && (imageCount!=1 || !"IDENTITY_SAMPLE".equals(evidence))))
+            return Tasks.forException(new Problem("FORM"));
         return fresh(base.uid,()->db.runTransaction(tx->{
             if(!same(base.uid)) throw new Problem("SESSION");
             DocumentReference ref=db.collection(collection(base.role)).document(id);

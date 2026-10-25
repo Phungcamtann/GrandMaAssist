@@ -1,5 +1,7 @@
 # C07 đã triển khai, chuẩn bị nghiệm thu — 25/10/2026
 
+**26/10/2026 — bản Rules hiện hành r4:** đã tìm và tái hiện nguyên nhân C07_SUBMIT_TRANSACTION/C07_WRITE_CONTENT_OR_HISTORY là giới hạn 1.000 biểu thức. Người dùng cho phép kiểm tra cục bộ lần này, kết quả 24/24 ca đạt. Publish toàn bộ Rules mới rồi gửi lại nháp cũ trên APK hiện tại; không đổi index/Storage/JSON. Chi tiết [C07-EXPRESSION-LIMIT-FIX](C07-EXPRESSION-LIMIT-FIX.md); nghiệm thu Firebase thật vẫn do người dùng.
+
 C06 đã nghiệm thu và commit `afd7891`, local/GitHub main đã đối chiếu. C07 đã có mã nguồn địa chỉ/gửi tin/Tin đã gửi/Admin duyệt/từ chối/sửa gửi lại. Người dùng thực hiện [C07-CONSOLE-SCHEMA](C07-CONSOLE-SCHEMA.md): Publish toàn bộ firestore.rules và tạo hai composite index jobs trước Sync/Run; không cần tự tạo jobs/history. Sau đó kiểm [C07-CHECKLIST](C07-CHECKLIST.md). Chi tiết [C07-FILES](C07-FILES.md). Codex chỉ rà tĩnh, chưa Sync/build/test/app/Rules hoặc Console/deploy/commit. Không sửa JSON/SHA/provider/Gradle/Storage vì thay đổi này; không xóa dữ liệu app để cập nhật nháp cũ.
 
 # Chốt bản hiện tại và chuẩn bị C06 — 25/10/2026

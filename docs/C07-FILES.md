@@ -1,5 +1,9 @@
 # C07 — bàn giao gửi và duyệt tin tuyển
 
+**26/10/2026 — đã xác định và sửa lỗi Rules:** người dùng cho phép kiểm tra cục bộ lần này; Emulator tái hiện chính lỗi PERMISSION_DENIED do quá 1.000 biểu thức. Đã sửa jobShape/jobSkills và guard ghi ở Rules r4, kiểm 24/24 ca đạt. Xem [báo cáo r4](C07-EXPRESSION-LIMIT-FIX.md), [kết quả](C07-RULES-REGRESSION-RESULTS.json) và script tools/firestore. Chờ người dùng Publish r4 và nghiệm thu Firebase thật; chưa build/test app hoặc commit/deploy. Trạng thái điều tra bên dưới giữ làm lịch sử.
+
+**26/10/2026 — đang điều tra lỗi gửi tin:** người dùng gặp PERMISSION_DENIED dù đã duyệt hồ sơ EMPLOYER. Đã thêm mã chẩn đoán bước đọc/transaction và kiểm preflight khớp Rules; chưa xác định nguyên nhân trên Console hoặc xác nhận sửa thành công. Xem [C07-PERMISSION-DIAGNOSTICS](C07-PERMISSION-DIAGNOSTICS.md). Không tự coi C07 đã được nghiệm thu.
+
 25/10/2026. **Đã triển khai mã nguồn, chờ người dùng cập nhật Console và nghiệm thu.** Nền HEAD `afd7891` — Soạn tin tuyển dụng, trước khi code có thay đổi tài liệu địa chỉ/kế hoạch đã được chốt, được giữ nguyên. Chưa Sync/build/test/lint/app/emulator/SMS/Rules tests; chưa Console/deploy/stage/commit/push.
 
 ## Kết quả

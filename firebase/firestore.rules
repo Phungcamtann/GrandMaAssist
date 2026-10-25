@@ -380,59 +380,77 @@ service cloud.firestore {
     // C07: public workAddress belongs to a moderated post, never the identity profile.
     function jobPath(id) { return /databases/$(database)/documents/jobs/$(id); }
     function jobHistoryPath(id, v) { return /databases/$(database)/documents/jobs/$(id)/history/$(string(v)); }
-    function jobEmployer(uid) {
-      let u = get(userPath(uid)).data;
-      let p = get(employerPath(uid)).data;
-      return owner(uid) && noAdmin(uid) && u.role == 'EMPLOYER' && u.accountStatus == 'ACTIVE'
-        && authPhone() != '' && u.phoneE164 == authPhone() && u.phoneVerificationMode == 'FIREBASE_AUTH'
-        && u.phoneVerifiedAt is timestamp && u.phoneVerifiedAt <= request.time
-        && jobText(u.displayName,100,true) && p.userId == uid
-        && p.areaCode != '' && validArea(p.areaCode)
+    // C07 Rules revision 2026-10-26 r4: expression-limit fix, verified on local emulator.
+    function jobArea(code) {
+      return code is string && code.size() > 0 && code.size() <= 80
+        && get(/databases/$(database)/documents/areas/$(code)).data.active == true;
+    }
+    function jobAccount(uid, u) {
+      return owner(uid) && noAdmin(uid) && u.role == 'EMPLOYER' && u.accountStatus == 'ACTIVE';
+    }
+    function jobPhone(u) {
+      return authPhone() != '' && u.phoneE164 == authPhone() && u.phoneVerificationMode == 'FIREBASE_AUTH'
+        && u.phoneVerifiedAt is timestamp && u.phoneVerifiedAt <= request.time;
+    }
+    function jobProfile(uid, u, p) {
+      return jobText(u.displayName,100,true) && p.userId == uid && jobArea(p.areaCode)
         && jobText(p.introduction,1000,true)
         && p.employerType in ['INDIVIDUAL', 'ORGANIZATION']
         && (p.employerType != 'ORGANIZATION' || jobText(p.organizationName,150,true));
     }
+    function jobEmployer(uid, u, p) {
+      return jobAccount(uid,u) && jobPhone(u) && jobProfile(uid,u,p);
+    }
     function jobCatalog(d) {
-      return d.categoryId.size() > 0 && d.areaCode != '' && validArea(d.areaCode)
-        && get(/databases/$(database)/documents/jobCategories/$(d.categoryId)).data.active == true
-        && d.categoryName == get(/databases/$(database)/documents/jobCategories/$(d.categoryId)).data.name
-        && d.areaName == get(/databases/$(database)/documents/areas/$(d.areaCode)).data.name;
+      let category = get(/databases/$(database)/documents/jobCategories/$(d.categoryId)).data;
+      let area = get(/databases/$(database)/documents/areas/$(d.areaCode)).data;
+      return d.categoryId.size() > 0 && d.areaCode.size() > 0
+        && category.active == true && area.active == true
+        && d.categoryName == category.name && d.areaName == area.name;
     }
     function jobText(v, maximum, required) {
       return v is string && v.size() <= maximum && (!required || v.matches('(?s).*[^\\s].*'));
     }
+    function jobSkills(items) {
+      return items is list && items.size() <= 8 && items.toSet().size() == items.size()
+        && (items.size() <= 0 || items[0].matches('(?s).{1,60}'))
+        && (items.size() <= 1 || items[1].matches('(?s).{1,60}'))
+        && (items.size() <= 2 || items[2].matches('(?s).{1,60}'))
+        && (items.size() <= 3 || items[3].matches('(?s).{1,60}'))
+        && (items.size() <= 4 || items[4].matches('(?s).{1,60}'))
+        && (items.size() <= 5 || items[5].matches('(?s).{1,60}'))
+        && (items.size() <= 6 || items[6].matches('(?s).{1,60}'))
+        && (items.size() <= 7 || items[7].matches('(?s).{1,60}'));
+    }
     function jobShape(d, id) {
-      return d.keys().hasAll(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
-          'workAddress','description','requirementsText','requiredSkillTags','workDays','workShift','scheduleText',
-          'physicalDemands','demandsDeclared','payAmount','payUnit','expiresAt','status','version','lastSubmissionId',
-          'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason'])
-        && d.keys().hasOnly(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
+      let keys = d.keys();
+      return keys.size() == 28 && keys.hasOnly(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
           'workAddress','description','requirementsText','requiredSkillTags','workDays','workShift','scheduleText',
           'physicalDemands','demandsDeclared','payAmount','payUnit','expiresAt','status','version','lastSubmissionId',
           'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason'])
         && d.id == id && id.matches('[A-Za-z0-9-]{36}')
-        && jobText(d.employerId,128,true) && jobText(d.employerDisplayName,150,true)
-        && jobText(d.title,120,true) && jobText(d.categoryId,80,true) && jobText(d.categoryName,120,true)
-        && jobText(d.areaCode,80,true) && jobText(d.areaName,120,true)
-        && jobText(d.workAddress,500,true) && jobText(d.description,3000,true)
-        && jobText(d.requirementsText,1000,false) && skills(d.requiredSkillTags)
+        && d.employerId.size() <= 128 && d.employerId.matches('(?s).*[^\\s].*') && d.employerDisplayName.size() <= 150 && d.employerDisplayName.matches('(?s).*[^\\s].*')
+        && d.title.size() <= 120 && d.title.matches('(?s).*[^\\s].*') && d.categoryId.size() <= 80 && d.categoryId.matches('(?s).*[^\\s].*') && d.categoryName.size() <= 120 && d.categoryName.matches('(?s).*[^\\s].*')
+        && d.areaCode.size() <= 80 && d.areaCode.matches('(?s).*[^\\s].*') && d.areaName.size() <= 120 && d.areaName.matches('(?s).*[^\\s].*')
+        && d.workAddress.size() <= 500 && d.workAddress.matches('(?s).*[^\\s].*') && d.description.size() <= 3000 && d.description.matches('(?s).*[^\\s].*')
+        && d.requirementsText.matches('(?s).{0,1000}') && jobSkills(d.requiredSkillTags)
         && d.workDays is list && d.workDays.size() > 0 && d.workDays.size() <= 7
         && d.workDays.hasOnly(['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'])
         && d.workDays.toSet().size() == d.workDays.size()
-        && d.workShift in ['MORNING','AFTERNOON','EVENING','FLEXIBLE'] && jobText(d.scheduleText,500,true)
+        && d.workShift in ['MORNING','AFTERNOON','EVENING','FLEXIBLE'] && d.scheduleText.size() <= 500 && d.scheduleText.matches('(?s).*[^\\s].*')
         && d.physicalDemands is list && d.physicalDemands.size() <= 3
         && d.physicalDemands.hasOnly(['HEAVY_LIFTING','PROLONGED_STANDING','FREQUENT_MOVEMENT'])
         && d.physicalDemands.toSet().size() == d.physicalDemands.size() && d.demandsDeclared == true
         && d.payAmount is int && d.payAmount > 0 && d.payUnit in ['HOUR','SESSION','DAY']
         && d.expiresAt is timestamp && d.version is int && d.version >= 1
         && d.status in ['PENDING_REVIEW','OPEN','REJECTED']
-        && jobText(d.lastSubmissionId,80,true) && d.createdAt is timestamp && d.updatedAt == request.time
-        && d.reviewedBy is string && jobText(d.reviewReason,1000,false);
+        && d.lastSubmissionId.size() <= 80 && d.lastSubmissionId.matches('(?s).*[^\\s].*') && d.createdAt is timestamp && d.updatedAt == request.time
+        && d.reviewedBy is string && d.reviewReason.matches('(?s).{0,1000}');
     }
     function submittedJob(d) {
       let u = get(userPath(d.employerId)).data;
       let p = get(employerPath(d.employerId)).data;
-      return jobEmployer(d.employerId) && jobCatalog(d) && d.expiresAt > request.time
+      return jobEmployer(d.employerId, u, p) && jobCatalog(d) && d.expiresAt > request.time
         && d.employerDisplayName == (p.employerType == 'ORGANIZATION' ? p.organizationName : u.displayName)
         && d.status == 'PENDING_REVIEW' && d.lastSubmissionId == d.id + '_s' + string(d.version)
         && d.reviewedBy == '' && d.reviewedAt == null && d.reviewReason == '';
@@ -442,15 +460,50 @@ service cloud.firestore {
       return e.jobId == d.id && e.version == d.version && e.actorId == request.auth.uid
         && e.action == action && e.createdAt == request.time && e.before == before && e.after == d;
     }
+    function jobHistoryCreate(id, v, d) {
+      let path = jobPath(id);
+      let existed = exists(path);
+      let before = existed ? get(path).data : null;
+      let after = getAfter(path).data;
+      return d.keys().hasAll(['jobId','version','actorId','action','createdAt','before','after'])
+        && d.keys().hasOnly(['jobId','version','actorId','action','createdAt','before','after'])
+        && d.jobId == id && v == string(d.version) && d.actorId == request.auth.uid
+        && d.createdAt == request.time && d.after == after && d.version == after.version
+        && (!existed
+          ? (d.before == null && d.version == 1 && d.action == 'SUBMITTED'
+              && after.employerId == request.auth.uid && after.status == 'PENDING_REVIEW')
+          : (d.before == before && d.version == before.version + 1
+              && ((before.status == 'REJECTED' && d.action == 'SUBMITTED'
+                    && before.employerId == request.auth.uid && after.status == 'PENDING_REVIEW')
+                || (admin() && before.employerId != request.auth.uid && before.status == 'PENDING_REVIEW'
+                    && ((d.action == 'APPROVED' && after.status == 'OPEN')
+                      || (d.action == 'REJECTED' && after.status == 'REJECTED'))))));
+    }
+    // Read-only owner diagnostics. These paths need no documents and can never be written.
+    // They expose only predicates over data the owner can already read, never job content.
+    function jobSourceCheck(uid, check) {
+      let u = get(userPath(uid)).data;
+      return (check == 'account' && jobAccount(uid,u))
+        || (check == 'phone' && jobPhone(u))
+        || (check == 'profile' && jobProfile(uid,u,get(employerPath(uid)).data));
+    }
+    match /jobSubmissionDiagnostics/{uid}/checks/{check} {
+      allow get: if owner(uid) && (check == 'revision_20261026_3' || jobSourceCheck(uid,check));
+      allow list, write: if false;
+    }
+    match /jobSubmissionDiagnostics/{uid}/expiry/{millis} {
+      allow get: if owner(uid) && millis.matches('[0-9]{1,16}') && timestamp.value(int(millis)) > request.time;
+      allow list, write: if false;
+    }
     match /jobs/{id} {
       allow get: if (request.auth != null && !exists(jobPath(id)))
         || resource.data.status == 'OPEN' || (request.auth != null && resource.data.employerId == request.auth.uid) || admin();
       allow list: if request.query.limit <= 20 && (resource.data.status == 'OPEN'
         || (request.auth != null && resource.data.employerId == request.auth.uid) || admin());
-      allow create: if request.auth != null && jobShape(request.resource.data,id)
+      allow create: if request.auth != null && resource == null && jobShape(request.resource.data,id)
         && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
         && submittedJob(request.resource.data) && jobEvent(request.resource.data,'SUBMITTED',null);
-      allow update: if request.auth != null && jobShape(request.resource.data,id)
+      allow update: if request.auth != null && resource != null && jobShape(request.resource.data,id)
         && request.resource.data.employerId == resource.data.employerId
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.version == resource.data.version + 1
@@ -467,22 +520,7 @@ service cloud.firestore {
       allow delete: if false;
       match /history/{v} {
         allow get, list: if request.auth != null && (get(jobPath(id)).data.employerId == request.auth.uid || admin());
-        allow create: if request.auth != null
-          && request.resource.data.keys().hasAll(['jobId','version','actorId','action','createdAt','before','after'])
-          && request.resource.data.keys().hasOnly(['jobId','version','actorId','action','createdAt','before','after'])
-          && request.resource.data.jobId == id && v == string(request.resource.data.version)
-          && request.resource.data.actorId == request.auth.uid && request.resource.data.createdAt == request.time
-          && request.resource.data.after == getAfter(jobPath(id)).data
-          && request.resource.data.version == getAfter(jobPath(id)).data.version
-          && ((!exists(jobPath(id)) && request.resource.data.before == null && request.resource.data.action == 'SUBMITTED'
-                && getAfter(jobPath(id)).data.employerId == request.auth.uid)
-            || (exists(jobPath(id)) && request.resource.data.before == get(jobPath(id)).data
-                && request.resource.data.version == get(jobPath(id)).data.version + 1
-                && ((get(jobPath(id)).data.status == 'REJECTED' && request.resource.data.action == 'SUBMITTED'
-                    && get(jobPath(id)).data.employerId == request.auth.uid)
-                  || (admin() && get(jobPath(id)).data.employerId != request.auth.uid
-                    && get(jobPath(id)).data.status == 'PENDING_REVIEW'
-                    && request.resource.data.action in ['APPROVED','REJECTED']))));
+        allow create: if request.auth != null && jobHistoryCreate(id,v,request.resource.data);
         allow update, delete: if false;
       }
     }

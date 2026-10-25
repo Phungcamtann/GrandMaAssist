@@ -210,7 +210,7 @@ public final class VerificationViewModel extends AndroidViewModel {
         CardQrReader.read(worker,candidateQrSource==null?bytes:candidateQrSource,()->valid(e)).addOnCompleteListener(t->{
             if(!valid(e))return; busy=false; processingImageTarget=null;
             if(t.isSuccessful()) {
-                identity=t.getResult(); identityImage=bytes; candidate=candidateQrSource=null; identityMessage="";
+                identity=t.getResult(); identityImage=bytes; candidate=candidateQrSource=null; identityMessage="";consent=false;
                 qrDiagnostic("OK");
             } else {
                 String code=qrFailureCode(t.getException()); qrDiagnostic(code);
@@ -237,15 +237,31 @@ public final class VerificationViewModel extends AndroidViewModel {
         pendingImageTarget=processingImageTarget=imageFocus=null; externalPending=false;
         deleteCapture(); emit();
     }
+    /** Shared presentation/write preconditions. Employer consent is taken in the send dialog. */
+    public String submissionRequirement(boolean requireConsent) {
+        if(sessionEnded || !loaded || home==null)return "Tải lại hồ sơ để kiểm tra tài khoản.";
+        if(!Arrays.asList("SEEKER","EMPLOYER").contains(home.role))return "Tài khoản không có quyền gửi hồ sơ này.";
+        if(!home.active)return "Tài khoản chưa được phép gửi hồ sơ.";
+        if(readRequired)return "Tải lại để kiểm tra hồ sơ trước khi gửi tiếp.";
+        if("SUBMITTED".equals(home.status))return "Hồ sơ đang chờ xét duyệt.";
+        if(!home.phone)return "Thêm và đồng bộ số điện thoại đã xác minh trước khi gửi.";
+        if(!home.complete)return home.profileRequirement;
+        if(candidate!=null)return "Bấm Dùng ảnh và đọc QR để xác nhận ảnh căn cước.";
+        if(identity==null || identityImage==null)return "Chọn hoặc chụp căn cước rồi đọc QR trước khi gửi.";
+        if("SEEKER".equals(home.role) && (evidence.isEmpty() || evidence.size()>3))return "Thêm từ 1 đến 3 ảnh bằng chứng nghỉ hưu.";
+        if(requireConsent && !consent)return "Đồng ý gửi giấy tờ trước khi gửi hồ sơ.";
+        return "";
+    }
+    /** Called only from the employer's explicit positive confirmation button. */
+    public void confirmEmployerAndSend() {
+        if(busy || externalPending || home==null || !"EMPLOYER".equals(home.role))return;
+        if(!submissionRequirement(false).isEmpty()){message=submissionRequirement(false);emit();return;}
+        consent=true;send();
+    }
     public void send() {
-        if(busy || readRequired || !loaded || home==null || sessionEnded)return;
-        if(!home.complete) { message="Hoàn thiện và lưu thông tin hồ sơ trước khi gửi xác minh.";emit();return; }
-        if(identity==null || identityImage==null || !consent || !home.active || !home.phone
-                || ("SEEKER".equals(home.role) && evidence.isEmpty())) {
-            message="Cần căn cước, ảnh bằng chứng và số điện thoại đã xác minh trước khi gửi.";
-            if("EMPLOYER".equals(home.role))message="Cần căn cước và số điện thoại đã xác minh trước khi gửi.";
-            emit(); return;
-        }
+        if(busy || externalPending)return;
+        String requirement=submissionRequirement(true);
+        if(!requirement.isEmpty()){message=requirement;emit();return;}
         if(requestId==null) { requestId=UUID.randomUUID().toString(); stagedBase=home; }
         long e=++epoch; String id=requestId; VerificationRepository.Home base=stagedBase;
         List<byte[]> images=new ArrayList<>(); images.add(identityImage);

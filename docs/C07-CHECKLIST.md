@@ -1,5 +1,7 @@
 # C07 — checklist người dùng nghiệm thu
 
+**26/10/2026:** có ngoại lệ được người dùng cho phép để kiểm Rules cục bộ trong lần điều tra lỗi gửi tin. Đã tái hiện lỗi 1.000 biểu thức và bản sửa r4 đạt 24/24 ca giả lập ([báo cáo](C07-EXPRESSION-LIMIT-FIX.md)). Đây là bằng chứng kiểm Rules, không tự đánh dấu các ca UI/Firebase thật bên dưới; người dùng cần Publish r4 và thử lại trên thiết bị.
+
 25/10/2026. **Chờ người dùng kiểm tra** sau [thiết lập Console](C07-CONSOLE-SCHEMA.md). Codex chỉ rà tĩnh, không chạy Sync/build/test/app hoặc Rules tests. Ghi thiết bị/API, tài khoản theo vai trò và kết quả thật; không đưa giấy tờ/số điện thoại/địa chỉ thật vào log báo lỗi. Không suy ra mọi ca đạt từ nghiệm thu C06.
 
 ## Địa chỉ và nháp
