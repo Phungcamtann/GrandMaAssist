@@ -1,3 +1,9 @@
+# Cập nhật cấu hình sau nhận commit C05 — 25/10/2026
+
+Đã đối chiếu commit `2552a04` trùng local/GitHub main. Trong commit, nội dung module app bị đặt vào build.gradle.kts gốc; app/build.gradle.kts thiếu thư viện QR, profile_strings.xml/profile_styles.xml thiếu phần bổ sung đã được Java/layout tham chiếu. Đã sửa bốn file tại working tree, giữ nguyên phiên bản và thay đổi IDE có sẵn. Chi tiết [C05-COMMIT-REPAIR](C05-COMMIT-REPAIR.md).
+
+Người dùng Sync Project with Gradle Files rồi Run, không cần đổi Firebase/Publish Rules. Codex chỉ rà tĩnh nguồn/XML/resource/diff, không Sync/build/test/app hoặc commit/push. Nếu vẫn lỗi, lấy nguyên phần What went wrong/Caused by trong Sync/Build Output; dòng vị trí file/line:1 chưa phải nội dung nguyên nhân đầy đủ. Các báo cáo và xác nhận chức năng trước đó giữ nguyên, bản sửa sau pull chờ người dùng kiểm tra.
+
 # Bàn giao nền tảng, C01 và C02 — 24/10/2026
 
 ## Trạng thái được xác nhận

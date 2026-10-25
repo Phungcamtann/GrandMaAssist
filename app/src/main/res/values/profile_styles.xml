@@ -1,4 +1,6 @@
 <resources>
+    <style name="Widget.GrandMa.ProfileSection" parent="Widget.GrandMa.VerificationSection"/>
+    <style name="Widget.GrandMa.ProfileSectionHeading" parent="Widget.GrandMa.VerificationHeading"/>
     <style name="Widget.GrandMa.ProfileInput" parent="Widget.AppCompat.EditText">
         <item name="android:textAppearance">@style/TextAppearance.GrandMa.Body</item>
         <item name="android:textSize">20sp</item>

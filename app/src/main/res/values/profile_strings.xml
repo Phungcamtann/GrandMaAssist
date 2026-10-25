@@ -1,5 +1,24 @@
 <resources>
     <string name="p_title">Hồ sơ của cô/chú</string>
+    <string name="p_section_info">Thông tin hồ sơ</string>
+    <string name="p_section_work">Thông tin công việc</string>
+    <string name="p_verification_title">Xác minh hồ sơ</string>
+    <string name="p_verification_label">Trạng thái: %1$s</string>
+    <string name="p_verification_loading">Đang cập nhật trạng thái…</string>
+    <string name="p_verification_none">Chưa xác minh</string>
+    <string name="p_verification_pending">Đang chờ duyệt</string>
+    <string name="p_verification_approved">Đã xác minh</string>
+    <string name="p_verification_needs_info">Cần bổ sung</string>
+    <string name="p_verification_rejected">Chưa được chấp thuận</string>
+    <string name="p_verification_again">Cần xác minh lại</string>
+    <string name="p_verification_unknown">Chưa xác định</string>
+    <string name="p_verification_failed">Chưa tải được</string>
+    <string name="p_verify">Xác minh hồ sơ</string>
+    <string name="p_verification_view">Xem lại hồ sơ</string>
+    <string name="p_verification_submitted">Xem hồ sơ đã gửi</string>
+    <string name="p_verification_supplement">Bổ sung hồ sơ</string>
+    <string name="p_verification_update">Cập nhật hồ sơ</string>
+    <string name="p_verification_retry">Xác minh lại</string>
     <string name="p_role_title">Cô/chú muốn làm gì?</string>
     <string name="p_role_intro">Chọn vai trò phù hợp để bắt đầu.</string>
     <string name="p_seeker">Tìm việc</string>

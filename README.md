@@ -1,3 +1,11 @@
+## Bàn giao C05 và sửa cấu hình sau pull — 25/10/2026
+
+Commit GitHub/main đã đối chiếu là `2552a04` — SCAN_QR_và_Luồng_Duyệt_Hồ_Sơ. Có mã C05, điều hướng theo vai trò và giao diện Hồ sơ thống nhất. Người dùng đã duyệt các ca C05-D01–D06 sau bản sửa quyết định; phần giao diện Hồ sơ mới C04-P01–P06 còn chờ kiểm tra. Không tự coi các ca Rules/timeout/thiết bị chưa tái hiện đã đạt.
+
+Sau pull phát hiện cấu hình module app nằm nhầm trong build.gradle.kts gốc, thiếu thư viện QR tại app/build.gradle.kts và thiếu 19 chuỗi/hai style của Hồ sơ thống nhất. Đã sửa tại working tree, giữ nguyên các phiên bản, không build/test/Sync hoặc commit/push. Xem [báo cáo sửa commit](docs/C05-COMMIT-REPAIR.md) trước khi Sync/Run.
+
+Tài liệu hiện hành: [C05 files](docs/C05-FILES.md), [C05 checklist](docs/C05-CHECKLIST.md), [cấp Admin và duyệt](docs/C05-ADMIN-GUIDE.md), [điều hướng và Hồ sơ thống nhất](docs/C04-C05-NAVIGATION.md). SEEKER/EMPLOYER chỉ mở Hồ sơ từ Trang chủ/Tài khoản; khối xác minh bên trong có trạng thái/nút theo tiến trình. Admin có Tổng quan/Xử lý riêng; các mục nghiệp vụ chưa có khóa/Sắp có. TTS vẫn ở C22. Các phần bàn giao cũ bên dưới giữ làm lịch sử; cập nhật hiện hành này và xác nhận người dùng mới nhất là căn cứ trạng thái.
+
 ## Bản phân tích và thiết kế hệ thống
 
 **Ngày cập nhật:** 18/10/2026  
@@ -315,7 +323,7 @@ Nên vẽ ba sơ đồ con: (a) Tài khoản và tìm việc; (b) Tuyển dụng
 3. Người dùng kiểm tra thông tin, bổ sung khu vực, kỹ năng, kinh nghiệm và lịch mong muốn. Không đặt ngưỡng tuổi để tự duyệt hoặc miễn bằng chứng nghỉ hưu.
 4. Đính kèm **giấy chứng nhận nghỉ hưu hoặc ảnh BHXH mô phỏng**. Đây là BHXH theo quyết định mới, không phải bắt kiểm tra tiền tố HT trên thẻ BHYT.
 5. Xem lại hồ sơ → xác nhận gửi. Tải ảnh riêng lên Storage, sau đó mới gửi SUBMITTED khi đủ dữ liệu. Nếu upload lỗi, báo lỗi và thử lại; không báo đã gửi nếu Firestore chưa xác nhận.
-6. Admin mở hồ sơ đang chờ, xem ảnh căn cước, dữ liệu trích xuất và bằng chứng. Tra cứu mô phỏng là đối chiếu theo kịch bản nội bộ của nhóm rồi ghi MATCH / NOT_MATCH / INSUFFICIENT, không phải một nút tự trả về xác minh thật. Admin nhập nhận xét và quyết định APPROVED / NEEDS_INFO / REJECTED; APPROVED cần kết quả MATCH và đủ căn cứ trong kịch bản. Không có API tra cứu BHXH hay VNeID thật.
+6. Admin mở hồ sơ đang chờ, xem ảnh căn cước, dữ liệu trích xuất và bằng chứng. Tra cứu mô phỏng là đối chiếu theo kịch bản nội bộ của nhóm rồi ghi MATCH / NOT_MATCH / INSUFFICIENT, không phải một nút tự trả về xác minh thật. Admin xác nhận đã xem đủ ảnh và quyết định APPROVED / NEEDS_INFO / REJECTED; APPROVED cần MATCH và đủ căn cứ trong kịch bản, không cần nhập nhận xét theo yêu cầu rút gọn 25/10. NEEDS_INFO/REJECTED và thu hồi mới mở ô lý do bắt buộc. Không có API tra cứu BHXH hay VNeID thật.
 7. Transaction lưu quyết định, người xử lý, thời gian server, phiên bản hồ sơ và thông báo kết quả. Đồng thời cập nhật trạng thái đủ điều kiện của user; không có thời điểm đã mở quyền nhưng quyết định chưa lưu.
 8. Người dùng nhận kết quả trong app; nếu đang đóng app thì thấy khi mở lại. NEEDS_INFO hướng dẫn bổ sung; REJECTED có lý do và đường gửi hồ sơ mới. Chỉ APPROVED hiện hành mới mở ứng tuyển.
 
@@ -950,7 +958,7 @@ OTP SMS thật là yêu cầu nghiệm thu. SMS và Firebase Storage cần cấu
 | ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
 | S01  | Chào và đăng nhập            | Số điện thoại, Google, tiếp tục xem việc                                                             |
 | S02  | OTP                          | Số đang xác minh, mã, sửa số, gửi lại                                                                |
-| S03  | Vai trò/hồ sơ                | Chọn vai trò lần đầu; SEEKER vào S04; EMPLOYER giữ form riêng; người quay lại không chọn vai trò lại |
+| S03  | Vai trò/hồ sơ                | Chọn và xác nhận vai trò lần đầu rồi vào Trang chủ đúng vai trò; mở Hồ sơ thống nhất qua điều hướng; người quay lại không chọn lại |
 | S04  | Hồ sơ xét duyệt theo vai trò | SEEKER: các màn S04a–e dưới đây; EMPLOYER: danh tính mẫu như v2                                      |
 | S04a | Chụp căn cước                | Camera, chụp/xem lại/chụp lại, đọc QR từ ảnh, lỗi/quyền camera                                       |
 | S04b | Kiểm tra thông tin           | Họ tên/ngày sinh từ QR; bổ sung nghề nghiệp; không tự tính tuổi để mở quyền                          |
@@ -981,7 +989,7 @@ OTP SMS thật là yêu cầu nghiệm thu. SMS và Firebase Storage cần cấu
 
 Các màn hình là nhóm chức năng, có thể triển khai bằng Fragment hoặc dialog phù hợp; không bắt buộc mỗi dòng là một Activity.
 
-**Luồng hồ sơ người tìm việc:** S01/S02 → S03 → S04a → S04b → S04c → S04d → Admin S21a → S24/S04e.
+**Luồng hồ sơ người tìm việc:** S01/S02 → S03 → S05 → Hồ sơ → khối Xác minh → S04a → S04b → S04c → S04d → Admin S21a → S24/S04e. Đang chờ/đã duyệt có nút xem bản hiện hành ngay trong Hồ sơ. Quyền ứng tuyển vẫn kiểm APPROVED hiện hành.
 
 **Luồng chính người tìm việc:** S05 → S06 → S07 → S08 → kiểm tra APPROVED → S09 → S10/S11 → S15 → S17 → S18. Chưa APPROVED thì từ S08 sang đúng trạng thái S04, không tạo đơn. Trong lúc chờ vẫn đi được S05–S08. Đã duyệt không phải nộp một hồ sơ mẫu thứ hai trước ca; chỉ kiểm tra quyết định còn hiệu lực.
 
@@ -1199,7 +1207,7 @@ Mỗi dòng là một đơn vị chức năng có thể nghiệm thu và commit,
 | C01 | Google, phục hồi phiên và đăng xuất                    | Tài khoản thật, hủy/lỗi/mạng, màn tài khoản sau login hoạt động                                                                    |
 | C02 | Đăng nhập điện thoại/OTP                               | SMS thật khi nghiệm thu, sai/hết hạn/gửi lại, xoay màn hình                                                                        |
 | C03 | Liên kết Google/phone và đổi số                        | Giữ UID, không chiếm tài khoản, Rules dựa Auth                                                                                     |
-| C04 | Vai trò cố định và hồ sơ                               | SEEKER/EMPLOYER riêng, Admin cấp sẵn; giữ form khi xoay                                                                            |
+| C04 | Vai trò cố định, hồ sơ và điều hướng theo vai trò      | SEEKER/EMPLOYER riêng, Admin cấp sẵn; trang chính/tài khoản/taskbar, giữ form khi xoay; mục nghiệp vụ chưa có khóa/Sắp có theo bổ sung 25/10 |
 | C05 | Hồ sơ nghỉ hưu từ chụp QR đến Admin duyệt và thông báo | Đủ gửi/bổ sung/xét/kết quả, Storage riêng và chặn ứng tuyển; gồm danh tính mẫu EMPLOYER hoặc tách thành chức năng hoàn chỉnh riêng |
 | C06 | Nháp tin tuyển và xem trước                            | Lưu nháp cục bộ, sửa, kiểm tra dữ liệu                                                                                             |
 | C07 | Gửi/duyệt tin tuyển                                    | Trạng thái và lý do thật; tin chưa duyệt không công khai                                                                           |
