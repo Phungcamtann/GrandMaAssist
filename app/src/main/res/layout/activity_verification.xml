@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/verificationScreenRoot" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/surface_ivory">
+    <include layout="@layout/role_topbar"/>
+    <ScrollView android:id="@+id/verificationScroll" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
+    <LinearLayout android:id="@+id/verificationRoot" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp" android:saveEnabled="false">
+        
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vBack" style="@style/Widget.GrandMa.BackLink" android:text="@string/n_back"/>
+        <TextView android:id="@+id/vPageTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+            android:text="@string/v_title" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"/>
+        <LinearLayout android:id="@+id/vFeedbackSection" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
+            <TextView android:id="@+id/vMessage" style="@style/Widget.GrandMa.VerificationMessage" android:layout_marginTop="0dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vCancelUpload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_cancel_upload" android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/vOwner" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <LinearLayout style="@style/Widget.GrandMa.VerificationSection">
+                <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_status_title"/>
+                <TextView android:id="@+id/vCurrent" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/vViewCurrent" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_view_current"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/vDraft" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <LinearLayout android:id="@+id/vIdentitySection" style="@style/Widget.GrandMa.VerificationSection">
+                    <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_identity_section"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vCapture" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_capture"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vPickCard" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_pick_card"/>
+                    <TextView android:id="@+id/vIdentityMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                    <LinearLayout android:id="@+id/vCandidate" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                        android:padding="12dp" android:background="@color/surface_soft_green" android:orientation="vertical" android:visibility="gone">
+                        <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_identity_preview"/>
+                        <ImageView android:id="@+id/vCandidateImage" android:layout_width="match_parent" android:layout_height="220dp" android:layout_marginTop="12dp"
+                            android:scaleType="fitCenter" android:contentDescription="@string/v_preview" android:saveEnabled="false"/>
+                        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vUseImage" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_use_image"/>
+                        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vDiscardImage" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_discard_image"/>
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/vIdentityImages" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+                    <TextView android:id="@+id/vIdentity" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/vEvidenceSection" style="@style/Widget.GrandMa.VerificationSection">
+                    <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_evidence_section"/>
+                    <RadioGroup android:id="@+id/vEvidenceType" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
+                        <RadioButton android:id="@+id/vRetirement" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_retirement"/>
+                        <RadioButton android:id="@+id/vBhxh" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_bhxh"/>
+                    </RadioGroup>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vAddEvidence" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_add_evidence"/>
+                    <TextView android:id="@+id/vEvidenceCount" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:accessibilityLiveRegion="polite" android:saveEnabled="false"/>
+                    <TextView android:id="@+id/vEvidenceMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                    <LinearLayout android:id="@+id/vEvidenceImages" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/vSubmitSection" style="@style/Widget.GrandMa.VerificationSection">
+                    <TextView android:id="@+id/vSubmitHeading" style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_submit_section"/>
+                    <TextView android:id="@+id/vSubmitMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vProcess" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_process"/>
+                    <CheckBox android:id="@+id/vConsent" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                        android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_consent"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vSend" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_send"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vClear" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_clear"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/vNoticeSection" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
+                <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_notices"/>
+                <LinearLayout android:id="@+id/vNotices" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/vAdmin" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
+            <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_admin_section"/>
+            <RadioGroup android:id="@+id/vQueueType" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
+                <RadioButton android:id="@+id/vQueueSeeker" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_seeker"/>
+                <RadioButton android:id="@+id/vQueueEmployer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_employer"/>
+            </RadioGroup>
+            <androidx.appcompat.widget.AppCompatEditText android:id="@+id/vSearch" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:inputType="textNoSuggestions" android:maxLength="128" android:hint="@string/v_search_hint"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vFind" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_find"/>
+            <LinearLayout android:id="@+id/vQueue" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="vertical"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/vReview" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
+            <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_review_section"/>
+            <TextView android:id="@+id/vReviewIdentity" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vPrevious" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_previous"/>
+            <LinearLayout android:id="@+id/vReviewImages" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vRetryImages" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_retry_images"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vUpdateIdentity" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_update_identity" android:visibility="gone"/>
+            <LinearLayout android:id="@+id/vDecision" style="@style/Widget.GrandMa.VerificationSection" android:background="@color/surface_soft_green">
+                <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_decision_section"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/v_simulated" android:textAppearance="@style/TextAppearance.GrandMa.Body"/>
+                <RadioGroup android:id="@+id/vLookup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
+                    <RadioButton android:id="@+id/vMatch" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_match"/>
+                    <RadioButton android:id="@+id/vNotMatch" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_not_match"/>
+                    <RadioButton android:id="@+id/vInsufficient" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_insufficient"/>
+                </RadioGroup>
+                <CheckBox android:id="@+id/vReviewed" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_reviewed"/>
+                <ProgressBar android:id="@+id/vDecisionProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="12dp" android:indeterminate="true" android:visibility="gone" android:importantForAccessibility="no"/>
+                <TextView android:id="@+id/vDecisionMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/vApprove" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_approve"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/vNeedsInfo" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_needs_info"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReject" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_reject"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/vRevoke" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_revoke"/>
+                <LinearLayout android:id="@+id/vReasonSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="vertical" android:visibility="gone" android:saveEnabled="false">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:labelFor="@id/vReason" android:text="@string/v_reason" android:textAppearance="@style/TextAppearance.GrandMa.Label"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/vReason" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:inputType="textMultiLine|textCapSentences" android:maxLength="1000" android:saveEnabled="false"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReasonConfirm" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/v_needs_info"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReasonCancel" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_cancel_reason"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        
+    </LinearLayout>
+
+    </ScrollView>
+    <include layout="@layout/role_navigation"/>
+</LinearLayout>

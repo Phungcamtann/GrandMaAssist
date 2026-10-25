@@ -7,6 +7,12 @@ service cloud.firestore {
     function employerPath(uid) { return /databases/$(database)/documents/employerProfiles/$(uid); }
     function adminPath(uid) { return /databases/$(database)/documents/adminAccess/$(uid); }
     function clientRole(role) { return role in ['SEEKER', 'EMPLOYER']; }
+    function admin() {
+      return request.auth != null
+        && get(adminPath(request.auth.uid)).data.enabled == true
+        && get(userPath(request.auth.uid)).data.role == 'ADMIN'
+        && get(userPath(request.auth.uid)).data.accountStatus == 'ACTIVE';
+    }
     function noAdmin(uid) {
       return !exists(adminPath(uid)) || get(adminPath(uid)).data.get('enabled', false) != true;
     }
@@ -22,15 +28,18 @@ service cloud.firestore {
           'phoneVerificationMode', 'phoneVerifiedAt', 'version', 'createdAt', 'updatedAt'])
         && d.keys().hasOnly(['id', 'role', 'accountStatus', 'displayName', 'phoneE164',
           'phoneVerificationMode', 'phoneVerifiedAt', 'version', 'createdAt', 'updatedAt',
-          'retirementStatus', 'identityStatus'])
+          'retirementStatus', 'identityStatus', 'currentRetirementRequestId', 'identityRequestId',
+          'approvedIdentityProfileVersion'])
         && d.id == uid && clientRole(d.role)
         && d.displayName is string && d.displayName.size() <= 100
         && d.version is int && d.version >= 1
         && d.createdAt is timestamp && d.updatedAt == request.time
         && ((d.role == 'SEEKER' && d.keys().hasAll(['retirementStatus'])
-            && !('identityStatus' in d) && d.retirementStatus == 'NOT_SUBMITTED')
+            && !('identityStatus' in d) && !('identityRequestId' in d)
+            && d.retirementStatus in ['NOT_SUBMITTED', 'SUBMITTED', 'APPROVED', 'NEEDS_INFO', 'REJECTED', 'REVERIFY_REQUIRED'])
           || (d.role == 'EMPLOYER' && d.keys().hasAll(['identityStatus'])
-            && !('retirementStatus' in d) && d.identityStatus == 'NOT_SUBMITTED'));
+            && !('retirementStatus' in d) && !('currentRetirementRequestId' in d)
+            && d.identityStatus in ['NOT_SUBMITTED', 'SUBMITTED', 'VERIFIED', 'NEEDS_INFO', 'REJECTED', 'REVERIFY_REQUIRED']));
     }
     function validArea(code) {
       return code is string && code.size() <= 80
@@ -55,7 +64,7 @@ service cloud.firestore {
       return d.keys().hasAll(['userId', 'areaCode', 'skills', 'experienceSummary',
           'preferredShifts', 'createdAt', 'updatedAt'])
         && d.keys().hasOnly(['userId', 'areaCode', 'skills', 'experienceSummary',
-          'preferredShifts', 'createdAt', 'updatedAt'])
+          'preferredShifts', 'createdAt', 'updatedAt', 'fullName', 'dateOfBirth', 'identityProfileVersion'])
         && commonProfile(d, uid) && skills(d.skills)
         && d.experienceSummary is string && d.experienceSummary.size() <= 1000
         && d.preferredShifts is list && d.preferredShifts.size() <= 3
@@ -66,7 +75,7 @@ service cloud.firestore {
       return d.keys().hasAll(['userId', 'areaCode', 'employerType', 'organizationName',
           'introduction', 'createdAt', 'updatedAt'])
         && d.keys().hasOnly(['userId', 'areaCode', 'employerType', 'organizationName',
-          'introduction', 'createdAt', 'updatedAt'])
+          'introduction', 'createdAt', 'updatedAt', 'fullName', 'dateOfBirth', 'identityProfileVersion'])
         && commonProfile(d, uid) && d.employerType in ['INDIVIDUAL', 'ORGANIZATION']
         && d.organizationName is string && d.organizationName.size() <= 150
         && (d.employerType != 'ORGANIZATION' || d.organizationName.size() > 0)
@@ -86,6 +95,226 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
     }
 
+    // C05: immutable requests; paired user/profile/request and decision/notification writes.
+    function requestPath(role, id) {
+      return role == 'SEEKER' ? /databases/$(database)/documents/retirementRequests/$(id)
+        : /databases/$(database)/documents/identityRequests/$(id);
+    }
+    function profilePath(uid, role) { return role == 'SEEKER' ? seekerPath(uid) : employerPath(uid); }
+    function pointer(role) { return role == 'SEEKER' ? 'currentRetirementRequestId' : 'identityRequestId'; }
+    function statusField(role) { return role == 'SEEKER' ? 'retirementStatus' : 'identityStatus'; }
+    function legal(d) {
+      return d.keys().hasAll(['fullName', 'dateOfBirth', 'identityProfileVersion'])
+        && d.fullName is string && d.fullName.size() > 0 && d.fullName.size() <= 100
+        && d.dateOfBirth is string && d.dateOfBirth.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && d.identityProfileVersion is int && d.identityProfileVersion > 0;
+    }
+    function professional(d, role) {
+      return d.areaCode != '' && validArea(d.areaCode)
+        && (role == 'SEEKER' ? (d.skills.size() > 0 && d.experienceSummary.size() > 0 && d.preferredShifts.size() > 0)
+          : (d.introduction.size() > 0));
+    }
+    function requestShape(d, id, role) {
+      return d.keys().hasAll(['id', 'userId', 'role', 'status', 'previousRequestId', 'identityProfileVersion',
+          'baseUserVersion', 'identitySnapshot', 'professionalSnapshot', 'evidenceType', 'imagePaths', 'lookupMode', 'lookupResult',
+          'reason', 'reviewedBy', 'reviewedAt', 'decisionVersion', 'createdAt', 'updatedAt', 'consentedAt', 'submittedAt'])
+        && d.keys().hasOnly(['id', 'userId', 'role', 'status', 'previousRequestId', 'identityProfileVersion',
+          'baseUserVersion', 'identitySnapshot', 'professionalSnapshot', 'evidenceType', 'imagePaths', 'lookupMode', 'lookupResult',
+          'reason', 'reviewedBy', 'reviewedAt', 'decisionVersion', 'createdAt', 'updatedAt', 'consentedAt', 'submittedAt'])
+        && d.id == id && id.matches('[A-Za-z0-9-]{36}') && d.role == role
+        && d.userId is string && d.previousRequestId is string
+        && d.baseUserVersion is int && d.baseUserVersion >= 1
+        && d.identityProfileVersion is int && d.identityProfileVersion >= 1
+        && d.identitySnapshot is map
+        && d.identitySnapshot.keys().hasAll(['fullName', 'dateOfBirth', 'documentNumber', 'source', 'parserVersion'])
+        && d.identitySnapshot.keys().hasOnly(['fullName', 'dateOfBirth', 'documentNumber', 'source', 'parserVersion'])
+        && d.identitySnapshot.fullName is string && d.identitySnapshot.fullName.size() > 0 && d.identitySnapshot.fullName.size() <= 100
+        && d.identitySnapshot.dateOfBirth.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && d.identitySnapshot.documentNumber.matches('[0-9]{12}')
+        && d.identitySnapshot.source == 'CCCD_QR' && d.identitySnapshot.parserVersion in [1, 2]
+        && d.lookupMode == 'SIMULATED' && d.createdAt is timestamp && d.consentedAt is timestamp
+        && d.updatedAt == request.time
+        && d.imagePaths is list && d.imagePaths.size() >= (role == 'SEEKER' ? 2 : 1)
+        && d.imagePaths.size() <= (role == 'SEEKER' ? 4 : 1)
+        && d.imagePaths[0] == 'verification/' + d.userId + '/' + id + '/identity.jpg'
+        && (d.imagePaths.size() < 2 || d.imagePaths[1] == 'verification/' + d.userId + '/' + id + '/evidence1.jpg')
+        && (d.imagePaths.size() < 3 || d.imagePaths[2] == 'verification/' + d.userId + '/' + id + '/evidence2.jpg')
+        && (d.imagePaths.size() < 4 || d.imagePaths[3] == 'verification/' + d.userId + '/' + id + '/evidence3.jpg')
+        && (role == 'SEEKER' ? d.evidenceType in ['RETIREMENT_CERTIFICATE', 'BHXH_SIMULATED'] : d.evidenceType == 'IDENTITY_SAMPLE');
+    }
+    function stageCreate(d, id, role) {
+      let u = get(userPath(d.userId)).data;
+      let p = get(profilePath(d.userId, role)).data;
+      return owner(d.userId) && noAdmin(d.userId) && u.role == role && u.accountStatus == 'ACTIVE'
+        && u[statusField(role)] != 'SUBMITTED' && requestShape(d, id, role)
+        && d.status == 'STAGING' && d.baseUserVersion == u.version
+        && d.previousRequestId == u.get(pointer(role), '')
+        && d.professionalSnapshot == profession(u, p, role)
+        && d.identityProfileVersion == p.get('identityProfileVersion', 0) + 1
+        && d.createdAt == request.time && d.consentedAt == request.time
+        && d.submittedAt == null && d.reviewedAt == null && d.reviewedBy == ''
+        && d.lookupResult == '' && d.reason == '' && d.decisionVersion == 0;
+    }
+    function profession(u, p, role) {
+      return role == 'SEEKER'
+        ? {'displayName': u.displayName, 'areaCode': p.areaCode, 'skills': p.skills,
+            'experienceSummary': p.experienceSummary, 'preferredShifts': p.preferredShifts}
+        : {'displayName': u.displayName, 'areaCode': p.areaCode, 'employerType': p.employerType,
+            'organizationName': p.organizationName, 'introduction': p.introduction};
+    }
+    function submissionUser(uid, d) {
+      let role = resource.data.role;
+      let id = d[pointer(role)];
+      let before = get(requestPath(role, id)).data;
+      let r = getAfter(requestPath(role, id)).data;
+      let p = getAfter(profilePath(uid, role)).data;
+      return owner(uid) && noAdmin(uid) && resource.data.accountStatus == 'ACTIVE'
+        && resource.data[statusField(role)] != 'SUBMITTED'
+        && contact(d) && authPhone() != '' && userShape(d, uid)
+        && d.diff(resource.data).affectedKeys().hasOnly([statusField(role), pointer(role), 'approvedIdentityProfileVersion', 'version', 'updatedAt'])
+        && before.status == 'STAGING' && before.baseUserVersion == resource.data.version
+        && r.status == 'SUBMITTED' && r.userId == uid && r.role == role && r.submittedAt == request.time
+        && r.previousRequestId == resource.data.get(pointer(role), '')
+        && d[statusField(role)] == 'SUBMITTED' && d.approvedIdentityProfileVersion == 0
+        && d.version == resource.data.version + 1 && p.identityProfileVersion == r.identityProfileVersion
+        && p.fullName == r.identitySnapshot.fullName && p.dateOfBirth == r.identitySnapshot.dateOfBirth;
+    }
+    function identityUpdate(uid, role) {
+      let u = getAfter(userPath(uid)).data;
+      let r = getAfter(requestPath(role, u[pointer(role)])).data;
+      let d = request.resource.data;
+      return profileUpdate(uid, role) && legal(d)
+        && d.diff(resource.data).affectedKeys().hasOnly(['fullName', 'dateOfBirth', 'identityProfileVersion', 'updatedAt'])
+        && r.userId == uid && r.status == 'SUBMITTED' && r.submittedAt == request.time
+        && r.identityProfileVersion == resource.data.get('identityProfileVersion', 0) + 1
+        && d.identityProfileVersion == r.identityProfileVersion
+        && d.fullName == r.identitySnapshot.fullName && d.dateOfBirth == r.identitySnapshot.dateOfBirth;
+    }
+    function submitRequest(d, id, role) {
+      let uid = resource.data.userId;
+      let u = get(userPath(uid)).data;
+      let after = getAfter(userPath(uid)).data;
+      let p = get(profilePath(uid, role)).data;
+      return owner(uid) && noAdmin(uid) && u.role == role && u.accountStatus == 'ACTIVE'
+        && authPhone() != '' && u.phoneE164 == authPhone() && professional(p, role) && u.displayName.size() > 0
+        && resource.data.status == 'STAGING' && d.status == 'SUBMITTED'
+        && d.diff(resource.data).affectedKeys().hasOnly(['status', 'submittedAt', 'updatedAt'])
+        && d.submittedAt == request.time && d.updatedAt == request.time
+        && d.baseUserVersion == u.version && u[statusField(role)] != 'SUBMITTED'
+        && d.identityProfileVersion == p.get('identityProfileVersion', 0) + 1
+        && after[pointer(role)] == id && after[statusField(role)] == 'SUBMITTED' && after.version == u.version + 1;
+    }
+    function terminal(status, role) {
+      return status in ['NEEDS_INFO', 'REJECTED'] || status == (role == 'SEEKER' ? 'APPROVED' : 'VERIFIED');
+    }
+    function decisionRequest(d, id, role) {
+      let uid = resource.data.userId;
+      let u = get(userPath(uid)).data;
+      let after = getAfter(userPath(uid)).data;
+      let p = get(profilePath(uid, role)).data;
+      let notice = getAfter(/databases/$(database)/documents/users/$(uid)/notifications/$(id + '_1')).data;
+      return admin() && request.auth.uid != uid && resource.data.status == 'SUBMITTED'
+        && resource.data.decisionVersion == 0 && d.decisionVersion == 1 && terminal(d.status, role)
+        && d.diff(resource.data).affectedKeys().hasOnly(['status', 'lookupResult', 'reason', 'reviewedBy', 'reviewedAt', 'decisionVersion', 'updatedAt'])
+        && d.lookupResult in ['MATCH', 'NOT_MATCH', 'INSUFFICIENT']
+        && (!(d.status in ['APPROVED', 'VERIFIED']) || d.lookupResult == 'MATCH')
+        && d.reason is string && d.reason.size() > 0 && d.reason.size() <= 1000 && !d.reason.matches('(?s).*[0-9]{12}.*')
+        && d.reviewedBy == request.auth.uid && d.reviewedAt == request.time && d.updatedAt == request.time
+        && u.accountStatus == 'ACTIVE' && u[pointer(role)] == id && u[statusField(role)] == 'SUBMITTED'
+        && p.identityProfileVersion == d.identityProfileVersion
+        && after[statusField(role)] == d.status && after.version == u.version + 1
+        && notice.requestId == id && notice.status == d.status && notice.reason == d.reason && notice.createdAt == request.time;
+    }
+    function userDecision(uid, d) {
+      let role = resource.data.role;
+      let id = resource.data[pointer(role)];
+      let before = get(requestPath(role, id)).data;
+      let r = getAfter(requestPath(role, id)).data;
+      let p = get(profilePath(uid, role)).data;
+      return admin() && request.auth.uid != uid && resource.data.accountStatus == 'ACTIVE'
+        && d.diff(resource.data).affectedKeys().hasOnly([statusField(role), 'approvedIdentityProfileVersion', 'version', 'updatedAt'])
+        && before.status == 'SUBMITTED' && resource.data[statusField(role)] == 'SUBMITTED'
+        && r.userId == uid && r.reviewedBy == request.auth.uid && r.reviewedAt == request.time
+        && r.decisionVersion == 1 && terminal(r.status, role)
+        && d[statusField(role)] == r.status && d.updatedAt == request.time && d.version == resource.data.version + 1
+        && r.identityProfileVersion == p.identityProfileVersion
+        && d.approvedIdentityProfileVersion == (r.status in ['APPROVED', 'VERIFIED'] ? r.identityProfileVersion : 0);
+    }
+    function revocationPath(id) { return /databases/$(database)/documents/verificationRevocations/$(id); }
+    function userRevocation(uid, d) {
+      let role = resource.data.role;
+      let id = resource.data[pointer(role)];
+      let r = get(requestPath(role, id)).data;
+      let rev = getAfter(revocationPath(id)).data;
+      return admin() && request.auth.uid != uid && resource.data.accountStatus == 'ACTIVE'
+        && resource.data[statusField(role)] in ['APPROVED', 'VERIFIED'] && r.status == resource.data[statusField(role)]
+        && !exists(revocationPath(id)) && rev.userId == uid && rev.role == role
+        && rev.reviewedBy == request.auth.uid && rev.createdAt == request.time
+        && d.diff(resource.data).affectedKeys().hasOnly([statusField(role), 'approvedIdentityProfileVersion', 'version', 'updatedAt'])
+        && d[statusField(role)] == 'REVERIFY_REQUIRED' && d.approvedIdentityProfileVersion == 0
+        && d.version == resource.data.version + 1 && d.updatedAt == request.time;
+    }
+    match /verificationRevocations/{id} {
+      allow get: if (request.auth != null && !exists(revocationPath(id))) || owner(resource.data.userId) || admin();
+      allow list, update, delete: if false;
+      allow create: if revocation(id, request.resource.data);
+    }
+    function revocation(id, d) {
+      let u = get(userPath(d.userId)).data;
+      let after = getAfter(userPath(d.userId)).data;
+      let r = get(requestPath(d.role, id)).data;
+      let p = get(profilePath(d.userId, d.role)).data;
+      let n = getAfter(/databases/$(database)/documents/users/$(d.userId)/notifications/$(id + '_2')).data;
+      return admin() && request.auth.uid != d.userId
+        && d.keys().hasAll(['requestId', 'userId', 'role', 'identityProfileVersion', 'reason', 'reviewedBy', 'createdAt'])
+        && d.keys().hasOnly(['requestId', 'userId', 'role', 'identityProfileVersion', 'reason', 'reviewedBy', 'createdAt'])
+        && d.requestId == id && d.role == u.role && u[pointer(d.role)] == id
+        && u[statusField(d.role)] in ['APPROVED', 'VERIFIED'] && r.status == u[statusField(d.role)]
+        && p.identityProfileVersion == r.identityProfileVersion && d.identityProfileVersion == p.identityProfileVersion
+        && d.reason is string && d.reason.size() > 0 && d.reason.size() <= 1000 && !d.reason.matches('(?s).*[0-9]{12}.*')
+        && d.reviewedBy == request.auth.uid && d.createdAt == request.time
+        && after[statusField(d.role)] == 'REVERIFY_REQUIRED' && after.approvedIdentityProfileVersion == 0
+        && after.version == u.version + 1 && n.status == 'REVERIFY_REQUIRED' && n.reason == d.reason && n.createdAt == request.time;
+    }
+    match /retirementRequests/{id} {
+      allow get: if (request.auth != null && !exists(requestPath('SEEKER', id))) || owner(resource.data.userId) || admin();
+      allow list: if admin() && request.query.limit <= 50 && resource.data.status == 'SUBMITTED';
+      allow create: if stageCreate(request.resource.data, id, 'SEEKER');
+      allow update: if submitRequest(request.resource.data, id, 'SEEKER') || decisionRequest(request.resource.data, id, 'SEEKER');
+      allow delete: if false;
+    }
+    match /identityRequests/{id} {
+      allow get: if (request.auth != null && !exists(requestPath('EMPLOYER', id))) || owner(resource.data.userId) || admin();
+      allow list: if admin() && request.query.limit <= 50 && resource.data.status == 'SUBMITTED';
+      allow create: if stageCreate(request.resource.data, id, 'EMPLOYER');
+      allow update: if submitRequest(request.resource.data, id, 'EMPLOYER') || decisionRequest(request.resource.data, id, 'EMPLOYER');
+      allow delete: if false;
+    }
+    match /users/{uid}/notifications/{noticeId} {
+      allow read: if owner(uid);
+      allow create: if admin() && request.auth.uid != uid
+        && (notice(uid, noticeId, request.resource.data) || revokeNotice(uid, noticeId, request.resource.data));
+      allow update, delete: if false;
+    }
+    function notice(uid, noticeId, d) {
+      let u = get(userPath(uid)).data;
+      let r = getAfter(requestPath(u.role, d.requestId)).data;
+      return d.keys().hasAll(['requestId', 'decisionVersion', 'status', 'reason', 'createdAt'])
+        && d.keys().hasOnly(['requestId', 'decisionVersion', 'status', 'reason', 'createdAt'])
+        && noticeId == d.requestId + '_1' && d.decisionVersion == 1
+        && get(requestPath(u.role, d.requestId)).data.status == 'SUBMITTED'
+        && r.userId == uid && r.reviewedBy == request.auth.uid && r.reviewedAt == request.time
+        && r.decisionVersion == 1 && d.status == r.status && d.reason == r.reason && d.createdAt == request.time;
+    }
+    function revokeNotice(uid, noticeId, d) {
+      let rev = getAfter(revocationPath(d.requestId)).data;
+      return d.keys().hasAll(['requestId', 'decisionVersion', 'status', 'reason', 'createdAt'])
+        && d.keys().hasOnly(['requestId', 'decisionVersion', 'status', 'reason', 'createdAt'])
+        && noticeId == d.requestId + '_2' && d.decisionVersion == 2 && d.status == 'REVERIFY_REQUIRED'
+        && !exists(revocationPath(d.requestId)) && rev.userId == uid
+        && rev.reviewedBy == request.auth.uid && rev.createdAt == request.time
+        && d.reason == rev.reason && d.createdAt == request.time;
+    }
     match /appConfig/public { allow get: if true; allow list, write: if false; }
     match /areas/{code} {
       allow get, list: if request.auth != null && resource.data.active == true;
@@ -96,45 +325,52 @@ service cloud.firestore {
       allow list, write: if false;
     }
     match /users/{uid} {
-      allow get: if owner(uid);
+      allow get: if owner(uid) || admin();
       allow list, delete: if false;
       allow create: if owner(uid) && noAdmin(uid) && userShape(request.resource.data, uid)
         && request.resource.data.accountStatus == 'ACTIVE'
         && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
+        && !('currentRetirementRequestId' in request.resource.data) && !('identityRequestId' in request.resource.data)
+        && !('approvedIdentityProfileVersion' in request.resource.data)
+        && request.resource.data[statusField(request.resource.data.role)] == 'NOT_SUBMITTED'
         && contact(request.resource.data)
         && (request.resource.data.phoneE164 == '' || request.resource.data.phoneVerifiedAt == request.time)
         && ((request.resource.data.role == 'SEEKER' && !exists(employerPath(uid))
               && getAfter(seekerPath(uid)).data.userId == uid)
           || (request.resource.data.role == 'EMPLOYER' && !exists(seekerPath(uid))
               && getAfter(employerPath(uid)).data.userId == uid));
-      allow update: if owner(uid) && noAdmin(uid) && resource.data.accountStatus == 'ACTIVE'
+      allow update: if (owner(uid) && noAdmin(uid) && resource.data.accountStatus == 'ACTIVE'
         && userShape(request.resource.data, uid) && contact(request.resource.data)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'displayName', 'phoneE164', 'phoneVerificationMode', 'phoneVerifiedAt', 'updatedAt', 'version'])
         && request.resource.data.version == resource.data.version + 1
         && (request.resource.data.phoneE164 == resource.data.phoneE164
           ? request.resource.data.phoneVerifiedAt == resource.data.phoneVerifiedAt
-          : (request.resource.data.phoneE164 == '' || request.resource.data.phoneVerifiedAt == request.time));
+          : (request.resource.data.phoneE164 == '' || request.resource.data.phoneVerifiedAt == request.time)))
+        || submissionUser(uid, request.resource.data) || userDecision(uid, request.resource.data)
+        || userRevocation(uid, request.resource.data);
     }
     match /jobSeekerProfiles/{uid} {
-      allow get: if owner(uid);
+      allow get: if owner(uid) || admin();
       allow list, delete: if false;
       allow create: if profileOwnerAfter(uid, 'SEEKER') && !exists(userPath(uid))
         && !exists(employerPath(uid)) && seeker(request.resource.data, uid)
+        && !('identityProfileVersion' in request.resource.data) && !('fullName' in request.resource.data) && !('dateOfBirth' in request.resource.data)
         && request.resource.data.createdAt == request.time;
-      allow update: if profileUpdate(uid, 'SEEKER') && seeker(request.resource.data, uid)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'areaCode', 'skills', 'experienceSummary', 'preferredShifts', 'updatedAt']);
+      allow update: if seeker(request.resource.data, uid) &&
+        ((profileUpdate(uid, 'SEEKER') && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'areaCode', 'skills', 'experienceSummary', 'preferredShifts', 'updatedAt'])) || identityUpdate(uid, 'SEEKER'));
     }
     match /employerProfiles/{uid} {
-      allow get: if owner(uid);
+      allow get: if owner(uid) || admin();
       allow list, delete: if false;
       allow create: if profileOwnerAfter(uid, 'EMPLOYER') && !exists(userPath(uid))
         && !exists(seekerPath(uid)) && employer(request.resource.data, uid)
+        && !('identityProfileVersion' in request.resource.data) && !('fullName' in request.resource.data) && !('dateOfBirth' in request.resource.data)
         && request.resource.data.createdAt == request.time;
-      allow update: if profileUpdate(uid, 'EMPLOYER') && employer(request.resource.data, uid)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'areaCode', 'employerType', 'organizationName', 'introduction', 'updatedAt']);
+      allow update: if employer(request.resource.data, uid) &&
+        ((profileUpdate(uid, 'EMPLOYER') && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'areaCode', 'employerType', 'organizationName', 'introduction', 'updatedAt'])) || identityUpdate(uid, 'EMPLOYER'));
     }
     match /{document=**} { allow read, write: if false; }
   }

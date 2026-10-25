@@ -79,3 +79,28 @@ Người dùng: sửa name/active trên cả ba document → Sync/Run bản mớ
 Người dùng xác nhận đã sửa dữ liệu khu vực và thử lại các yêu cầu trong checklist, tất cả hoạt động ổn. Các mục C04-01 đến C04-23 và C04-R01 đến C04-R08 được ghi nhận đạt theo xác nhận tổng thể này. Không có thêm thông tin thiết bị/API hoặc bằng chứng từng ca được cung cấp; không tự bổ sung kết quả chi tiết hay khẳng định Codex đã kiểm thử độc lập.
 Xác nhận này thay thế các trạng thái chờ kiểm tra/chưa nghiệm thu C04 trong phần lịch sử phía trên. Lỗi danh mục khu vực và đợt rút gọn giao diện đã được người dùng kiểm tra lại và duyệt.
 Codex chỉ cập nhật báo cáo; không chạy build/test/lint/emulator/SMS, không sửa Console/deploy hoặc stage/commit/push. C02-F01 và các mục theo dõi từ luồng trước vẫn giữ nguyên. CCCD/QR thuộc C05; giọng đọc thuộc C22, chưa được tính là đã triển khai trong C04.
+
+## Trang chính/điều hướng bổ sung — chờ người dùng kiểm tra
+
+Nền C04 đã duyệt vẫn được giữ nguyên. Các ca mới dưới đây chưa được nghiệm thu; không tự kế thừa kết quả từ C04-01–23/C04-R01–08.
+
+- [ ] C04-N01 Tài khoản mới vẫn phải chọn và xác nhận vai trò; sau đó vào Trang chủ đúng vai trò. Đóng/mở hoặc đăng nhập lại không chọn vai trò lần nữa; mặc định vào Trang chủ/Tổng quan.
+- [ ] C04-N02 SEEKER có Trang chủ/Việc của tôi/Việc khác/Hồ sơ; EMPLOYER có Trang chủ/Tin của tôi/Ca làm/Tài khoản. Các mục chưa hoạt động có Sắp có và không bấm được. Thẻ Trang chủ không có số việc/tên DEMO giả.
+- [ ] C04-N03 Mọi màn đăng nhập/vai trò/hồ sơ/tài khoản/phương thức đăng nhập có topbar xanh logo + vai trò đúng, một dòng; khi chưa biết role hiện Chung, đăng xuất không còn tên/role của UID cũ. Màn xác minh có cùng topbar và thanh điều hướng theo role.
+- [ ] C04-N04 Người thuê → Tài khoản hiện tên cá nhân/tổ chức và khu vực đã lưu; Xem hồ sơ vào trang Hồ sơ thống nhất, Phương thức đăng nhập và Đăng xuất hoạt động. Không còn nút Hồ sơ xác minh riêng của người thuê. Cài đặt/Trợ giúp Sắp có. Đổi tài khoản không lộ thông tin người trước.
+- [ ] C04-N05 Sửa form → chuyển Tài khoản → quay lại Hồ sơ còn nháp; chuyển Trang chủ/đăng xuất có hỏi bỏ nháp. Chọn tiếp tục sửa không mất nội dung; xác nhận bỏ và về Trang chủ không tự lưu. Sau lưu mở lại lấy đúng dữ liệu đã lưu.
+- [ ] C04-N06 Xoay ở Trang chủ/Tài khoản/Hồ sơ/phương thức đăng nhập giữ đúng trang và không tạo thao tác lần nữa; Back từ form/tài khoản về Trang chủ, từ màn phương thức về Tài khoản. Hồi quy Google/OTP/liên kết/đổi số, khu vực và đồng bộ contact còn hoạt động.
+- [ ] C04-N07 Font 200%, màn ngang/hẹp/chia cửa sổ và bàn phím: nội dung cuộn được, điều hướng đổi hai cột khi cần/ẩn lúc nhập, không che nút; TalkBack nhận nhãn vai trò/tab đang chọn/Sắp có. Nút/thẻ có khoảng cách, không cắt chữ nội dung. Nhãn role thu gọn nếu màn quá hẹp nhưng có mô tả đầy đủ cho accessibility.
+
+Đối chiếu phạm vi và file trong [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md). Không chạy build/test/app hay commit/push trong đợt Codex này.
+
+## Hồ sơ thống nhất — chờ người dùng kiểm tra
+
+Người dùng đã duyệt các ca của bản sửa quyết định C05; phần cải tiến giao diện mới này chưa được nghiệm thu.
+
+- [ ] C04-P01 SEEKER/EMPLOYER trên Trang chủ/Tài khoản không còn hai nút Hồ sơ/Hồ sơ xác minh trùng nhau. Mở Hồ sơ thấy các vùng Thông tin hồ sơ/Công việc/Số điện thoại và Xác minh, khoảng cách rõ. Lưu trường nghề nghiệp/số liên hệ vẫn hoạt động; Admin vẫn có đường Kiểm tra hồ sơ riêng.
+- [ ] C04-P02 Chưa gửi: Trạng thái Chưa xác minh + Xác minh hồ sơ. Đang SUBMITTED: Đang chờ duyệt + Xem hồ sơ đã gửi, mở bản hiện hành chỉ đọc, không tạo/gửi bản mới tự động.
+- [ ] C04-P03 APPROVED của SEEKER hoặc VERIFIED của EMPLOYER với version hiện hành khớp: Đã xác minh + Xem lại hồ sơ. Mở thẳng thông tin/ảnh đã gửi, Quay lại về trang Hồ sơ. Cập nhật giấy tờ bên trong là thao tác riêng có xác nhận; chỉ khi gửi bản mới mới chuyển sang chờ xét lại.
+- [ ] C04-P04 NEEDS_INFO/REJECTED/REVERIFY_REQUIRED lần lượt có nhãn và nút Bổ sung hồ sơ/Cập nhật hồ sơ/Xác minh lại; xem được lý do ở wizard và gửi bản mới theo C05. Không đổi nhãn thành đã xác minh chỉ vì đã đọc QR hoặc upload ảnh.
+- [ ] C04-P05 Mở lại Hồ sơ/đưa app lên foreground/đi xác minh rồi quay về cập nhật trạng thái server. Lỗi mạng hoặc trạng thái/version không nhất quán hiện Chưa tải được/Chưa xác định và Tải lại, không giả Chưa xác minh hoặc Đã xác minh. Có nháp nghề nghiệp trong khi cập nhật không bị ghi đè.
+- [ ] C04-P06 Xoay/chữ 200%/bàn phím/TalkBack dùng được các vùng và nút, không tự mở wizard/gửi hồ sơ. Đổi UID/đăng xuất không giữ nhãn/nội dung của người trước; callback trạng thái cũ không áp vào tài khoản mới. Nháp và trường danh tính riêng tuân theo chính sách RAM/FLAG_SECURE hiện có.

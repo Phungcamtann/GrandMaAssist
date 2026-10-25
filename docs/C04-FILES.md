@@ -1,6 +1,6 @@
 # File thuộc phạm vi C04
 
-25/10/2026 — **đã triển khai mã nguồn, chờ người dùng Publish Rules/seed, Sync/build/chạy và kiểm tra; chưa nghiệm thu.**
+25/10/2026 — **nền C04 đã được người dùng duyệt và commit `fce2c26`; phần trang chính/điều hướng bổ sung mới đang chờ kiểm tra.** Các mục bàn giao ban đầu và xác nhận bên dưới được giữ làm lịch sử.
 Nền: commit 211730a (C03), working tree sạch trước khi triển khai. C01/C02/C03 đã được người dùng duyệt.
 Lần này người dùng đính kèm yêu cầu triển khai trực tiếp; Codex thực hiện trong repo, không chuyển sang C05.
 
@@ -89,3 +89,21 @@ Người dùng: sửa name/active trên cả ba document → Sync/Run bản mớ
 Người dùng xác nhận đã sửa dữ liệu khu vực và thử lại các yêu cầu trong checklist, tất cả hoạt động ổn. Các mục C04-01 đến C04-23 và C04-R01 đến C04-R08 được ghi nhận đạt theo xác nhận tổng thể này. Không có thêm thông tin thiết bị/API hoặc bằng chứng từng ca được cung cấp; không tự bổ sung kết quả chi tiết hay khẳng định Codex đã kiểm thử độc lập.
 Xác nhận này thay thế các trạng thái chờ kiểm tra/chưa nghiệm thu C04 trong phần lịch sử phía trên. Lỗi danh mục khu vực và đợt rút gọn giao diện đã được người dùng kiểm tra lại và duyệt.
 Codex chỉ cập nhật báo cáo; không chạy build/test/lint/emulator/SMS, không sửa Console/deploy hoặc stage/commit/push. C02-F01 và các mục theo dõi từ luồng trước vẫn giữ nguyên. CCCD/QR thuộc C05; giọng đọc thuộc C22, chưa được tính là đã triển khai trong C04.
+
+## Bổ sung trang chính/điều hướng C04 và cửa vào Admin C05 — 25/10/2026
+
+Theo ảnh và yêu cầu mới, đã bổ sung trang chính riêng theo SEEKER/EMPLOYER/ADMIN, Tài khoản người thuê/Admin, topbar xanh logo + vai trò một dòng, thanh điều hướng dùng chung với C05. Sau chọn vai trò hoặc khôi phục phiên, tài khoản có vai trò vào trang chính thay vì form hồ sơ. Admin vào Tổng quan → Kiểm tra hồ sơ hoặc tab Xử lý; chưa đủ grant/User thì báo rõ, không tự cấp quyền.
+
+Người dùng đã chốt giữ mục chưa triển khai tại vị trí mẫu, khóa và ghi Sắp có. Thẻ/tabs việc làm, tin tuyển, ca làm, trợ giúp, báo cáo/tranh chấp/quá hạn/thống kê hiện chưa mở nghiệp vụ. Không dùng số lượng DEMO. Các form nghề nghiệp/liên kết phương thức và bảo vệ nháp được nối lại vào điều hướng mới.
+
+File mới: hai lớp `ui/navigation/RoleNavigationBar.java`, `RoleHomePanel.java`; bốn layout `role_topbar`, `role_navigation`, `role_home_content`, `role_account_content`; strings/styles/drawables `navigation_*` và `ic_nav_*`. Sửa MainActivity, ProfilePanel, ProfileViewModel, ProfileRepository, activity_main/profile_content; phía C05 sửa VerificationActivity/ViewModel/layout. Danh sách và giới hạn đầy đủ trong [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md).
+
+Không đổi Rules/schema/cấu hình Firebase cho đợt này. Đã rà tĩnh, chưa chạy build/test/app hoặc commit/push. Các ca C04-N01–N07 trong C04-CHECKLIST đang chờ người dùng; phê duyệt C04 cũ không tự phê duyệt bổ sung này.
+
+## Hồ sơ thống nhất theo đề xuất người dùng — 25/10/2026
+
+Người dùng đã kiểm tra và duyệt các ca bản sửa quyết định C05; tiếp tục đề xuất gộp lối vào Hồ sơ/xác minh. Đã phân vùng form Thông tin hồ sơ/Công việc/Số điện thoại, giữ Lưu và các chức năng hiện có. Khối Xác minh có một dòng trạng thái server và một nút theo trạng thái. Trang chủ/Tài khoản người dùng bỏ nút Hồ sơ xác minh riêng; Admin giữ lối Kiểm tra hồ sơ.
+
+ProfileRepository.Snapshot đọc thêm trạng thái xác minh, chỉ hiện đã xác minh khi đúng role/version/pointer; ProfileViewModel refresh khi mở/foreground, giữ nháp và kiểm callback UID/request. ProfilePanel nối nút động; C05 Activity/ViewModel mở thẳng request hiện hành từ cờ boolean, Quay lại về Hồ sơ. Người dùng đã duyệt vẫn có thể chủ động Cập nhật giấy tờ bên trong màn xem, không tự đưa vào gửi mới. Không đưa giấy tờ riêng lên trang Hồ sơ thường.
+
+Sửa MainActivity, ProfileRepository/ProfileViewModel/ProfilePanel/RoleHomePanel; profile_content/role_home_content/role_account_content, profile strings/styles; VerificationActivity/ViewModel, activity_verification và verification_strings. Báo cáo và bảng trạng thái trong [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md). Không đổi Rules/schema/Console/QR/upload/quyết định; không build/test/app/stage/commit/push. C04-P01–P06 đang chờ người dùng xác minh bản UI mới.

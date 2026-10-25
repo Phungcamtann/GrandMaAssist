@@ -25,6 +25,8 @@ import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ProfileRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.ProfileDraft;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.AuthViewModel;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ProfileViewModel;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleHomePanel;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
 
 /** Activity-owned bindings only. No Activity escapes into profile state or repositories. */
 public final class ProfilePanel {
@@ -36,9 +38,22 @@ public final class ProfilePanel {
     private List<String> areaCodes = new ArrayList<>();
     private String renderedAreaKey;
     private final OnBackPressedCallback back;
+    private final RoleHomePanel homePanel;
+    private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> verification;
 
     public ProfilePanel(AppCompatActivity activity, ProfileViewModel vm, AuthViewModel auth) {
         this.activity = activity; this.vm = vm; this.auth = auth;
+        verification=activity.registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),result->{
+            if(vm.busy || vm.dirty)return;
+            android.content.Intent data=result.getData();
+            if(data!=null && vm.snapshot!=null && com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser()!=null
+                    && vm.snapshot.uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if("HOME".equals(route))vm.showHome();else if("ACCOUNT".equals(route))vm.showAccount();
+                else if("PROFILE".equals(route))vm.showProfile();
+            }
+            vm.load();
+        });
         view(R.id.profileContent).setSaveFromParentEnabled(false);
         edit(R.id.profileDisplayName, value -> vm.draft.displayName = value);
         edit(R.id.profileSkills, value -> vm.draft.skills = value);
@@ -76,20 +91,57 @@ public final class ProfilePanel {
         click(R.id.btnProfileReload, () -> discardThen(vm::load));
         click(R.id.btnAreasReload, vm::loadAreas);
         click(R.id.btnProfileSync, () -> discardThen(() -> { vm.dirty = false; vm.syncPhone(); }));
-        click(R.id.btnProfileAccount, vm::showAccount);
-        click(R.id.btnReturnProfile, () -> { vm.showProfile(); activity.findViewById(R.id.main).scrollTo(0, 0); });
-        click(R.id.btnProfilePhone, () -> { vm.showAccount(); auth.beginAccountMethod(false); });
+        click(R.id.btnProfileAccount,()->{if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();scrollTop();});
+        click(R.id.btnProfileVerification,()->{
+            if(vm.verificationLoading)return;
+            if("UNKNOWN".equals(vm.verificationStatus))vm.refreshVerification();else openVerification();
+        });
+        click(R.id.btnProfileBackHome,()->navigate(RoleNavigationBar.Action.HOME));
+        click(R.id.btnReturnProfile,()->{if(vm.snapshot==null)vm.showProfile();else vm.showAccount();scrollTop();});
+        click(R.id.btnProfilePhone, () -> { vm.showSecurity(); auth.beginAccountMethod(false);scrollTop(); });
         click(R.id.btnProfileSignOut, this::signOut);
         click(R.id.btnSignOut, this::signOut);
         back = new OnBackPressedCallback(false) {
             @Override public void handleOnBackPressed() {
                 if (vm.busy) {
                     new AlertDialog.Builder(activity).setMessage(R.string.p_busy).setPositiveButton(android.R.string.ok, null).show();
-                } else if (vm.accountPage) vm.showProfile();
+                } else if (vm.accountPage) {if(vm.snapshot==null)vm.showProfile();else vm.showAccount();scrollTop();}
+                else if(vm.snapshot!=null && vm.destination!=ProfileViewModel.Destination.HOME)navigate(RoleNavigationBar.Action.HOME);
                 else discardThen(() -> { vm.dirty = false; activity.finish(); });
             }
         };
         activity.getOnBackPressedDispatcher().addCallback(activity, back);
+        homePanel=new RoleHomePanel(activity,vm,this::navigate,this::openVerification,()->{vm.showSecurity();scrollTop();},this::signOut);
+    }
+    private void scrollTop(){activity.findViewById(R.id.main).scrollTo(0,0);}
+    private void navigate(RoleNavigationBar.Action action){
+        if(vm.busy || auth.getState().getValue().isBusy())return;
+        switch(action){
+            case HOME:discardThen(()->{vm.dirty=false;vm.showHome();scrollTop();});break;
+            case PROFILE:
+                if(vm.snapshot!=null && "ADMIN".equals(vm.snapshot.role))vm.showAccount();
+                else{vm.showProfile();vm.refreshVerification();}
+                scrollTop();break;
+            case ACCOUNT:vm.showAccount();scrollTop();break;
+            case PROCESS:openVerification();break;
+            default:break;
+        }
+    }
+    private void openVerification(){
+        if(vm.busy || auth.getState().getValue().isBusy() || vm.snapshot==null)return;
+        if(vm.dirty){new AlertDialog.Builder(activity).setMessage("Lưu hoặc bỏ các thay đổi hồ sơ trước khi mở xác minh.")
+                .setPositiveButton(android.R.string.ok,null).show();return;}
+        if("ADMIN".equals(vm.snapshot.role) && !"ACTIVE".equals(vm.snapshot.status)){
+            new AlertDialog.Builder(activity).setMessage(R.string.p_inactive).setPositiveButton(android.R.string.ok,null).show();return;
+        }
+        boolean viewCurrent="SUBMITTED".equals(vm.verificationStatus) || "APPROVED".equals(vm.verificationStatus) || "VERIFIED".equals(vm.verificationStatus);
+        verification.launch(new android.content.Intent(activity,
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.verification.VerificationActivity.class)
+                .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.verification.VerificationActivity.OPEN_CURRENT,viewCurrent));
+    }
+    public void onForeground(){
+        if(vm.destination==ProfileViewModel.Destination.PROFILE && !auth.methods().active()
+                && !auth.getState().getValue().isBusy())vm.refreshVerification();
     }
     private View view(int id) { return activity.findViewById(id); }
     private void click(int id, Runnable action) { view(id).setOnClickListener(v -> action.run()); }
@@ -102,7 +154,7 @@ public final class ProfilePanel {
         if (!vm.dirty) { action.run(); return; }
         new AlertDialog.Builder(activity).setMessage(R.string.p_unsaved)
                 .setNegativeButton(R.string.p_keep, null)
-                .setPositiveButton(R.string.p_discard, (dialog, which) -> action.run()).show();
+                .setPositiveButton(R.string.p_discard, (dialog, which) -> { vm.discardEdits(); action.run(); }).show();
     }
     private void edit(int id, Consumer<String> update) {
         ((EditText) view(id)).addTextChangedListener(new TextWatcher() {
@@ -136,26 +188,35 @@ public final class ProfilePanel {
         boolean methods = auth.methods().active();
         vm.bind(account, methods || state.checkingSession);
         rendering = true;
-        boolean profile = account && !methods && !vm.accountPage;
+        boolean known=account && vm.snapshot!=null && (vm.screen==ProfileViewModel.Screen.PROFILE || vm.screen==ProfileViewModel.Screen.ADMIN);
+        boolean home=known && !methods && vm.destination==ProfileViewModel.Destination.HOME;
+        boolean hub=known && !methods && vm.destination==ProfileViewModel.Destination.ACCOUNT;
+        boolean security=account && (methods || vm.accountPage);
+        boolean profile=account && !home && !hub && !security;
         show(R.id.profileContent, profile);
-        show(R.id.accountContent, account && !profile);
-        show(R.id.methodsContent, account && !profile);
-        if (profile && !state.error) {
+        show(R.id.accountContent,security);
+        show(R.id.methodsContent,security);
+        if (!security && !state.error) {
             // Routine Auth diagnostics stay on the account screen, not on the form.
             show(R.id.authStatus, false);
             show(R.id.btnRetry, false);
         }
-        show(R.id.btnReturnProfile, account && !methods);
+        show(R.id.btnReturnProfile,security && !methods);
+        text(R.id.btnReturnProfile,vm.snapshot==null?R.string.n_back:R.string.n_back_account);
+        show(R.id.btnProfileBackHome,known && profile);
+        show(R.id.profileRole,false);
         boolean role = vm.screen == ProfileViewModel.Screen.ROLE;
         boolean editor = vm.screen == ProfileViewModel.Screen.PROFILE;
         show(R.id.rolePicker, role);
         show(R.id.profileEditor, editor);
         show(R.id.adminProfile, vm.screen == ProfileViewModel.Screen.ADMIN);
+        show(R.id.profileVerificationSection,editor && vm.snapshot!=null);
         int message = vm.busy && vm.message == 0 ? R.string.p_loading : vm.message;
         text(R.id.profileMessage, message);
         show(R.id.profileMessage, message != 0);
         ViewCompat.setAccessibilityLiveRegion(view(R.id.profileMessage), ViewCompat.ACCESSIBILITY_LIVE_REGION_POLITE);
-        show(R.id.btnProfileReload, vm.screen == ProfileViewModel.Screen.ERROR || vm.readRequired);
+        show(R.id.btnProfileReload, vm.screen == ProfileViewModel.Screen.ERROR || vm.screen==ProfileViewModel.Screen.ROLE || vm.readRequired);
+        text(R.id.btnProfileReload,vm.screen==ProfileViewModel.Screen.ROLE?R.string.n_check_account:R.string.p_reload);
         enable(view(R.id.rolePicker), !vm.busy);
         for (int id : new int[]{R.id.btnRoleSeeker, R.id.btnRoleEmployer}) {
             boolean selected = vm.selectedRole.equals(id == R.id.btnRoleSeeker ? "SEEKER" : "EMPLOYER");
@@ -199,17 +260,40 @@ public final class ProfilePanel {
             // Completeness/authorization explanations belong in help and validation, not
             // as permanent paragraphs between the form and its primary action.
             show(R.id.profileCompleteness, false);
+            renderVerification(state);
         }
         for (int id : new int[]{R.id.btnProfileReload, R.id.btnProfileAccount,
-                R.id.btnProfileSignOut, R.id.btnReturnProfile}) view(id).setEnabled(!vm.busy);
+                R.id.btnProfileSignOut, R.id.btnReturnProfile,R.id.btnProfileBackHome}) view(id).setEnabled(!vm.busy);
         if (vm.busy) for (int id : new int[]{R.id.btnSignOut, R.id.btnAccountPhone, R.id.btnAccountGoogle}) view(id).setEnabled(false);
-        back.setEnabled(account && !methods && (vm.busy || vm.dirty || vm.accountPage));
+        back.setEnabled(account && !methods && (vm.busy || vm.dirty || vm.destination!=ProfileViewModel.Destination.HOME));
+        RoleNavigationBar.Action selected=vm.destination==ProfileViewModel.Destination.HOME?RoleNavigationBar.Action.HOME:
+                vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)?RoleNavigationBar.Action.PROFILE:RoleNavigationBar.Action.ACCOUNT;
+        homePanel.render(state,known && !methods,home,hub,selected);
         if (!account) {
             for (int id : new int[]{R.id.profileDisplayName, R.id.profileSkills, R.id.profileExperience,
-                    R.id.profileOrganization, R.id.profileIntroduction, R.id.profileContact, R.id.profileContactState}) set(id, "");
+                    R.id.profileOrganization, R.id.profileIntroduction, R.id.profileContact, R.id.profileContactState,R.id.profileVerificationStatus}) set(id, "");
             renderedAreas = null; renderedAreaKey = null;
         }
         rendering = false;
+    }
+    private void renderVerification(AuthRepository.State state){
+        int label=R.string.p_verification_unknown,button=R.string.p_reload;
+        switch(vm.verificationStatus){
+            case "NOT_SUBMITTED":label=R.string.p_verification_none;button=R.string.p_verify;break;
+            case "SUBMITTED":label=R.string.p_verification_pending;button=R.string.p_verification_submitted;break;
+            case "APPROVED":case "VERIFIED":label=R.string.p_verification_approved;button=R.string.p_verification_view;break;
+            case "NEEDS_INFO":label=R.string.p_verification_needs_info;button=R.string.p_verification_supplement;break;
+            case "REJECTED":label=R.string.p_verification_rejected;button=R.string.p_verification_update;break;
+            case "REVERIFY_REQUIRED":label=R.string.p_verification_again;button=R.string.p_verification_retry;break;
+        }
+        if(vm.verificationFailed)label=R.string.p_verification_failed;
+        set(R.id.profileVerificationStatus,vm.verificationLoading?activity.getString(R.string.p_verification_loading):
+                activity.getString(R.string.p_verification_label,activity.getString(label)));
+        boolean verified="APPROVED".equals(vm.verificationStatus) || "VERIFIED".equals(vm.verificationStatus);
+        ((TextView)view(R.id.profileVerificationStatus)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,
+                !vm.verificationLoading && verified?R.color.brand_green:R.color.text_charcoal));
+        text(R.id.btnProfileVerification,button);
+        view(R.id.btnProfileVerification).setEnabled(!vm.busy && !vm.verificationLoading && !state.isBusy());
     }
     private void renderAreas() {
         if (renderedAreas != vm.areas || !vm.draft.areaCode.equals(renderedAreaKey)) {

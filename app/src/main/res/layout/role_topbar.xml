@@ -1,0 +1,12 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/roleTopbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:minHeight="56dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+    android:background="@drawable/brand_bar" android:gravity="center_vertical" android:orientation="horizontal">
+    <ImageView android:id="@+id/roleTopbarLogo" android:layout_width="@dimen/brand_logo_width" android:layout_height="wrap_content" android:adjustViewBounds="true"
+        android:padding="@dimen/brand_logo_padding" android:background="@drawable/brand_logo_surface"
+        android:src="@drawable/grandma_primary_logo" android:scaleType="fitCenter" android:importantForAccessibility="no"/>
+    <TextView android:id="@+id/roleTopbarLabel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+        android:layout_marginStart="12dp" android:gravity="end|center_vertical" android:text="@string/n_common"
+        android:textAppearance="@style/TextAppearance.GrandMa.Label" android:textSize="16sp" android:maxLines="1" android:ellipsize="end"
+        android:textColor="@color/white" android:saveEnabled="false"/>
+</LinearLayout>

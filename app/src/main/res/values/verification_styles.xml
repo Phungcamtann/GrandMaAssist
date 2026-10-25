@@ -1,0 +1,39 @@
+<resources>
+    <style name="Widget.GrandMa.VerificationSection" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:background">@drawable/verification_section</item>
+        <item name="android:saveEnabled">false</item>
+    </style>
+    <style name="Widget.GrandMa.VerificationPrimary" parent="Widget.GrandMa.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    <style name="Widget.GrandMa.VerificationSecondary" parent="Widget.GrandMa.Button.Secondary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    <style name="Widget.GrandMa.VerificationHeading" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.GrandMa.Label</item>
+        <item name="android:textColor">@color/brand_green</item>
+        <item name="android:accessibilityHeading">true</item>
+    </style>
+    <style name="Widget.GrandMa.VerificationMessage" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.GrandMa.Body</item>
+        <item name="android:accessibilityLiveRegion">polite</item>
+        <item name="android:saveEnabled">false</item>
+        <item name="android:visibility">gone</item>
+    </style>
+</resources>

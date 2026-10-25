@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/roleHomeContent" android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="@dimen/screen_padding" android:visibility="gone" android:saveEnabled="false">
+    <TextView android:id="@+id/homeTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true" android:saveEnabled="false"/>
+    <TextView android:id="@+id/homeIntro" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
+    <LinearLayout android:id="@+id/homeMember" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeMainFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_find_jobs" android:drawableStart="@drawable/ic_nav_search"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeAttentionFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_attention" android:drawableStart="@drawable/ic_nav_queue"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeWorkFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_my_jobs" android:drawableStart="@drawable/ic_role_work"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOtherFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_other_jobs" android:drawableStart="@drawable/ic_nav_search"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOpenProfile" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_profile_open" android:drawableStart="@drawable/ic_nav_account"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeHelpFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_help"/>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/homeAdmin" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homePostsFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_posts"/>
+        <LinearLayout style="@style/Widget.GrandMa.HomeCard">
+            <TextView android:id="@+id/homeQueueTitle" style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/n_queue_title" android:saveEnabled="false"/>
+            <TextView android:id="@+id/homeQueueCounts" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Body" android:accessibilityLiveRegion="polite" android:saveEnabled="false"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeReviewProfiles" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/n_admin_review"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeRefreshCounts" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
+        </LinearLayout>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeReportsFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_reports"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeDisputesFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_disputes"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOverdueFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_overdue"/>
+    </LinearLayout>
+</LinearLayout>

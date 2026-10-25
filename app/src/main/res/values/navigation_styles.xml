@@ -1,0 +1,25 @@
+<resources>
+    <style name="Widget.GrandMa.HomeCard" parent="Widget.GrandMa.VerificationSection">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+    <style name="Widget.GrandMa.HomeButton" parent="Widget.GrandMa.Button.Secondary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:background">@drawable/verification_section</item>
+    </style>
+    <style name="Widget.GrandMa.HomeFuture" parent="Widget.GrandMa.HomeButton">
+        <item name="android:enabled">false</item>
+        <item name="android:textColor">@color/button_disabled_text</item>
+    </style>
+    <style name="Widget.GrandMa.BackLink" parent="Widget.GrandMa.Button.Secondary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:paddingStart">0dp</item>
+    </style>
+</resources>

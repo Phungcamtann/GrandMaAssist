@@ -9,6 +9,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.firestore.AggregateQuerySnapshot;
+import com.google.firebase.firestore.AggregateSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,13 +33,18 @@ public final class ProfileRepository {
         @Override public String toString() { return name; }
     }
     public static final class Snapshot {
-        public final String uid, role, phone, status;
+        public final String uid, role, phone, status, verificationStatus;
         public final long version;
         public final ProfileDraft draft;
-        Snapshot(String uid, String role, String phone, String status, long version, ProfileDraft draft) {
+        Snapshot(String uid, String role, String phone, String status, long version, ProfileDraft draft, String verificationStatus) {
             this.uid = uid; this.role = role; this.phone = phone; this.status = status;
             this.version = version; this.draft = draft;
+            this.verificationStatus=verificationStatus;
         }
+    }
+    public static final class AdminCounts {
+        public final long seeker, employer;
+        AdminCounts(long seeker,long employer){this.seeker=seeker;this.employer=employer;}
     }
     private static final class Proof {
         final String uid, phone;
@@ -69,11 +76,13 @@ public final class ProfileRepository {
             DocumentSnapshot access = tx.get(db.collection("adminAccess").document(uid));
             boolean admin = access.exists() && Boolean.TRUE.equals(access.getBoolean("enabled"));
             if (admin) {
-                if (!user.exists() || !"ADMIN".equals(user.getString("role"))) throw new Failure("SCHEMA");
-                return new Snapshot(uid, "ADMIN", proof.phone, text(user, "accountStatus"), 0, new ProfileDraft());
+                if (!user.exists() || !"ADMIN".equals(user.getString("role"))) throw new Failure("ADMIN_ACCESS");
+                ProfileDraft d=new ProfileDraft();d.displayName=text(user,"displayName");
+                return new Snapshot(uid, "ADMIN", proof.phone, text(user, "accountStatus"), 0, d, "UNKNOWN");
             }
             if (!user.exists()) return null;
             String role = user.getString("role");
+            if("ADMIN".equals(role))throw new Failure("ADMIN_ACCESS");
             if (!"SEEKER".equals(role) && !"EMPLOYER".equals(role)) throw new Failure("SCHEMA");
             DocumentSnapshot profile = tx.get(profileRef(uid, role));
             Long version = user.getLong("version");
@@ -92,8 +101,35 @@ public final class ProfileRepository {
                 d.introduction = text(profile, "introduction");
             }
             return new Snapshot(uid, role, text(user, "phoneE164"),
-                    text(user, "accountStatus"), version, d);
+                    text(user, "accountStatus"), version, d, verificationStatus(user,profile,role));
         }));
+    }
+    /** Summary only. Business authorization remains at the request/version checks and Rules. */
+    private static String verificationStatus(DocumentSnapshot user,DocumentSnapshot profile,String role){
+        String field="SEEKER".equals(role)?"retirementStatus":"identityStatus";
+        if(!user.contains(field))return "NOT_SUBMITTED"; // Existing C04 users before their first submission.
+        String status=text(user,field);
+        String approved="SEEKER".equals(role)?"APPROVED":"VERIFIED";
+        if(approved.equals(status)){
+            Object accepted=user.get("approvedIdentityProfileVersion"),current=profile.get("identityProfileVersion");
+            String pointer="SEEKER".equals(role)?"currentRetirementRequestId":"identityRequestId";
+            return accepted instanceof Long && current instanceof Long && (Long)accepted>0 && accepted.equals(current) && !text(user,pointer).isEmpty()
+                    ?status:"UNKNOWN";
+        }
+        return java.util.Arrays.asList("NOT_SUBMITTED","SUBMITTED","NEEDS_INFO","REJECTED","REVERIFY_REQUIRED").contains(status)?status:"UNKNOWN";
+    }
+    public Task<AdminCounts> adminCounts(String uid){
+        return withProof(uid,proof->{
+            Task<AggregateQuerySnapshot> seeker=db.collection("retirementRequests").whereEqualTo("status","SUBMITTED")
+                    .limit(50).count().get(AggregateSource.SERVER);
+            Task<AggregateQuerySnapshot> employer=db.collection("identityRequests").whereEqualTo("status","SUBMITTED")
+                    .limit(50).count().get(AggregateSource.SERVER);
+            return Tasks.whenAll(seeker,employer).continueWith(done->{
+                if(!done.isSuccessful())throw done.getException();
+                if(!same(uid))throw new Failure("SESSION");
+                return new AdminCounts(seeker.getResult().getCount(),employer.getResult().getCount());
+            });
+        });
     }
     public Task<List<Area>> areas() {
         return db.collection("areas").whereEqualTo("active", true).get(Source.SERVER).continueWith(task -> {
@@ -151,8 +187,8 @@ public final class ProfileRepository {
             updates.put("displayName", draft.displayName.trim());
             updates.put("version", snapshot.version + 1); updates.put("updatedAt", FieldValue.serverTimestamp());
             Map<String, Object> data = profileData(proof.uid, snapshot.role, draft);
-            data.put("createdAt", oldProfile.get("createdAt"));
-            tx.update(ref, updates); tx.set(profile, data);
+            // Preserve identity fields written by the verification transaction.
+            tx.update(ref, updates); tx.update(profile, data);
             return null;
         }));
     }
@@ -206,4 +242,3 @@ public final class ProfileRepository {
         return result;
     }
 }
-

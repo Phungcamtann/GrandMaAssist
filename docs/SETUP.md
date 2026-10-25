@@ -194,3 +194,53 @@ Người dùng: sửa name/active trên cả ba document → Sync/Run bản mớ
 Người dùng xác nhận đã sửa dữ liệu khu vực và thử lại các yêu cầu trong checklist, tất cả hoạt động ổn. Các mục C04-01 đến C04-23 và C04-R01 đến C04-R08 được ghi nhận đạt theo xác nhận tổng thể này. Không có thêm thông tin thiết bị/API hoặc bằng chứng từng ca được cung cấp; không tự bổ sung kết quả chi tiết hay khẳng định Codex đã kiểm thử độc lập.
 Xác nhận này thay thế các trạng thái chờ kiểm tra/chưa nghiệm thu C04 trong phần lịch sử phía trên. Lỗi danh mục khu vực và đợt rút gọn giao diện đã được người dùng kiểm tra lại và duyệt.
 Codex chỉ cập nhật báo cáo; không chạy build/test/lint/emulator/SMS, không sửa Console/deploy hoặc stage/commit/push. C02-F01 và các mục theo dõi từ luồng trước vẫn giữ nguyên. CCCD/QR thuộc C05; giọng đọc thuộc C22, chưa được tính là đã triển khai trong C04.
+
+## Bàn giao mã nguồn C05 — 25/10/2026
+
+Trạng thái hiện hành: C04 đã duyệt và commit fce2c26; C05 đã triển khai mã nguồn, CHỜ người dùng kiểm tra, chưa nghiệm thu. Không tự kế thừa kết quả C04 cho phần C05.
+
+Có màn xác minh riêng từ hồ sơ, camera/chọn ảnh/xem lại/QR, hồ sơ SEEKER với bằng chứng nghỉ hưu/BHXH mô phỏng và danh tính mẫu EMPLOYER, upload ảnh riêng, request/version bất biến, Admin xem/duyệt/bổ sung/từ chối/thu hồi và thông báo trong app. Lưu nghề nghiệp C04 giữ nguyên dữ liệu định danh C05. Giọng đọc vẫn thuộc C22.
+
+Trước chạy: Publish toàn bộ firebase/firestore.rules và firebase/storage.rules mới tại grandmaassist-a1dfa; chấp nhận kết nối Storage–Firestore nếu Console yêu cầu; chuẩn bị Admin riêng theo tài liệu. Không cần xóa dữ liệu C04 hoặc sửa JSON/SHA/Auth đang chạy ổn.
+
+Xem docs/C05-CONSOLE-SCHEMA.md (thiết lập), docs/C05-FILES.md (phạm vi/giới hạn/file) và docs/C05-CHECKLIST.md (các ca chưa kiểm tra). Codex chỉ rà nguồn/XML/resource/diff, không build/test/lint/emulator/SMS/kiểm thử Rules, không Console/deploy/stage/commit/push. Người dùng tự Sync/Run/kiểm tra rồi mới chốt. C02-F01 và các mục theo dõi cũ giữ nguyên.
+
+### Cập nhật C05 sau lần Sync/Run đầu — 25/10/2026
+
+Người dùng đã Sync/Run app thành công, nhưng chưa duyệt C05 do bố cục và chọn ảnh bằng chứng. Đã tách vùng Căn cước/Bằng chứng/Gửi, giãn nút 12dp/khối 24dp, tách đường nhận ảnh và cho bằng chứng hiển thị ngay sau chọn hợp lệ. Chờ người dùng kiểm tra lại theo C05-CHECKLIST mục C05-UI01–UI06. Chi tiết trong C05-FILES. Đợt này không đổi Rules/schema/Firebase; không cần Publish lại Rules chỉ vì bản sửa giao diện. Codex không build/test/chạy app hoặc commit/push.
+
+### C05 — rà lỗi QR sau xác nhận giao diện/ảnh
+
+Người dùng xác nhận giao diện cải thiện và phần ảnh đã thành công; lỗi còn lại là thông báo đọc QR sau nhận ảnh. Đã chuyển scan sang ảnh nguồn tạm trong RAM, thử vùng QR tuần tự và tách lỗi không thấy/không rõ/khác định dạng/dữ liệu sai/bộ đọc. Chờ người dùng kiểm tra theo C05-QR01–QR07, chưa nghiệm thu C05. Không đổi Rules/schema/dependency hoặc tự build/test/commit. Chi tiết và mã Logcat an toàn nằm trong C05-FILES.
+
+### C05 — tương thích QR 6 trường với dấu ||
+
+Đã nhận cấu trúc QR đã che dữ liệu do người dùng cung cấp cho thẻ cấp năm 2024: 6 mục ngăn bằng || và dấu rỗng ở cuối, khác parser cũ 7 mục | có ô CMND. Bổ sung parserVersion=2 cho mẫu này, giữ version=1 cũ; Rules chấp nhận [1,2]. Cần người dùng Publish lại toàn bộ firebase/firestore.rules để gửi hồ sơ version=2, rồi Run/đối chiếu họ tên/ngày sinh/gửi. Storage Rules/JSON không đổi; chưa tự build/test/commit hoặc nghiệm thu. Xem C05-FILES và C05-CHECKLIST mục C05-FMT01–FMT04.
+
+## Người dùng xác nhận QR/gửi hồ sơ và chuyển sang kiểm tra Admin — 25/10/2026
+
+Người dùng xác nhận đã cập nhật, quét/đọc QR thành công, đối chiếu thông tin đều đúng, giao diện ổn và gửi hồ sơ thành công. Đây là kết quả do người dùng thực hiện; Codex không chạy lại hoặc tự xem dữ liệu thật. Phần cấp tài khoản Admin, đăng nhập, xem ảnh, chấp thuận/bổ sung/từ chối/thu hồi và kết quả ở tài khoản người dùng vẫn chờ kiểm tra; chưa đánh dấu toàn bộ C05 đạt.
+
+Đã bổ sung docs/C05-ADMIN-GUIDE.md: đăng nhập Google riêng để có UID, dừng trước chọn role, cấp adminAccess enabled=true và users role ADMIN/accountStatus ACTIVE bằng Console, đăng nhập lại rồi Duyệt hồ sơ. Có trình tự xem ảnh, chọn kết quả đối chiếu mô phỏng, nhận xét, xác nhận và kiểm tra kết quả ở chủ hồ sơ.
+
+Các ca hồi quy/Rules/cạnh tranh/timeout/thiết bị không tự được coi đạt chỉ từ xác nhận quét và gửi thành công. Không chạy build/test, không Console/deploy/stage/commit/push trong đợt hướng dẫn này.
+
+## Bổ sung trang chính/điều hướng và cửa vào Admin — 25/10/2026
+
+Đã bổ sung mã nguồn theo ảnh/yêu cầu hiện hành: topbar xanh logo + vai trò một dòng, trang chính theo vai trò, Tài khoản người thuê/Admin và thanh điều hướng dùng chung Main/C05. Người dùng chọn giữ các mục chưa triển khai ở vị trí mẫu, khóa và ghi Sắp có. Không có số việc/hàng đợi DEMO; số SUBMITTED Admin đọc server, giới hạn 50 mỗi loại và có nhãn 50+ nếu chạm giới hạn.
+
+Admin có đủ grant/User ADMIN/ACTIVE → Tổng quan → Kiểm tra hồ sơ hoặc tab Xử lý → chọn loại và tên → chi tiết/ảnh/quyết định. Hướng dẫn cấp quyền giữ nguyên; nếu đang ở màn chọn vai trò sau khi quản lý cấp, có Kiểm tra lại tài khoản. Không chọn/sửa vai trò người dùng thành Admin trong client. Xem [C05-ADMIN-GUIDE](C05-ADMIN-GUIDE.md).
+
+Đợt này không thay Rules/schema/Firebase: nếu bản C05/parserVersion 2 đang gửi thành công thì chỉ cần Sync/Run mã nguồn mới. Thử lại từng vai trò, điều hướng/nháp/xoay/đăng xuất và Admin đọc/duyệt/kết quả theo các mục C04-N01–N07 và C05-N01–N06. Chi tiết [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md). Chưa tự coi phần bổ sung đạt; Codex chỉ rà tĩnh, không build/test/app/kiểm thử Rules hoặc Console/deploy/stage/commit/push.
+
+## Admin đã vào hàng đợi, bản sửa thao tác quyết định — 25/10/2026
+
+Người dùng xác nhận đã cấp lại đúng hai document, vào Admin và tải hồ sơ chờ thành công. Chấp thuận chưa lưu; app vẫn cuộn/quay lại được. Đã sửa validation bắt nhập nhận xét cho mọi quyết định và vị trí phản hồi bị khuất: Chấp thuận không cần gõ; Bổ sung/Từ chối/Thu hồi mới mở ô lý do; trạng thái lưu/lỗi ngay cạnh nút, có thông báo thành công và tải lại danh sách.
+
+Không đổi Rules/schema/cấu hình Firebase; Chấp thuận ghi dòng trạng thái chuẩn vào reason để tương thích bản Rules hiện có. Chỉ cần Sync/Run mã nguồn mới, thử C05-D01–D06 theo [C05-CHECKLIST](C05-CHECKLIST.md) và [C05-ADMIN-GUIDE](C05-ADMIN-GUIDE.md). Nếu còn lỗi lấy các dòng GrandMaReview, không gửi giấy tờ/UID/raw QR. Chưa tự coi quyết định/kết quả đã đạt; Codex không build/test/app/Console/deploy/stage/commit/push.
+
+## Người dùng duyệt quyết định; cải tiến một trang Hồ sơ — 25/10/2026
+
+Đã ghi nhận người dùng kiểm tra lại các ca sau bản sửa quyết định và duyệt, D01–D06 đạt theo xác nhận tổng thể. Đề xuất tiếp theo đã triển khai mã nguồn: Trang chủ/Tài khoản người dùng chỉ có Xem hồ sơ; trong Hồ sơ phân vùng thông tin/công việc/số điện thoại và khối Xác minh với trạng thái/nút theo tiến trình. Đã duyệt mở Xem lại chỉ đọc, đang chờ mở bản đã gửi, còn các trạng thái cần hành động mở đúng wizard. Admin giữ lối duyệt riêng.
+
+Không cần sửa Console/Publish Rules/schema. Chỉ Sync/Run và thử C04-P01–P06 trong [C04-CHECKLIST](C04-CHECKLIST.md); phần UI mới chưa được người dùng xác minh. Trạng thái đọc lại khi mở/foreground, nháp công việc được giữ. Không build/test/app/stage/commit/push trong đợt Codex này; chi tiết [C04-C05-NAVIGATION](C04-C05-NAVIGATION.md).

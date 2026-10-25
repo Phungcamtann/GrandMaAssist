@@ -88,11 +88,12 @@ public class MainActivity extends AppCompatActivity {
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
                 .setAppearanceLightNavigationBars(true);
         setContentView(R.layout.activity_main);
-        View root = findViewById(R.id.main);
+        View root = findViewById(R.id.appRoot);
         ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
             Insets safe = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()
                     | WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.ime());
             view.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+            if(profilePanel!=null)profilePanel.render(model.getState().getValue());
             return windowInsets;
         });
         ViewCompat.requestApplyInsets(root);
@@ -158,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         // force token; outside that window, never send automatically on foreground/rotation.
         launchPhoneRequest(model.reattachPhone());
         uiHandler.post(countdown);
+        if(profilePanel!=null)profilePanel.onForeground();
     }
 
     @Override protected void onStop() {
