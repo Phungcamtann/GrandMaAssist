@@ -51,15 +51,21 @@ public final class AuthRepository {
     public enum Retry { NONE, CHECK_SESSION, CLEAR_CREDENTIALS }
 
     public static final class Account {
+        private final String uid;
         public final String name;
         public final String email;
+        public final String googleEmail;
         public final boolean google;
         public final boolean phone;
         public final String phoneNumber;
 
         private Account(FirebaseUser user) {
+            uid = user.getUid();
             name = user.getDisplayName();
             email = user.getEmail();
+            googleEmail = user.getProviderData().stream()
+                    .filter(provider -> GoogleAuthProvider.PROVIDER_ID.equals(provider.getProviderId()))
+                    .map(provider -> provider.getEmail() == null ? "" : provider.getEmail()).findFirst().orElse("");
             google = user.getProviderData().stream()
                     .anyMatch(provider -> GoogleAuthProvider.PROVIDER_ID.equals(provider.getProviderId()));
             phone = user.getProviderData().stream()
@@ -102,6 +108,7 @@ public final class AuthRepository {
     private final Executor credentialWorker = new ThreadPoolExecutor(0, 2,
             30L, TimeUnit.SECONDS, new SynchronousQueue<>());
     private final MutableLiveData<State> state;
+    private final AccountMethodsFlow methods;
     private long version;
     private boolean initialAuthObserved;
     private boolean exchangeInFlight;
@@ -124,10 +131,17 @@ public final class AuthRepository {
         state = new MutableLiveData<>(user == null
                 ? ready(0, false, Retry.NONE)
                 : account(user, R.string.auth_session_local, false, false, Retry.CHECK_SESSION));
+        methods = new AccountMethodsFlow(auth, mainExecutor, this::publishCurrentAccount);
         // Firebase can invalidate the locally stored session during refresh.
         auth.addAuthStateListener(firebaseAuth -> {
             State current = state.getValue();
             FirebaseUser observed = firebaseAuth.getCurrentUser();
+            methods.sessionChanged();
+            if (current.account != null && observed != null && !current.account.uid.equals(observed.getUid())) {
+                ++version;
+                state.setValue(account(observed, R.string.auth_session_local, false, false, Retry.CHECK_SESSION));
+                return;
+            }
             if (!initialAuthObserved) {
                 initialAuthObserved = true;
                 if (version == 0 && current.phase == Phase.READY && observed != null) {
@@ -143,6 +157,17 @@ public final class AuthRepository {
         });
     }
 
+    private void publishCurrentAccount() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (state.getValue().phase == Phase.ACCOUNT && user != null) {
+            state.setValue(account(user, 0, false, false, Retry.NONE));
+        }
+    }
+    public AccountMethodsFlow getMethods() { return methods; }
+    public void beginAccountMethod(boolean google) {
+        State current = state.getValue();
+        if (current.phase == Phase.ACCOUNT && !current.checkingSession && !exchangeInFlight && !methods.busy()) methods.begin(google);
+    }
     public LiveData<State> getState() { return state; }
     public LiveData<PhoneSignInFlow.State> getPhoneState() { return phoneFlow.getState(); }
 
@@ -154,17 +179,18 @@ public final class AuthRepository {
     }
 
     public void updatePhoneInput(String value) {
-        if (state.getValue().phase == Phase.READY) phoneFlow.updateInput(value);
+        if (methods.active()) methods.updateInput(value);
+        else if (state.getValue().phase == Phase.READY) phoneFlow.updateInput(value);
     }
 
-    public void reviewPhone() { if (canUsePhone()) phoneFlow.review(); }
+    public void reviewPhone() { if (methods.active()) methods.review(); else if (canUsePhone()) phoneFlow.review(); }
     public PhoneSignInFlow.Request sendPhone(boolean resend) {
-        return canUsePhone() ? phoneFlow.send(resend) : null;
+        return methods.active() ? methods.send(resend) : canUsePhone() ? phoneFlow.send(resend) : null;
     }
     public PhoneSignInFlow.Request reattachPhone() {
-        return canUsePhone() ? phoneFlow.reattach() : null;
+        return methods.active() ? methods.reattach() : canUsePhone() ? phoneFlow.reattach() : null;
     }
-    public void verifyPhone(String code) { if (canUsePhone()) phoneFlow.verify(code); }
+    public void verifyPhone(String code) { if (methods.active()) methods.verify(code); else if (canUsePhone()) phoneFlow.verify(code); }
     public void restorePhoneProcess(boolean active) {
         if (state.getValue().account == null) phoneFlow.processRestored(active);
     }
@@ -175,6 +201,7 @@ public final class AuthRepository {
     }
 
     public void cancelPhone() {
+        if (methods.active()) { methods.editPhone(); return; }
         if (state.getValue().account != null) return;
         if (exchangeInFlight && !phoneExchange) return;
         if (exchangeInFlight) recoveryFlags.edit().putBoolean("cancelled_phone_exchange", true).apply();
@@ -226,6 +253,7 @@ public final class AuthRepository {
     }
 
     public long beginGooglePicker() {
+        if (methods.active()) return methods.beginPicker();
         if (state.getValue().phase != Phase.READY || exchangeInFlight
                 || auth.getCurrentUser() != null
                 || phoneFlow.getState().getValue().method != PhoneSignInFlow.Method.GOOGLE) return 0;
@@ -236,6 +264,7 @@ public final class AuthRepository {
     }
 
     public void pickerFailed(long request, int message, boolean error) {
+        if (request < 0) { methods.pickerFailed(request, message, error); return; }
         if (!isCurrent(request, Phase.PICKING_GOOGLE)) return;
         ++version;
         state.setValue(ready(message, error, Retry.NONE));
@@ -246,6 +275,7 @@ public final class AuthRepository {
     }
 
     public void signIn(long request, Credential credential) {
+        if (request < 0) { methods.picked(request, credential); return; }
         if (!isCurrent(request, Phase.PICKING_GOOGLE)) return;
         if (!(credential instanceof CustomCredential)
                 || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
@@ -290,7 +320,7 @@ public final class AuthRepository {
     /** The local Firebase session is enough to show account details, never to grant business rights. */
     public void checkSession() {
         State current = state.getValue();
-        if (current.phase != Phase.ACCOUNT || current.checkingSession) return;
+        if (current.phase != Phase.ACCOUNT || current.checkingSession || methods.active()) return;
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             finishSession(R.string.auth_session_expired);
@@ -338,13 +368,18 @@ public final class AuthRepository {
 
     public void signOut() {
         if (state.getValue().phase != Phase.ACCOUNT) return;
+        if (methods.busy()) { methods.cancel(); return; }
         finishSession(R.string.auth_signed_out);
     }
 
     private void finishSession(int message) {
         State current = state.getValue();
-        boolean clearGoogle = current.account != null && current.account.google;
+        FirebaseUser currentUser = auth.getCurrentUser();
+        boolean clearGoogle = currentUser != null && currentUser.getProviderData().stream()
+                .anyMatch(provider -> GoogleAuthProvider.PROVIDER_ID.equals(provider.getProviderId()));
+        clearGoogle = clearGoogle || (current.account != null && current.account.google);
         long request = ++version;
+        methods.clear();
         phoneFlow.cancel(true);
         // Drop UI account data before Firebase notifies listeners or clearCredentialState returns.
         state.setValue(new State(Phase.CLEARING_CREDENTIALS, null,

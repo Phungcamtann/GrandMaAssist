@@ -1242,3 +1242,20 @@ Báo cáo bàn giao phải ghi file thay đổi, hành vi, review tĩnh đã th�
 ### Cập nhật chốt C02 — 24/10/2026
 
 Người dùng đã kiểm tra và duyệt C02: SMS thật, CAPTCHA quay về app, tự xác minh và nhập OTP thủ công sai/đúng, gửi lại mã, sửa số/Back/đổi phương thức, xoay/Home/quay lại, khôi phục phiên phone, đăng xuất, hồi quy Google, mất mạng/phục hồi và định dạng số. Báo cáo hiện hành tại docs/C02-CHECKLIST.md, docs/C02-FILES.md và docs/SETUP.md; các trạng thái chờ kiểm tra C02 ở phần lịch sử không còn áp dụng cho các nhóm cơ bản vừa được duyệt. Ngôn ngữ/tên SMS (C02-F01) và các nhánh khó tái hiện tiếp tục theo dõi riêng, không được tự đánh dấu đã giải quyết. Người dùng tự commit trước khi triển khai C03; Codex không tự thao tác Git.
+
+### Cập nhật C03 — 24/10/2026
+
+C01/C02 đã được duyệt và commit tại `ffcc6a2`/`82c1edf`. C03 đã triển khai mã nguồn, **chờ người dùng tự Sync/build/chạy/kiểm tra bằng Android Studio; chưa nghiệm thu**. Trạng thái hiện hành này thay thế các câu chờ commit/không triển khai C03 ở phần lịch sử.
+
+Màn Tài khoản quản lý phương thức Google/phone thực tế từ Firebase: thêm số bằng OTP, chọn/xác nhận Google trước liên kết, đổi số sau xác thực lại bằng provider đã liên kết. Dùng linkWithCredential/reauthenticate/updatePhoneNumber trên cùng UID, chặn callback cũ và xung đột với tài khoản khác. Không tự merge/xóa/unlink hoặc đăng nhập sang UID khác. Mutation đã gửi không bị coi là hủy do Back; lỗi reload/token được phân biệt với cập nhật Auth đã thành công, có Đọc lại kết quả.
+
+Xem [C03-FILES](docs/C03-FILES.md), [C03-CHECKLIST](docs/C03-CHECKLIST.md), [SETUP](docs/SETUP.md). Không cần cấu hình Console/dependency mới so với C01/C02; cần Google/số chưa thuộc UID khác cho ca link thành công và tự đối chiếu UID trước/sau trong Console, không công khai dữ liệu thật. Codex chỉ review tĩnh, không build/test/lint/emulator/SMS/Git ghi/deploy. Chưa xác minh chạy thực tế. C02-F01/các nhánh theo dõi cũ vẫn mở; profile/claim/Rules tích hợp C04, TTS C22, chưa triển khai các phần đó.
+## Chốt C03 — 25/10/2026
+
+**Người dùng xác nhận đã kiểm tra lại toàn bộ C03 và phê duyệt.** Xác nhận này thay thế trạng thái “chờ người dùng kiểm tra/chưa nghiệm thu C03” trong các phần bàn giao trước. Các ca C03-01 đến C03-23 trong C03-CHECKLIST được ghi nhận đạt theo xác nhận tổng thể của người dùng; Codex không tự chạy kiểm thử hoặc bổ sung kết quả đo/thiết bị không được cung cấp.
+
+Phạm vi được duyệt: liên kết Google/phone vào cùng UID, đăng nhập lại bằng các provider đã liên kết, xử lý xung đột giữ tài khoản hiện tại, xác thực lại và đổi số giữ UID, xử lý hủy/lỗi/vòng đời, giao diện và hồi quy C01/C02 theo checklist. Không có dữ liệu tài khoản thật được thêm vào báo cáo.
+
+Giữ nguyên các mục theo dõi riêng từ C01/C02, đặc biệt C02-F01 về ngôn ngữ SMS và tên “Your Firebase App”; việc duyệt C03 không có nghĩa các mục đó đã được sửa. Đồng bộ số vào hồ sơ/claim và Rules tích hợp C04 vẫn thuộc bước sau; TTS thuộc C22.
+
+Người dùng tự review và commit C03 trước khi triển khai luồng tiếp theo. Lần ghi nhận này chỉ sửa tài liệu; Codex không sửa code, build/test, stage, commit, push hoặc deploy.

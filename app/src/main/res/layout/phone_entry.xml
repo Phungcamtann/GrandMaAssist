@@ -4,11 +4,11 @@
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.GrandMa.Title"
-        android:accessibilityHeading="true" android:text="@string/phone_welcome" />
+        android:accessibilityHeading="true" android:id="@+id/phoneEntryTitle" android:text="@string/phone_welcome" />
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_small"
-        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/phone_intro" />
+        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:id="@+id/phoneEntryIntro" android:text="@string/phone_intro" />
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/inputPhone" style="@style/Widget.GrandMa.Input"
         android:layout_width="match_parent" android:layout_height="wrap_content"

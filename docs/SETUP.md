@@ -135,3 +135,26 @@ Tiếp tục theo dõi riêng:
 - Các nhánh khó tái hiện còn ghi trong checklist: mã thực sự hết hiệu lực/mã cũ sau resend, timeout, callback đồng thời/trễ, hủy đúng lúc Firebase sign-in, process bị hủy, CAPTCHA bị hủy và các biến thể font 200%/TalkBack/tablet/thiết bị khác, trừ khi có xác nhận cụ thể sau này.
 
 Không còn mục chờ xác nhận trong năm nhóm cơ bản nêu trên. Codex chỉ cập nhật tài liệu, không chạy kiểm thử và không stage/commit/push. Liên kết/đổi số thuộc C03; TTS thuộc C22.
+
+## C03 — liên kết và đổi số (24/10/2026)
+
+**Trạng thái hiện hành: C01/C02 đã được người dùng duyệt và commit tại ffcc6a2/82c1edf. C03 đã triển khai mã nguồn, chờ người dùng Sync/build/chạy/kiểm tra; chưa nghiệm thu. Chưa chuyển C04.** Những câu chờ commit hoặc chờ triển khai C03 ở phần lịch sử phía trên không còn là trạng thái hiện hành.
+
+Màn Tài khoản có Phương thức đăng nhập, Google và số từ Firebase; thêm số, thêm Google hoặc đổi số theo provider thực tế. Liên kết dùng linkWithCredential, xác thực lại dùng reauthenticate, đổi số dùng updatePhoneNumber trên cùng UID. Google được hiển thị để xác nhận trước link; đổi số phải reauth bằng Google đã link hoặc OTP số cũ cố định từ Firebase rồi mới xác minh số mới. Credential thuộc UID khác báo xung đột, không merge/xóa/unlink hoặc chuyển phiên.
+
+Không cần dependency/backend/Console mới so với C01/C02 đã hoạt động. Giữ Google/Phone enabled, Web client/SHA/Play services và vùng/quota SMS hiện có. Ca link thành công cần Google/số chưa thuộc UID khác; không xóa user Console để chuẩn bị dữ liệu. Người dùng tự Sync/build và chạy theo [C03-CHECKLIST](C03-CHECKLIST.md), tự đối chiếu UID trước/sau riêng tư trong Authentication → Users. Danh sách thay đổi và tài liệu API ở [C03-FILES](C03-FILES.md).
+
+Back/Quay lại trước mutation bỏ challenge. Khi Task Firebase đã gửi, Quay lại/đăng xuất bị khóa và Back giải thích đang hoàn tất; không giả hủy server. Mutation thành công nhưng reload/token lỗi được báo riêng, chỉ Đọc lại kết quả, không lặp thay đổi. Kết quả mạng chưa rõ cũng phải đọc lại. Process chết chỉ phục hồi phiên SDK, đọc lại FirebaseUser/reload/token; không tự SMS hoặc khôi phục số/UID/credential/OTP/verificationId/resend token từ app storage. Xoay giữ coordinator trong bộ nhớ và cơ chế cooldown/reattach C02.
+
+C03 chưa ghi profile Firestore. C04 phải đối chiếu số hồ sơ với claim phone_number của token đã refresh của cùng UID; Rules kiểm tra độc lập UI. Nếu refresh chưa đạt, chưa xác nhận claim/hồ sơ đồng bộ. Không đổi retirementStatus/quyền ứng tuyển. C02-F01 và các nhánh khó tái hiện C01/C02 vẫn theo dõi nguyên trạng.
+
+Codex chỉ review tĩnh mã/diff/tham chiếu tài nguyên. Chưa xác minh biên dịch, UI thực tế, SMS, backend linking/collision, vòng đời và hồi quy C01/C02 trên bản C03. Không chạy build/test/lint/emulator, gửi SMS, sửa Console, stage/commit/push/merge/deploy.
+## Chốt C03 — 25/10/2026
+
+**Người dùng xác nhận đã kiểm tra lại toàn bộ C03 và phê duyệt.** Xác nhận này thay thế trạng thái “chờ người dùng kiểm tra/chưa nghiệm thu C03” trong các phần bàn giao trước. Các ca C03-01 đến C03-23 trong C03-CHECKLIST được ghi nhận đạt theo xác nhận tổng thể của người dùng; Codex không tự chạy kiểm thử hoặc bổ sung kết quả đo/thiết bị không được cung cấp.
+
+Phạm vi được duyệt: liên kết Google/phone vào cùng UID, đăng nhập lại bằng các provider đã liên kết, xử lý xung đột giữ tài khoản hiện tại, xác thực lại và đổi số giữ UID, xử lý hủy/lỗi/vòng đời, giao diện và hồi quy C01/C02 theo checklist. Không có dữ liệu tài khoản thật được thêm vào báo cáo.
+
+Giữ nguyên các mục theo dõi riêng từ C01/C02, đặc biệt C02-F01 về ngôn ngữ SMS và tên “Your Firebase App”; việc duyệt C03 không có nghĩa các mục đó đã được sửa. Đồng bộ số vào hồ sơ/claim và Rules tích hợp C04 vẫn thuộc bước sau; TTS thuộc C22.
+
+Người dùng tự review và commit C03 trước khi triển khai luồng tiếp theo. Lần ghi nhận này chỉ sửa tài liệu; Codex không sửa code, build/test, stage, commit, push hoặc deploy.

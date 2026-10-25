@@ -112,6 +112,14 @@ public final class PhoneSignInFlow {
         publish();
     }
 
+    /** Trusted Firebase phone only; bypasses editable entry, still requires send consent. */
+    void reviewFixed(String firebasePhone) {
+        cancel(true);
+        number = firebasePhone;
+        step = Step.REVIEW;
+        publish();
+    }
+
     public void review() {
         if (step != Step.ENTRY || method != Method.PHONE) return;
         touched = true;

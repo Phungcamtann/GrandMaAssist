@@ -4,7 +4,7 @@
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"
-        android:text="@string/phone_review_title" />
+        android:id="@+id/phoneReviewTitle" android:text="@string/phone_review_title" />
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/reviewPhoneNumber"
         android:layout_width="match_parent" android:layout_height="wrap_content"

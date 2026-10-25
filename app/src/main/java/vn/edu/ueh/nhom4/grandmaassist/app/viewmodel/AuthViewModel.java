@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import vn.edu.ueh.nhom4.grandmaassist.app.GrandMaAssistApp;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AccountMethodsFlow;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AuthRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PhoneSignInFlow;
 
@@ -20,6 +21,8 @@ public final class AuthViewModel extends AndroidViewModel {
         repository = ((GrandMaAssistApp) application).getAuthRepository();
     }
 
+    public AccountMethodsFlow methods() { return repository.getMethods(); }
+    public void beginAccountMethod(boolean google) { repository.beginAccountMethod(google); }
     public LiveData<AuthRepository.State> getState() { return repository.getState(); }
     public long beginGooglePicker() { return repository.beginGooglePicker(); }
     public void pickerFailed(long request, int message, boolean error) {

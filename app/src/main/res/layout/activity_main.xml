@@ -111,15 +111,6 @@
                         android:drawablePadding="@dimen/google_icon_gap"
                         android:text="@string/auth_continue_google" />
                     </LinearLayout>
-                    <include android:id="@+id/phoneEntry" layout="@layout/phone_entry" />
-                    <include android:id="@+id/phoneReview" layout="@layout/phone_review" android:visibility="gone" />
-                    <include android:id="@+id/phoneCode" layout="@layout/phone_code" android:visibility="gone" />
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/phoneStatus"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_medium" android:saveEnabled="false"
-                        android:accessibilityLiveRegion="polite"
-                        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -200,6 +191,72 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_large"
                     android:text="@string/auth_sign_out" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/methodsContent"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:paddingStart="@dimen/screen_padding" android:paddingEnd="@dimen/screen_padding"
+                android:orientation="vertical" android:visibility="gone">
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_large" android:accessibilityHeading="true"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/c03_methods" />
+                <com.google.android.material.textview.MaterialTextView android:id="@+id/methodsSummary"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" android:saveEnabled="false"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnAccountPhone"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_add_phone" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnAccountGoogle"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_link_google" />
+                <com.google.android.material.textview.MaterialTextView android:id="@+id/methodsInstructions"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" android:saveEnabled="false"
+                    android:layout_marginTop="@dimen/space_medium"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnReauthGoogle"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_reauth_google" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnReauthPhone"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_reauth_phone" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnMethodsGoogle"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_choose_google" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnConfirmGoogle"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_confirm_google" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnRefreshMethods"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_read_again" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnCancelMethods"
+                    style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_small"
+                    android:text="@string/c03_cancel" />
+                <com.google.android.material.textview.MaterialTextView android:id="@+id/methodsStatus"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" android:saveEnabled="false"
+                    android:accessibilityLiveRegion="polite" android:textAppearance="@style/TextAppearance.GrandMa.Body" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/phoneForms"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:paddingStart="@dimen/screen_padding" android:paddingEnd="@dimen/screen_padding"
+                android:orientation="vertical">
+                    <include android:id="@+id/phoneEntry" layout="@layout/phone_entry" />
+                    <include android:id="@+id/phoneReview" layout="@layout/phone_review" android:visibility="gone" />
+                    <include android:id="@+id/phoneCode" layout="@layout/phone_code" android:visibility="gone" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/phoneStatus"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_medium" android:saveEnabled="false"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body" android:visibility="gone" />
             </LinearLayout>
 
             <ProgressBar
