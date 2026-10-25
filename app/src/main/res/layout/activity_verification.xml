@@ -70,6 +70,7 @@
         </LinearLayout>
         <LinearLayout android:id="@+id/vAdmin" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
             <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_admin_section"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReviewPosts" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Duyệt tin tuyển"/>
             <RadioGroup android:id="@+id/vQueueType" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
                 <RadioButton android:id="@+id/vQueueSeeker" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_seeker"/>
                 <RadioButton android:id="@+id/vQueueEmployer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_employer"/>

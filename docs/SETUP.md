@@ -1,3 +1,7 @@
+# C07 đã triển khai, chuẩn bị nghiệm thu — 25/10/2026
+
+C06 đã nghiệm thu và commit `afd7891`, local/GitHub main đã đối chiếu. C07 đã có mã nguồn địa chỉ/gửi tin/Tin đã gửi/Admin duyệt/từ chối/sửa gửi lại. Người dùng thực hiện [C07-CONSOLE-SCHEMA](C07-CONSOLE-SCHEMA.md): Publish toàn bộ firestore.rules và tạo hai composite index jobs trước Sync/Run; không cần tự tạo jobs/history. Sau đó kiểm [C07-CHECKLIST](C07-CHECKLIST.md). Chi tiết [C07-FILES](C07-FILES.md). Codex chỉ rà tĩnh, chưa Sync/build/test/app/Rules hoặc Console/deploy/commit. Không sửa JSON/SHA/provider/Gradle/Storage vì thay đổi này; không xóa dữ liệu app để cập nhật nháp cũ.
+
 # Chốt bản hiện tại và chuẩn bị C06 — 25/10/2026
 
 Người dùng đã duyệt hết bản C04/C05/Hồ sơ thống nhất/sửa sau pull. Đã đối chiếu local/GitHub main cùng `11fcdeb`, working tree sạch trước cập nhật tài liệu; bản sửa Gradle/resource đầy đủ trong `a63734e`, commit cuối chỉ chỉnh JDK jbr-21 của Android Studio. Xem [C05-ACCEPTANCE](C05-ACCEPTANCE.md). Không tự chạy kiểm thử hoặc tự commit để xác minh.

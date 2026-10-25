@@ -21,10 +21,17 @@ import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.LocalJobDraft;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.JobDraftViewModel;
 
-/** Local composition only. This Activity has no publish action. */
+/** Local composition and explicit online submission; no writes from rendering. */
 public final class JobDraftActivity extends AppCompatActivity {
-    public static final String CREATE_NEW="create_new_draft";
+    public static final String CREATE_NEW="create_new_draft",EDIT_POST="edit_rejected_post";
     private JobDraftViewModel vm;
+    private final androidx.activity.result.ActivityResultLauncher<Intent> posts=registerForActivityResult(
+        new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),r->{
+            if(vm==null||vm.sessionEnded)return;
+            if(r.getData()!=null){String route=r.getData().getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if(route!=null&&!"DRAFTS".equals(route)){setResult(RESULT_OK,r.getData());finish();return;}}
+            vm.loadList();
+        });
     private RoleNavigationBar navigation;
     private boolean rendering;
     private Object renderedList;
@@ -56,6 +63,7 @@ public final class JobDraftActivity extends AppCompatActivity {
             int width=Math.min(available,getResources().getDimensionPixelSize(R.dimen.content_max_width));
             if(p.width!=width){p.width=width;p.gravity=Gravity.TOP|Gravity.CENTER_HORIZONTAL;content.setLayoutParams(p);}
         });
+        bindText("workAddress",R.id.jdWorkAddress,v->vm.draft.workAddress=v);
         bindText("title",R.id.jdName,v->vm.draft.title=v);bindText("description",R.id.jdDescription,v->vm.draft.description=v);
         bindText("requirements",R.id.jdRequirements,v->vm.draft.requirements=v);bindText("skillsInput",R.id.jdSkills,v->vm.draft.skillsInput=v);
         bindText("schedule",R.id.jdScheduleText,v->vm.draft.schedule=v);bindText("payInput",R.id.jdPay,v->vm.draft.payInput=v);
@@ -72,6 +80,12 @@ public final class JobDraftActivity extends AppCompatActivity {
             if(!canEdit())return;vm.draft.demandMode=id==R.id.jdNoDemands?"NONE":id==R.id.jdSomeDemands?"SELECT":"";
             if("NONE".equals(vm.draft.demandMode))vm.draft.demands.clear();vm.edited("demands");
         });
+        click(R.id.jdSent,()->guard("SENT"));
+        click(R.id.jdCheckSent,()->guard("SENT"));
+        click(R.id.jdFixAccount,()->guard("ACCOUNT"));
+        click(R.id.jdSubmit,()->{if(vm.busy||vm.draft==null)return;String id=vm.draft.id;
+            new AlertDialog.Builder(this).setMessage("Gửi tin để Admin duyệt? Khi được duyệt, nội dung và địa chỉ làm việc sẽ hiển thị công khai.")
+                .setNegativeButton("Quay lại",null).setPositiveButton("Gửi duyệt",(d,w)->{if(vm.draft!=null&&id.equals(vm.draft.id))vm.submit();}).show();});
         click(R.id.jdBack,this::back);click(R.id.jdCreate,()->guard("NEW"));click(R.id.jdListReload,vm::loadList);
         click(R.id.jdRetryAccess,vm::retry);click(R.id.jdCatalogRefresh,vm::refreshCatalog);
         click(R.id.jdSave,()->{hideKeyboard();vm.saveThen("");});click(R.id.jdPreview,()->{hideKeyboard();vm.preview();});
@@ -83,7 +97,7 @@ public final class JobDraftActivity extends AppCompatActivity {
         });
         getOnBackPressedDispatcher().addCallback(this,new OnBackPressedCallback(true){@Override public void handleOnBackPressed(){back();}});
         boolean retained=vm.started;lastPageEvent=vm.pageEvent;lastValidationEvent=vm.validationEvent;
-        vm.changes.observe(this,n->render());vm.initialize(saved==null && getIntent().getBooleanExtra(CREATE_NEW,false));
+        vm.changes.observe(this,n->render());vm.initialize(saved==null && getIntent().getBooleanExtra(CREATE_NEW,false),getIntent().getStringExtra(EDIT_POST));
         if(saved!=null && retained){int y=saved.getInt("draft_scroll",0);findViewById(R.id.jdScroll).post(()->findViewById(R.id.jdScroll).scrollTo(0,y));}
     }
     @Override protected void onStart(){super.onStart();if(vm.ready && !vm.busy)vm.refreshAccess();}
@@ -144,6 +158,11 @@ public final class JobDraftActivity extends AppCompatActivity {
     }
     private void render(){
         if(vm.sessionEnded){finish();return;}
+        if(vm.showPosts||!vm.submittedPostId.isEmpty()){
+            String id=vm.submittedPostId,notice=vm.submittedNotice;vm.submittedPostId="";vm.submittedNotice="";vm.showPosts=false;
+            if(!id.isEmpty()&&getIntent().hasExtra(EDIT_POST)){setResult(RESULT_OK,new Intent().putExtra(JobPostActivity.POST_ID,id).putExtra("submission_notice",notice));finish();return;}
+            Intent intent=new Intent(this,JobPostActivity.class).putExtra("submission_notice",notice);if(!id.isEmpty())intent.putExtra(JobPostActivity.POST_ID,id);posts.launch(intent);return;
+        }
         if(!vm.exitRoute.isEmpty()){
             if(!"CLOSE".equals(vm.exitRoute))setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,vm.exitRoute));
             finish();return;
@@ -159,7 +178,7 @@ public final class JobDraftActivity extends AppCompatActivity {
         set(R.id.jdTitle,getString(list||!vm.ready?R.string.jd_title:edit?R.string.jd_edit_title:R.string.jd_preview_title));
         set(R.id.jdMessage,vm.message);show(R.id.jdMessage,!form&&!vm.message.isEmpty());
         set(R.id.jdActionMessage,vm.message);show(R.id.jdActionMessage,form&&!vm.message.isEmpty());
-        show(R.id.jdProgress,!form&&(vm.busy||vm.accessChecking));show(R.id.jdActionProgress,form&&vm.busy);
+        show(R.id.jdProgress,!form&&(vm.busy||vm.accessChecking));show(R.id.jdActionProgress,form&&vm.busy);show(R.id.jdCheckSent,form&&vm.checkSent);
         show(R.id.jdAccessNote,vm.ready&&vm.offlineAccess);show(R.id.jdRetryAccess,!vm.ready&&!vm.busy&&!vm.accessChecking);
         enabled(findViewById(R.id.jdListSection),!vm.busy);enabled(findViewById(R.id.jdEditorSection),!vm.busy);
         enabled(findViewById(R.id.jdActions),!vm.busy);findViewById(R.id.jdEdit).setEnabled(!vm.busy);
@@ -178,7 +197,7 @@ public final class JobDraftActivity extends AppCompatActivity {
         }
         if(form){
             LocalJobDraft d=vm.draft;
-            set(R.id.jdName,d.title);set(R.id.jdDescription,d.description);set(R.id.jdRequirements,d.requirements);set(R.id.jdSkills,d.skillsInput);set(R.id.jdScheduleText,d.schedule);set(R.id.jdPay,d.payInput);
+            set(R.id.jdWorkAddress,d.workAddress);set(R.id.jdName,d.title);set(R.id.jdDescription,d.description);set(R.id.jdRequirements,d.requirements);set(R.id.jdSkills,d.skillsInput);set(R.id.jdScheduleText,d.schedule);set(R.id.jdPay,d.payInput);
             catalogOptions(R.id.jdCategory,vm.catalog.categories,d.categoryId);catalogOptions(R.id.jdArea,vm.catalog.areas,d.areaCode);
             options(R.id.jdShift,LocalJobDraft.SHIFTS,Arrays.asList(getResources().getStringArray(R.array.jd_shifts)),d.shift);
             options(R.id.jdUnit,LocalJobDraft.UNITS,Arrays.asList(getResources().getStringArray(R.array.jd_units)),d.payUnit);
@@ -196,12 +215,12 @@ public final class JobDraftActivity extends AppCompatActivity {
                 if(view instanceof EditText)((EditText)view).setError(error);
                 Integer errorId=errorViews.get(field.getKey());if(errorId!=null){set(errorId,error==null?"":error);show(errorId,error!=null);}
             }
-            show(R.id.jdPreview,edit);show(R.id.jdFormReload,vm.readRequired);findViewById(R.id.jdSave).setEnabled(!vm.busy&&!vm.readRequired);
+            show(R.id.jdSubmit,preview);findViewById(R.id.jdSubmit).setEnabled(!vm.busy&&!vm.readRequired);show(R.id.jdFixAccount,vm.fixAccount);show(R.id.jdPreview,edit);show(R.id.jdFormReload,vm.readRequired);findViewById(R.id.jdSave).setEnabled(!vm.busy&&!vm.readRequired);
             if(preview){
                 set(R.id.jdPreviewWork,d.title.trim()+"\n\n"+name(vm.catalog.categories,d.categoryId)+"\n\n"+d.description.trim()
                         +(d.requirements.trim().isEmpty()?"":"\n\nYêu cầu: "+d.requirements.trim())
                         +"\n\nKỹ năng: "+(d.skills().isEmpty()?"Không yêu cầu kỹ năng riêng":String.join(", ",d.skills())));
-                set(R.id.jdPreviewSchedule,"Khu vực: "+name(vm.catalog.areas,d.areaCode)+"\n\n"+labels(LocalJobDraft.DAYS,Arrays.asList(getResources().getStringArray(R.array.jd_days)),d.days)
+                set(R.id.jdPreviewSchedule,"Khu vực: "+name(vm.catalog.areas,d.areaCode)+"\nĐịa chỉ: "+d.workAddress.trim()+"\n\n"+labels(LocalJobDraft.DAYS,Arrays.asList(getResources().getStringArray(R.array.jd_days)),d.days)
                         +"\n"+choice(LocalJobDraft.SHIFTS,R.array.jd_shifts,d.shift)+"\n"+d.schedule.trim()+"\n\nYêu cầu thể lực: "
                         +("NONE".equals(d.demandMode)?"Không có các yêu cầu trong danh sách":labels(LocalJobDraft.DEMANDS,
                             Arrays.asList(getString(R.string.jd_lifting),getString(R.string.jd_standing),getString(R.string.jd_moving)),d.demands)));

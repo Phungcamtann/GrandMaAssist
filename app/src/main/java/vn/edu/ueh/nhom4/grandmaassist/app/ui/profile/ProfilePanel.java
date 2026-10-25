@@ -50,6 +50,7 @@ public final class ProfilePanel {
             if(data!=null && vm.snapshot!=null && com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser()!=null
                     && vm.snapshot.uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid())){
                 String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if("POSTS".equals(route)){openPosts();return;}
                 if("WORK".equals(route) && "EMPLOYER".equals(vm.snapshot.role)){openDrafts(false);return;}
                 if("HOME".equals(route))vm.showHome();else if("ACCOUNT".equals(route))vm.showAccount();
                 else if("PROFILE".equals(route))vm.showProfile();
@@ -61,6 +62,8 @@ public final class ProfilePanel {
             android.content.Intent data=result.getData();
             if(data!=null && result.getResultCode()==android.app.Activity.RESULT_OK){
                 String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+                if("PROFILES".equals(route)){openVerification();return;}
+                if("DRAFTS".equals(route)){openDrafts(false);return;}
                 if("HOME".equals(route))vm.showHome();
                 else if("ACCOUNT".equals(route)){if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();}
             }
@@ -124,7 +127,7 @@ public final class ProfilePanel {
             }
         };
         activity.getOnBackPressedDispatcher().addCallback(activity, back);
-        homePanel=new RoleHomePanel(activity,vm,this::navigate,this::openVerification,()->{vm.showSecurity();scrollTop();},this::signOut,()->openDrafts(true));
+        homePanel=new RoleHomePanel(activity,vm,this::navigate,this::openVerification,()->{vm.showSecurity();scrollTop();},this::signOut,()->openDrafts(true),this::openPosts);
     }
     private void scrollTop(){activity.findViewById(R.id.main).scrollTo(0,0);}
     private void navigate(RoleNavigationBar.Action action){
@@ -136,10 +139,15 @@ public final class ProfilePanel {
                 else{vm.showProfile();vm.refreshVerification();}
                 scrollTop();break;
             case ACCOUNT:vm.showAccount();scrollTop();break;
-            case PROCESS:openVerification();break;
+            case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
             case WORK:openDrafts(false);break;
             default:break;
         }
+    }
+    private void openPosts(){
+        AuthRepository.State state=auth.getState().getValue();
+        if(vm.busy||state.account==null||auth.methods().active()||vm.snapshot==null||!"ADMIN".equals(vm.snapshot.role)||!"ACTIVE".equals(vm.snapshot.status))return;
+        discardThen(()->jobDrafts.launch(new android.content.Intent(activity,vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.JobPostActivity.class)));
     }
     private void openDrafts(boolean create){
         AuthRepository.State state=auth.getState().getValue();
@@ -159,7 +167,7 @@ public final class ProfilePanel {
         if(offline)launch.run();else discardThen(launch);
     }
     private void openVerification(){
-        if(vm.busy || auth.getState().getValue().isBusy() || vm.snapshot==null)return;
+        if(vm.busy || auth.methods().active() || auth.getState().getValue().phase!=AuthRepository.Phase.ACCOUNT || vm.snapshot==null)return;
         if(vm.dirty){new AlertDialog.Builder(activity).setMessage("Lưu hoặc bỏ các thay đổi hồ sơ trước khi mở xác minh.")
                 .setPositiveButton(android.R.string.ok,null).show();return;}
         if("ADMIN".equals(vm.snapshot.role) && !"ACTIVE".equals(vm.snapshot.status)){

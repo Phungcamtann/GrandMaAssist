@@ -7,6 +7,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.local.JobDraftStore;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobDraftRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobPostRepository;
+import com.google.android.gms.tasks.Tasks;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.LocalJobDraft;
 
 /** A saved draft is durable SQLite; an unsaved edit is RAM only. No background publication. */
@@ -18,6 +20,10 @@ public final class JobDraftViewModel extends AndroidViewModel {
     public final String uid;
     public boolean started,ready,busy,accessChecking,offlineAccess,catalogLoading,fromCache,dirty,readRequired,sessionEnded;
     private boolean knownOwner,startNew;
+    private String pendingEditId="";
+    public String submittedPostId="",submittedNotice="";
+    public boolean showPosts,fixAccount,checkSent;
+    private final JobPostRepository posts=new JobPostRepository();
     public Page page=Page.LIST;
     public String message="",catalogMessage="",exitRoute="";
     public List<LocalJobDraft> drafts=new ArrayList<>();
@@ -37,7 +43,8 @@ public final class JobDraftViewModel extends AndroidViewModel {
     }
     public void emit(){changes.setValue(changes.getValue()+1);}
     private boolean valid(long e){return e==generation && !sessionEnded && repository.same(uid);}
-    public void initialize(boolean create){
+    public void initialize(boolean create,String editId){
+        if(!started)pendingEditId=editId==null?"":editId;
         if(started || sessionEnded)return;started=true;startNew=create;busy=true;message="Đang mở nháp…";emit();
         long e=generation;
         repository.offlineOwner(uid).addOnCompleteListener(t->{
@@ -50,7 +57,7 @@ public final class JobDraftViewModel extends AndroidViewModel {
     }
     public void retry(){
         if(busy)return;
-        if(!started){initialize(false);return;}
+        if(!started){initialize(false,"");return;}
         if(!ready){refreshAccess();return;}loadList();
     }
     public void refreshAccess(){
@@ -99,6 +106,7 @@ public final class JobDraftViewModel extends AndroidViewModel {
             if(!valid(e)||a!=formRequest)return;busy=false;
             if(t.isSuccessful()){
                 drafts=t.getResult();message=notice.isEmpty()?(drafts.isEmpty()?"Chưa có bản nháp.":""):notice;
+                if(!pendingEditId.isEmpty()){String id=pendingEditId;pendingEditId="";openRejected(id);return;}
                 if(startNew){startNew=false;newDraft();return;}
             }else{drafts=new ArrayList<>();message=JobDraftRepository.error(t.getException());}
             emit();
@@ -151,10 +159,46 @@ public final class JobDraftViewModel extends AndroidViewModel {
             if(t.isSuccessful())loadList("Đã xóa nháp.");else{message=JobDraftRepository.error(t.getException());emit();}
         });
     }
+    public void openRejected(String id){
+        if(!ready||busy)return;busy=true;long e=generation,a=++formRequest;message="Đang mở tin bị từ chối…";emit();
+        posts.get(uid,id).addOnCompleteListener(t->{
+            if(!valid(e)||a!=formRequest)return;
+            if(!t.isSuccessful()){busy=false;message=JobPostRepository.error(t.getException());emit();return;}
+            if(!uid.equals(t.getResult().content.ownerUid)||!"REJECTED".equals(t.getResult().status)){
+                busy=false;message="Tin đã thay đổi. Hãy tải lại trong Tin đã gửi.";emit();return;}
+            LocalJobDraft value=t.getResult().content.copy();
+            repository.read(uid,id).addOnCompleteListener(local->{
+                if(!valid(e)||a!=formRequest)return;busy=false;
+                if(local.isSuccessful()){value.revision=local.getResult().revision;value.createdAt=local.getResult().createdAt;value.updatedAt=local.getResult().updatedAt;}
+                else{Throwable c=local.getException();boolean missing=false;for(int i=0;c!=null&&i<8;i++,c=c.getCause())if(c instanceof JobDraftStore.Failure&&"MISSING".equals(((JobDraftStore.Failure)c).code))missing=true;
+                    if(!missing){message=JobDraftRepository.error(local.getException());emit();return;}}
+                draft=value;page=Page.EDIT;dirty=true;readRequired=false;errors.clear();message="Sửa nội dung rồi xem trước để gửi lại.";++pageEvent;emit();
+            });
+        });
+    }
+    public void submit(){
+        if(!ready||busy||draft==null||readRequired)return;preview();if(!errors.isEmpty())return;
+        final LocalJobDraft value=draft.copy();long e=generation,a=++formRequest;busy=true;fixAccount=checkSent=false;message="Đang lưu nháp trước khi gửi…";emit();
+        (dirty||value.revision==0?repository.save(uid,value):Tasks.forResult(value)).addOnCompleteListener(saved->{
+            if(!valid(e)||a!=formRequest)return;
+            if(!saved.isSuccessful()){busy=false;readRequired=true;message=JobDraftRepository.error(saved.getException());emit();return;}
+            draft=saved.getResult();dirty=false;message="Đang gửi và đối chiếu tin…";emit();
+            posts.submit(uid,draft).addOnCompleteListener(t->{
+                if(!valid(e)||a!=formRequest)return;busy=false;
+                if(t.isSuccessful()){submittedPostId=t.getResult().content.id;
+                    submittedNotice=t.getResult().sameContent(draft)?"":"Tin này đã gửi trước đó. Phần sửa nháp chưa thay đổi tin trên máy chủ. Nếu bị từ chối, chọn Sửa và gửi lại từ tin này.";
+                    message="Đã đối chiếu tin trên máy chủ. Nháp vẫn được giữ.";}
+                else{checkSent=true;message=JobPostRepository.error(t.getException());Throwable c=t.getException();for(int i=0;c!=null&&i<10;i++,c=c.getCause())
+                    if(c instanceof JobPostRepository.Failure&&Arrays.asList("PHONE","PROFILE").contains(((JobPostRepository.Failure)c).code))fixAccount=true;}
+                emit();
+            });
+        });
+    }
     /** The Activity asks before calling this if an edit is dirty. No Activity retained by pending work. */
     public void navigate(String action){
         if(busy)return;
         switch(action){
+            case "SENT":dirty=false;showPosts=true;emit();break;
             case "LIST":dirty=false;loadList();break;
             case "NEW":dirty=false;newDraft();break;
             case "HOME":case "ACCOUNT":case "CLOSE":draft=null;dirty=false;exitRoute=action;emit();break;

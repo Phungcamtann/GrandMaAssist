@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GrandMaAssist">
         <activity android:name=".ui.verification.VerificationActivity" android:exported="false" />
+        <activity android:name=".ui.jobs.JobPostActivity" android:exported="false" />
         <activity android:name=".ui.jobs.JobDraftActivity" android:exported="false" />
         <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.verification-files" android:exported="false" android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/verification_paths" />

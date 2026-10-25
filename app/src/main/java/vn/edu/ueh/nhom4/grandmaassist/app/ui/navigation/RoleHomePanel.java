@@ -17,11 +17,12 @@ public final class RoleHomePanel {
     private final ProfileViewModel vm;
     private final RoleNavigationBar navigation;
     public RoleHomePanel(AppCompatActivity activity,ProfileViewModel vm,Consumer<RoleNavigationBar.Action> navigate,
-                         Runnable verify,Runnable security,Runnable signOut,Runnable createDraft){
+                         Runnable verify,Runnable security,Runnable signOut,Runnable createDraft,Runnable reviewPosts){
         this.activity=activity;this.vm=vm;navigation=new RoleNavigationBar(activity,navigate);
         activity.findViewById(R.id.roleHomeContent).setSaveFromParentEnabled(false);
         activity.findViewById(R.id.roleAccountContent).setSaveFromParentEnabled(false);
         click(R.id.homeOpenProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
+        click(R.id.homePostsFuture,reviewPosts);
         click(R.id.homeReviewProfiles,verify);click(R.id.homeRefreshCounts,vm::loadCounts);
         click(R.id.homeMainFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))createDraft.run();});
         click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))navigate.accept(RoleNavigationBar.Action.WORK);});
@@ -64,6 +65,8 @@ public final class RoleHomePanel {
         future(R.id.homeDisputesFuture,R.string.n_admin_disputes);future(R.id.homeOverdueFuture,R.string.n_admin_overdue);
         future(R.id.accountHubSettings,R.string.n_settings);future(R.id.accountHubHelp,R.string.n_help);
         if(admin){
+            text(R.id.homePostsFuture,"Duyệt tin tuyển");activity.findViewById(R.id.homePostsFuture).setEnabled(active&&!vm.busy&&!auth.isBusy());
+            ((TextView)activity.findViewById(R.id.homePostsFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,R.color.brand_green));
             text(R.id.homeQueueTitle,activity.getString(R.string.n_queue_title));
             if(vm.countsLoading)text(R.id.homeQueueCounts,activity.getString(R.string.n_queue_loading));
             else if(vm.countsMessage!=0)text(R.id.homeQueueCounts,activity.getString(vm.countsMessage));

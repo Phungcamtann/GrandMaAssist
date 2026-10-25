@@ -31,6 +31,8 @@ Sau khi server xác nhận người thuê hoạt động, app lưu marker UID đ
 
 ### SQLite — job_drafts.db, version 1
 
+**Bổ sung C07:** payload có thêm workAddress/serverBaseVersion tùy chọn đọc, tương thích nháp cũ; không thay bảng/DB version. Chính sách gửi và schema server mới ở [C07-CONSOLE-SCHEMA](C07-CONSOLE-SCHEMA.md). Phần C06 bên dưới mô tả nền trước khi có gửi tin.
+
 | Bảng | Nội dung |
 |---|---|
 | job_drafts | Khóa ghép owner_uid/id, revision, created_at/updated_at cục bộ và payload JSON schemaVersion=1 |

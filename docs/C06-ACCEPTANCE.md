@@ -4,6 +4,8 @@
 
 ## Địa chỉ chính xác
 
+**Cập nhật sau nghiệm thu:** người dùng đã chốt nhập địa chỉ làm việc khi soạn tin và công khai trên tin OPEN trong phạm vi bổ sung C07. Xem [C07-ADDRESS-CHANGE](C07-ADDRESS-CHANGE.md). Phân tích bên dưới giữ làm lịch sử v3/C06, không còn là quyết định trì hoãn toàn bộ địa chỉ đến C15. C06 đã commit không bị thay đổi kết quả nghiệm thu bởi yêu cầu mới.
+
 Người dùng nêu cần xem lại địa chỉ chính xác cho người thuê. Đối chiếu README v3:
 
 - EmployerProfile và JobPost dùng areaCode; SearchPreference của người tìm việc dùng areaCodes.

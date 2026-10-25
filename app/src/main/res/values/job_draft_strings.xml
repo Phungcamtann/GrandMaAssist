@@ -19,7 +19,7 @@
     <string name="jd_choose">Chọn…</string>
     <string name="jd_unavailable">Lựa chọn cũ không còn trong danh mục</string>
     <string name="jd_info">1. Công việc</string>
-    <string name="jd_schedule">2. Khu vực và lịch</string>
+    <string name="jd_schedule">2. Địa điểm và lịch</string>
     <string name="jd_demands">3. Yêu cầu thể lực</string>
     <string name="jd_payment">4. Tiền công và hạn nhận</string>
     <string name="jd_name">Tiêu đề tin *</string>

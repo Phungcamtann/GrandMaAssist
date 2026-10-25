@@ -87,6 +87,8 @@ public final class VerificationActivity extends AppCompatActivity {
         File dir=new File(getCacheDir(),"verification-capture");
         File[] stale=dir.listFiles();
         if(stale!=null)for(File f:stale)if(!f.equals(vm.capture))f.delete();
+        click(R.id.vReviewPosts,()->{if(vm.home!=null&&"ADMIN".equals(vm.home.role))discardThen(()->{
+            setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,"POSTS"));finish();});});
         click(R.id.vBack,this::leave);
         click(R.id.vCancelUpload,vm::cancelSending);
         click(R.id.vReload,()->discardThen(()->{ vm.clearDraft(); vm.load(); }));
@@ -234,6 +236,11 @@ public final class VerificationActivity extends AppCompatActivity {
     }
     private void navigate(RoleNavigationBar.Action action){
         if(vm.busy || vm.externalPending){vm.message="Đang xử lý. Cô/chú vui lòng chờ.";vm.emit();return;}
+        if(action==RoleNavigationBar.Action.PROCESS && vm.selected==null){
+            new AlertDialog.Builder(this).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{
+                if(w==0)vm.loadQueue();else discardThen(()->{setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,"POSTS"));finish();});
+            }).show();return;
+        }
         if(action==RoleNavigationBar.Action.PROCESS){
             if(vm.selected!=null)discardThen(vm::loadQueue);else findViewById(R.id.verificationScroll).scrollTo(0,0);
             return;

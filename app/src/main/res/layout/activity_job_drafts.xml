@@ -10,6 +10,7 @@
             <TextView android:id="@+id/jdMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdRetryAccess" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_retry" android:visibility="gone"/>
             <LinearLayout android:id="@+id/jdListSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSent" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Tin đã gửi"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCreate" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/jd_create"/>
                 <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_saved_drafts" android:accessibilityHeading="true"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdListReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
@@ -37,6 +38,10 @@
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_area" android:labelFor="@id/jdArea"/>
                     <Spinner android:id="@+id/jdArea" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_area"/>
                     <TextView android:id="@+id/jdAreaError" style="@style/Widget.GrandMa.DraftError"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Địa chỉ làm việc" android:labelFor="@id/jdWorkAddress"/>
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdWorkAddress" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPostalAddress|textMultiLine" android:hint="Số nhà, đường, phường/xã và tỉnh/thành"/>
+                    <TextView style="@style/Widget.GrandMa.VerificationMessage" android:text="Địa chỉ sẽ hiển thị trên tin đã duyệt."/>
+
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_days"/>
                     <CheckBox android:id="@+id/jdMonday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Hai"/>
                     <CheckBox android:id="@+id/jdTuesday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Ba"/>
@@ -87,6 +92,9 @@
             <LinearLayout android:id="@+id/jdActions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
                 <ProgressBar android:id="@+id/jdActionProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="12dp" android:visibility="gone" android:importantForAccessibility="no"/>
                 <TextView android:id="@+id/jdActionMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCheckSent" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Kiểm tra tin đã gửi" android:visibility="gone"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSubmit" style="@style/Widget.GrandMa.VerificationPrimary" android:text="Gửi duyệt" android:visibility="gone"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdFixAccount" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Mở tài khoản / hồ sơ" android:visibility="gone"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSave" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/jd_save"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdPreview" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_preview"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdFormReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_reload" android:visibility="gone"/>

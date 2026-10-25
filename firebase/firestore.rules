@@ -377,6 +377,115 @@ service cloud.firestore {
         ((profileUpdate(uid, 'EMPLOYER') && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'areaCode', 'employerType', 'organizationName', 'introduction', 'updatedAt'])) || identityUpdate(uid, 'EMPLOYER'));
     }
+    // C07: public workAddress belongs to a moderated post, never the identity profile.
+    function jobPath(id) { return /databases/$(database)/documents/jobs/$(id); }
+    function jobHistoryPath(id, v) { return /databases/$(database)/documents/jobs/$(id)/history/$(string(v)); }
+    function jobEmployer(uid) {
+      let u = get(userPath(uid)).data;
+      let p = get(employerPath(uid)).data;
+      return owner(uid) && noAdmin(uid) && u.role == 'EMPLOYER' && u.accountStatus == 'ACTIVE'
+        && authPhone() != '' && u.phoneE164 == authPhone() && u.phoneVerificationMode == 'FIREBASE_AUTH'
+        && u.phoneVerifiedAt is timestamp && u.phoneVerifiedAt <= request.time
+        && jobText(u.displayName,100,true) && p.userId == uid
+        && p.areaCode != '' && validArea(p.areaCode)
+        && jobText(p.introduction,1000,true)
+        && p.employerType in ['INDIVIDUAL', 'ORGANIZATION']
+        && (p.employerType != 'ORGANIZATION' || jobText(p.organizationName,150,true));
+    }
+    function jobCatalog(d) {
+      return d.categoryId.size() > 0 && d.areaCode != '' && validArea(d.areaCode)
+        && get(/databases/$(database)/documents/jobCategories/$(d.categoryId)).data.active == true
+        && d.categoryName == get(/databases/$(database)/documents/jobCategories/$(d.categoryId)).data.name
+        && d.areaName == get(/databases/$(database)/documents/areas/$(d.areaCode)).data.name;
+    }
+    function jobText(v, maximum, required) {
+      return v is string && v.size() <= maximum && (!required || v.matches('(?s).*[^\\s].*'));
+    }
+    function jobShape(d, id) {
+      return d.keys().hasAll(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
+          'workAddress','description','requirementsText','requiredSkillTags','workDays','workShift','scheduleText',
+          'physicalDemands','demandsDeclared','payAmount','payUnit','expiresAt','status','version','lastSubmissionId',
+          'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason'])
+        && d.keys().hasOnly(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
+          'workAddress','description','requirementsText','requiredSkillTags','workDays','workShift','scheduleText',
+          'physicalDemands','demandsDeclared','payAmount','payUnit','expiresAt','status','version','lastSubmissionId',
+          'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason'])
+        && d.id == id && id.matches('[A-Za-z0-9-]{36}')
+        && jobText(d.employerId,128,true) && jobText(d.employerDisplayName,150,true)
+        && jobText(d.title,120,true) && jobText(d.categoryId,80,true) && jobText(d.categoryName,120,true)
+        && jobText(d.areaCode,80,true) && jobText(d.areaName,120,true)
+        && jobText(d.workAddress,500,true) && jobText(d.description,3000,true)
+        && jobText(d.requirementsText,1000,false) && skills(d.requiredSkillTags)
+        && d.workDays is list && d.workDays.size() > 0 && d.workDays.size() <= 7
+        && d.workDays.hasOnly(['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'])
+        && d.workDays.toSet().size() == d.workDays.size()
+        && d.workShift in ['MORNING','AFTERNOON','EVENING','FLEXIBLE'] && jobText(d.scheduleText,500,true)
+        && d.physicalDemands is list && d.physicalDemands.size() <= 3
+        && d.physicalDemands.hasOnly(['HEAVY_LIFTING','PROLONGED_STANDING','FREQUENT_MOVEMENT'])
+        && d.physicalDemands.toSet().size() == d.physicalDemands.size() && d.demandsDeclared == true
+        && d.payAmount is int && d.payAmount > 0 && d.payUnit in ['HOUR','SESSION','DAY']
+        && d.expiresAt is timestamp && d.version is int && d.version >= 1
+        && d.status in ['PENDING_REVIEW','OPEN','REJECTED']
+        && jobText(d.lastSubmissionId,80,true) && d.createdAt is timestamp && d.updatedAt == request.time
+        && d.reviewedBy is string && jobText(d.reviewReason,1000,false);
+    }
+    function submittedJob(d) {
+      let u = get(userPath(d.employerId)).data;
+      let p = get(employerPath(d.employerId)).data;
+      return jobEmployer(d.employerId) && jobCatalog(d) && d.expiresAt > request.time
+        && d.employerDisplayName == (p.employerType == 'ORGANIZATION' ? p.organizationName : u.displayName)
+        && d.status == 'PENDING_REVIEW' && d.lastSubmissionId == d.id + '_s' + string(d.version)
+        && d.reviewedBy == '' && d.reviewedAt == null && d.reviewReason == '';
+    }
+    function jobEvent(d, action, before) {
+      let e = getAfter(jobHistoryPath(d.id,d.version)).data;
+      return e.jobId == d.id && e.version == d.version && e.actorId == request.auth.uid
+        && e.action == action && e.createdAt == request.time && e.before == before && e.after == d;
+    }
+    match /jobs/{id} {
+      allow get: if (request.auth != null && !exists(jobPath(id)))
+        || resource.data.status == 'OPEN' || (request.auth != null && resource.data.employerId == request.auth.uid) || admin();
+      allow list: if request.query.limit <= 20 && (resource.data.status == 'OPEN'
+        || (request.auth != null && resource.data.employerId == request.auth.uid) || admin());
+      allow create: if request.auth != null && jobShape(request.resource.data,id)
+        && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
+        && submittedJob(request.resource.data) && jobEvent(request.resource.data,'SUBMITTED',null);
+      allow update: if request.auth != null && jobShape(request.resource.data,id)
+        && request.resource.data.employerId == resource.data.employerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.version == resource.data.version + 1
+        && ((resource.data.status == 'REJECTED' && submittedJob(request.resource.data)
+              && jobEvent(request.resource.data,'SUBMITTED',resource.data))
+          || (admin() && resource.data.employerId != request.auth.uid && resource.data.status == 'PENDING_REVIEW'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','version','updatedAt','reviewedBy','reviewedAt','reviewReason'])
+            && request.resource.data.reviewedBy == request.auth.uid && request.resource.data.reviewedAt == request.time
+            && ((request.resource.data.status == 'OPEN' && request.resource.data.reviewReason == ''
+                  && request.resource.data.expiresAt > request.time && jobCatalog(request.resource.data)
+                  && jobEvent(request.resource.data,'APPROVED',resource.data))
+              || (request.resource.data.status == 'REJECTED' && jobText(request.resource.data.reviewReason,1000,true)
+                  && jobEvent(request.resource.data,'REJECTED',resource.data)))));
+      allow delete: if false;
+      match /history/{v} {
+        allow get, list: if request.auth != null && (get(jobPath(id)).data.employerId == request.auth.uid || admin());
+        allow create: if request.auth != null
+          && request.resource.data.keys().hasAll(['jobId','version','actorId','action','createdAt','before','after'])
+          && request.resource.data.keys().hasOnly(['jobId','version','actorId','action','createdAt','before','after'])
+          && request.resource.data.jobId == id && v == string(request.resource.data.version)
+          && request.resource.data.actorId == request.auth.uid && request.resource.data.createdAt == request.time
+          && request.resource.data.after == getAfter(jobPath(id)).data
+          && request.resource.data.version == getAfter(jobPath(id)).data.version
+          && ((!exists(jobPath(id)) && request.resource.data.before == null && request.resource.data.action == 'SUBMITTED'
+                && getAfter(jobPath(id)).data.employerId == request.auth.uid)
+            || (exists(jobPath(id)) && request.resource.data.before == get(jobPath(id)).data
+                && request.resource.data.version == get(jobPath(id)).data.version + 1
+                && ((get(jobPath(id)).data.status == 'REJECTED' && request.resource.data.action == 'SUBMITTED'
+                    && get(jobPath(id)).data.employerId == request.auth.uid)
+                  || (admin() && get(jobPath(id)).data.employerId != request.auth.uid
+                    && get(jobPath(id)).data.status == 'PENDING_REVIEW'
+                    && request.resource.data.action in ['APPROVED','REJECTED']))));
+        allow update, delete: if false;
+      }
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

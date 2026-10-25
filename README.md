@@ -1,3 +1,7 @@
+## C07 đã triển khai, chờ nghiệm thu — 25/10/2026
+
+C06 đã được người dùng duyệt và commit trong `afd7891`, đã đối chiếu local/GitHub main. C07 đã được duyệt bố cục và triển khai: địa chỉ làm việc khi soạn tin, gửi PENDING_REVIEW, Tin đã gửi, Admin chấp thuận/từ chối, sửa gửi lại REJECTED cùng ID/version và lịch sử bất biến. Thực hiện [Console/index/schema C07](docs/C07-CONSOLE-SCHEMA.md) rồi Sync/Run và [checklist C07](docs/C07-CHECKLIST.md); chi tiết file/giới hạn trong [C07-FILES](docs/C07-FILES.md). Chưa có kết quả build/test/runtime do Codex thực hiện, chưa sửa Console/deploy/stage/commit/push. Màn tin công khai thuộc C08, sửa OPEN/đóng/ẩn thuộc C11. Các bàn giao cũ dưới đây giữ làm lịch sử; trạng thái này và xác nhận mới của người dùng được ưu tiên.
+
 ## Chốt C04/C05 và chuẩn bị C06 — 25/10/2026
 
 Local/main/origin/main và GitHub main đã đối chiếu cùng `11fcdeb`. `a63734e` chứa bản sửa Gradle/resource; `11fcdeb` chỉ cập nhật cấu hình JDK jbr-21 của Android Studio. Working tree sạch trước lần cập nhật tài liệu này. Người dùng đã duyệt hết tất cả bản hiện tại, gồm C04/C05, điều hướng/Hồ sơ thống nhất và sửa sau pull; xem [bản chốt nghiệm thu](docs/C05-ACCEPTANCE.md). Không tự coi các ca kỹ thuật chưa tái hiện đã được Codex kiểm thử.
@@ -595,13 +599,15 @@ Số liên hệ không lặp dưới dạng có thể sửa tùy ý trong hai pr
 
 | Lớp | Thuộc tính chính | Trách nhiệm/phương thức |
 | --- | --- | --- |
-| JobPost | id, employerId, employerDisplayName, categoryId, areaCode, title, description, requirementsText, requiredSkillTags: List, workDays: List, workShift, scheduleText, physicalDemands: List, demandsDeclared, payAmount: Long, payUnit, status, version, expiresAt, createdAt, updatedAt, reviewedBy?, reviewedAt?, reviewReason? | isExpired(now), canReceiveApplication(now), validate() |
+| JobPost | id, employerId, employerDisplayName, categoryId, areaCode, workAddress, title, description, requirementsText, requiredSkillTags: List, workDays: List, workShift, scheduleText, physicalDemands: List, demandsDeclared, payAmount: Long, payUnit, status, version, expiresAt, createdAt, updatedAt, reviewedBy?, reviewedAt?, reviewReason? | isExpired(now), canReceiveApplication(now), validate() |
 | Application | id, jobId, seekerId, employerId, message?, status, applicantSnapshot, jobSnapshot, employerContactSnapshot?, createdAt, updatedAt | canWithdraw(), canReview() |
 | SavedJob | seekerId, jobId, savedAt | Liên kết duy nhất theo cặp |
 | Report | id, reporterId, jobId, reason, detail?, status, resolution?, handledBy?, resolutionNote?, createdAt, resolvedAt? | isResolved() |
 | ApplicantSnapshot | displayName, verifiedPhone, skills, experienceSummary, consentAt, profileVersion | Dữ liệu người gửi đồng ý chia sẻ khi ứng tuyển |
-| JobSnapshot | title, categoryId, areaCode, scheduleText, physicalDemands, payAmount, payUnit, jobVersion | Điều kiện tin tại lúc nộp đơn |
+| JobSnapshot | title, categoryId, areaCode, workAddress, scheduleText, physicalDemands, payAmount, payUnit, jobVersion | Điều kiện tin tại lúc nộp đơn |
 | ContactSnapshot | displayName, verifiedPhone, sharedAt | Liên hệ chủ tin khi chấp nhận |
+
+**Bổ sung được người dùng chốt 25/10/2026 cho C07:** workAddress là địa chỉ làm việc chính xác do người thuê nhập, bắt buộc khi xem trước/gửi, tối đa 500 ký tự; được lưu cùng tin và công khai khi OPEN. areaCode vẫn dùng lọc khu vực. Nháp C06 cũ được bổ sung trường mà không mất dữ liệu. Địa chỉ này không lấy từ CCCD; tách khỏi privateAddress/hướng dẫn riêng trong thỏa thuận ca. C07 đã bổ sung form/xem trước/chi tiết chủ tin/Admin và Rules local, chờ nghiệm thu. C08 làm màn công khai/cache địa chỉ; C12 chụp theo jobVersion; C15 xác nhận lại địa điểm từng ca. Xem [bổ sung địa chỉ C07](docs/C07-ADDRESS-CHANGE.md).
 
 payUnit của tin có thể HOUR/SESSION/DAY. Tin là thông tin tham khảo; khi lập ca phải chốt tổng laborAmount cụ thể. Nếu tính từ đơn giá giờ thì hiển thị thời lượng và phép tính để hai bên xác nhận, không tự dùng số giờ GPS hoặc bộ đếm làm tiền cuối.
 
