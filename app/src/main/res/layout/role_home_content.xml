@@ -10,8 +10,9 @@
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeAttentionFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_attention" android:drawableStart="@drawable/ic_nav_queue"/>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeWorkFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_my_jobs" android:drawableStart="@drawable/ic_role_work"/>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOtherFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_other_jobs" android:drawableStart="@drawable/ic_nav_search"/>
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOpenProfile" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_profile_open" android:drawableStart="@drawable/ic_nav_account"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOpenProfile" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_profile_open" android:drawableStart="@drawable/ic_nav_account" android:visibility="gone"/>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeHelpFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_help"/>
+        <TextView android:id="@+id/homeAudioGuide" style="@style/Widget.GrandMa.VerificationSecondary" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_gravity="center_horizontal" android:layout_marginTop="16dp" android:gravity="center" android:paddingStart="20dp" android:paddingEnd="20dp" android:text="@string/gs_listen_guide" android:visibility="gone"/>
     </LinearLayout>
     <LinearLayout android:id="@+id/homeAdmin" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homePostsFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_posts"/>

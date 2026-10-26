@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gs_title">Tìm việc theo hướng dẫn</string>
+    <string name="gs_step_1">Bước 1/4</string>
+    <string name="gs_q_category">Cô/chú muốn làm việc gì?</string>
+    <string name="gs_sub_category">Có thể chọn nhiều</string>
+    <string name="gs_no_priority">Chưa có ưu tiên</string>
+    <string name="gs_no_avoid">Không có yêu cầu riêng</string>
+
+    <string name="gs_step_2">Bước 2/4</string>
+    <string name="gs_q_area">Cô/chú muốn làm ở khu vực nào?</string>
+    <string name="gs_profile_suggest">%s • Gợi ý từ hồ sơ</string>
+
+    <string name="gs_step_3">Bước 3/4</string>
+    <string name="gs_q_schedule">Cô/chú rảnh lúc nào?</string>
+    <string name="gs_flexible">Linh hoạt</string>
+
+    <string name="gs_step_4">Bước 4/4</string>
+    <string name="gs_q_demands">Cô/chú muốn tránh yêu cầu nào?</string>
+
+    <string name="gs_summary_title">Lựa chọn của cô/chú</string>
+    <string name="gs_edit">Sửa</string>
+    <string name="gs_sum_cat">1. Loại việc</string>
+    <string name="gs_sum_area">2. Khu vực</string>
+    <string name="gs_sum_schedule">3. Lịch làm</string>
+    <string name="gs_sum_demands">4. Muốn tránh</string>
+
+    <string name="gs_action_continue">Tiếp tục</string>
+    <string name="gs_action_back">&lt; Quay lại</string>
+    <string name="gs_action_skip">Bỏ qua</string>
+    <string name="gs_action_see_jobs">Xem việc phù hợp</string>
+    <string name="gs_empty_results">Chưa có việc làm nào khớp hoàn toàn với 4 tiêu chí của cô/chú. Cô/chú có muốn nới lỏng khu vực hoặc thêm buổi rảnh không?</string>
+    <string name="gs_see_all">Xem tất cả việc</string>
+    <string name="gs_listen_guide">Nghe hướng dẫn</string>
+
+    <string name="gs_d_mon">T2</string>
+    <string name="gs_d_tue">T3</string>
+    <string name="gs_d_wed">T4</string>
+    <string name="gs_d_thu">T5</string>
+    <string name="gs_d_fri">T6</string>
+    <string name="gs_d_sat">T7</string>
+    <string name="gs_d_sun">CN</string>
+
+    <string name="gs_s_morning">Sáng</string>
+    <string name="gs_s_afternoon">Chiều</string>
+    <string name="gs_s_evening">Tối</string>
+
+    <string name="gs_demand_heavy">Mang vác nặng</string>
+    <string name="gs_demand_standing">Đứng lâu</string>
+    <string name="gs_demand_movement">Di chuyển nhiều</string>
+
+    <string name="gs_matched_count">Tìm thấy %d công việc phù hợp</string>
+    <string name="gs_seeker_home_title">Cô/chú mong muốn công việc như thế nào ?</string>
+    <string name="gs_seeker_home_intro">Cứ thong thả, từng bước một.</string>
+    <string name="gs_seeker_help_me">Giúp tôi tìm việc</string>
+    <string name="gs_seeker_pending">Việc cần xử lý</string>
+    <string name="gs_seeker_pending_sub">1 việc chờ cô/chú xem</string>
+    <string name="gs_seeker_my_jobs">Việc của tôi</string>
+    <string name="gs_seeker_my_jobs_sub">Lịch làm và tiền công</string>
+    <string name="gs_seeker_other_jobs">Xem các việc khác</string>
+    <string name="gs_seeker_other_jobs_sub">Tìm việc phù hợp</string>
+    <string name="gs_seeker_support">Trợ giúp</string>
+    <string name="gs_seeker_support_sub">Có người hướng dẫn</string>
+</resources>

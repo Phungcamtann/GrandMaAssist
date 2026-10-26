@@ -14,6 +14,10 @@
     <exclude domain="database" path="job_drafts.db-journal"/>
     <exclude domain="database" path="job_drafts.db-wal"/>
     <exclude domain="database" path="job_drafts.db-shm"/>
+    <exclude domain="database" path="search_preferences.db"/>
+    <exclude domain="database" path="search_preferences.db-journal"/>
+    <exclude domain="database" path="search_preferences.db-wal"/>
+    <exclude domain="database" path="search_preferences.db-shm"/>
     <!--
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>

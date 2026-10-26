@@ -72,7 +72,7 @@ public final class RoleNavigationBar {
         for(int i=0;i<4;i++){
             Action action=routes[i];actions[i]=action;
             boolean live=i==0 || i==3 || (seeker && i==2) || ((admin || "EMPLOYER".equals(role)) && i==1);AppCompatButton b=buttons[i];
-            String title=activity.getString(labels[i]);String value=title+(live?"":"\n"+activity.getString(R.string.n_soon));
+            String title=activity.getString(labels[i]);String value=title;
             if(!b.getText().toString().equals(value))b.setText(value);
             b.setEnabled(enabled && live);b.setSelected(live && selected==action);
             b.setTypeface(ResourcesCompat.getFont(activity,selected==action?R.font.be_vietnam_pro_semibold:R.font.be_vietnam_pro_regular),Typeface.NORMAL);
