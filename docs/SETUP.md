@@ -1,4 +1,8 @@
-# C07 đã triển khai, chuẩn bị nghiệm thu — 25/10/2026
+# C08 đã triển khai, chờ người dùng nghiệm thu — 26/10/2026
+
+**Bước hiện hành:** [C08-CONSOLE-SCHEMA](C08-CONSOLE-SCHEMA.md) hướng dẫn Publish toàn bộ Rules hiện tại (mở đọc danh mục active cho khách, giữ jobs/history r4) và tạo bốn index mới, giữ hai index C07. Chờ Enabled rồi Sync/Run và [C08-CHECKLIST](C08-CHECKLIST.md). Khách → Xem việc không cần đăng nhập; SEEKER → Việc khác. Bàn giao tại [C08-FILES](C08-FILES.md). Không gỡ app/xóa dữ liệu hoặc thay Auth/JSON/SHA/Storage; C06 dùng nguyên DB nháp. Codex không chạy build/test/app/Emulator/Rules tests, không thay Console hoặc commit/deploy. Các trạng thái “chuẩn bị C08/chưa triển khai” bên dưới thuộc lịch sử.
+
+**Trạng thái hiện hành:** người dùng đã xác nhận hết lỗi gửi tin và duyệt các luồng hoạt động khác. Commit `08d2211` đã được đối chiếu sau fetch, local HEAD trùng `origin/main`; không có thay đổi chưa commit trước lần cập nhật tài liệu này. Xem [C07-ACCEPTANCE](C07-ACCEPTANCE.md). Không cần làm lại cấu hình C07 hoặc xóa cache/dữ liệu chỉ để chuyển bước. C08 chưa triển khai; các hướng dẫn chờ Publish/nghiệm thu phía dưới là lịch sử trước xác nhận mới. Codex không chạy lại app/test hoặc commit/deploy trong lần đối chiếu này.
 
 **26/10/2026 — bản Rules hiện hành r4:** đã tìm và tái hiện nguyên nhân C07_SUBMIT_TRANSACTION/C07_WRITE_CONTENT_OR_HISTORY là giới hạn 1.000 biểu thức. Người dùng cho phép kiểm tra cục bộ lần này, kết quả 24/24 ca đạt. Publish toàn bộ Rules mới rồi gửi lại nháp cũ trên APK hiện tại; không đổi index/Storage/JSON. Chi tiết [C07-EXPRESSION-LIMIT-FIX](C07-EXPRESSION-LIMIT-FIX.md); nghiệm thu Firebase thật vẫn do người dùng.
 

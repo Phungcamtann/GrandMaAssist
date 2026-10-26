@@ -249,6 +249,11 @@
                         android:textAppearance="@style/TextAppearance.GrandMa.Body" android:visibility="gone" />
             </LinearLayout>
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBrowseJobs" style="@style/Widget.GrandMa.Button.Secondary"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" android:layout_marginStart="@dimen/screen_padding"
+                android:layout_marginEnd="@dimen/screen_padding" android:text="@string/pb_guest" android:visibility="gone"/>
             <ProgressBar
                 android:id="@+id/authProgress"
                 android:layout_width="@dimen/progress_size"

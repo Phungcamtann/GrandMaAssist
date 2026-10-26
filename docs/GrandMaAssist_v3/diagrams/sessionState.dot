@@ -1,0 +1,24 @@
+digraph sessionState {graph [fontname="Arial", bgcolor="transparent", pad="0.2", nodesep="0.4", ranksep="0.65", splines=polyline]; node [fontname="Arial", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f2f8f4", color="#8caf9a", margin="0.15,0.12"]; edge [fontname="Arial", fontsize=10, color="#668071", arrowsize=0.7]; rankdir=TB; PROPOSED[label="Đề xuất\nPROPOSED"];
+AWAITING_FUNDS[label="Chờ cấp tiền\nAWAITING_FUNDS"];
+READY[label="Sẵn sàng\nREADY"];
+IN_PROGRESS[label="Đang thực hiện\nIN_PROGRESS"];
+COMPLETION_PENDING[label="Chờ xác nhận kết quả\nCOMPLETION_PENDING"];
+DISPUTED[label="Đang tranh chấp\nDISPUTED"];
+SETTLEMENT_PENDING[label="Chờ quyết toán\nSETTLEMENT_PENDING"];
+COMPLETED[label="Hoàn thành\nCOMPLETED",peripheries=2];
+CANCELLED[label="Đã hủy\nCANCELLED",peripheries=2];
+ start[shape=point,fillcolor="#185b3e"]; start->PROPOSED;
+ PROPOSED->AWAITING_FUNDS[label="Cùng xác nhận version"];
+ AWAITING_FUNDS->PROPOSED[label="Sửa trước cấp tiền"];
+ AWAITING_FUNDS->READY[label="Đủ tiền"];
+ PROPOSED->CANCELLED[label="Từ chối / hủy"];
+ AWAITING_FUNDS->CANCELLED[label="Chưa có tiền, hủy / quá hạn"];
+ READY->IN_PROGRESS[label="Hai bên xác nhận bắt đầu"];
+ IN_PROGRESS->COMPLETION_PENDING[label="Người làm báo xong"];
+ COMPLETION_PENDING->SETTLEMENT_PENDING[label="Đồng ý kết quả"];
+ READY->SETTLEMENT_PENDING[label="Đồng ý hủy, hoàn đủ"];
+ READY->DISPUTED;IN_PROGRESS->DISPUTED;COMPLETION_PENDING->DISPUTED;
+ DISPUTED->SETTLEMENT_PENDING[label="Admin quyết định"];
+ SETTLEMENT_PENDING->COMPLETED[label="Phân bổ xong, tiền công > 0"];
+ SETTLEMENT_PENDING->CANCELLED[label="Phân bổ xong, tiền công = 0"];
+ }

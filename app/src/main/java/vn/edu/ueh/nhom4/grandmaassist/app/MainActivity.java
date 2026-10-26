@@ -50,6 +50,7 @@ import vn.edu.ueh.nhom4.grandmaassist.app.ui.profile.ProfilePanel;
 public class MainActivity extends AppCompatActivity {
     private AuthViewModel model;
     private ProfilePanel profilePanel;
+    private ProfileViewModel profileModel;
     private CancellationSignal pickerCancellation;
     private long pickerRequest;
     private View loginContent;
@@ -142,7 +143,15 @@ public class MainActivity extends AppCompatActivity {
             model.selectMethod(PhoneSignInFlow.Method.PHONE);
         }
         googleButton.setOnClickListener(view -> launchGooglePicker());
-        ProfileViewModel profiles = new ViewModelProvider(this).get(ProfileViewModel.class);
+        profileModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+        ProfileViewModel profiles = profileModel;
+        findViewById(R.id.btnBrowseJobs).setOnClickListener(v -> {
+            AuthRepository.State state=model.getState().getValue();
+            if(state.isBusy() || model.methods().active())return;
+            String role=state.account!=null && profileModel.snapshot!=null?profileModel.snapshot.role:"";
+            startActivity(new android.content.Intent(this,vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.class)
+                    .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.ROLE,role));
+        });
         profilePanel = new ProfilePanel(this, profiles, model);
         profiles.changes().observe(this, ignored -> render(model.getState().getValue()));
         retryButton.setOnClickListener(view -> model.retry());
@@ -339,6 +348,14 @@ public class MainActivity extends AppCompatActivity {
         renderMethods(state);
         renderPhone();
         if (profilePanel != null) profilePanel.render(state);
+        boolean browseGuest=!hasAccount && state.phase==AuthRepository.Phase.READY
+                && model.getPhoneState().getValue().step==PhoneSignInFlow.Step.ENTRY;
+        boolean browseOffline=hasAccount && profileModel!=null
+                && (profileModel.screen==ProfileViewModel.Screen.ERROR || profileModel.screen==ProfileViewModel.Screen.LOADING);
+        View browse=findViewById(R.id.btnBrowseJobs);
+        browse.setVisibility((browseGuest || browseOffline) && !model.methods().active()?View.VISIBLE:View.GONE);
+        browse.setEnabled(!state.isBusy());
+        ((TextView)browse).setText(hasAccount?R.string.pb_open:R.string.pb_guest);
     }
 
     private void renderPhone() {

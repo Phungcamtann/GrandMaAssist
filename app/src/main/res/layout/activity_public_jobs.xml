@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pbRoot" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/surface_ivory">
+    <include layout="@layout/role_topbar"/>
+    <LinearLayout android:id="@+id/pbToolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" android:orientation="horizontal" android:gravity="center_vertical"
+        android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbBack" style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:background="@drawable/public_back_button" android:gravity="start|center_vertical"
+            android:text="@string/n_back"/>
+        <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp">
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbReload" style="@style/Widget.GrandMa.PublicToolbarButton"
+                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end|center_vertical"
+                android:text="@string/pb_reload_short" android:contentDescription="@string/pb_reload" android:tooltipText="@string/pb_reload"/>
+        </FrameLayout>
+    </LinearLayout>
+    <ScrollView android:id="@+id/pbScroll" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
+        <LinearLayout android:id="@+id/pbContent" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="20dp" android:saveEnabled="false">
+            <TextView android:id="@+id/pbTitle" style="@style/Widget.GrandMa.VerificationHeading" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/pb_title"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbFilterToggle" style="@style/Widget.GrandMa.VerificationPrimary"
+                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                android:text="@string/pb_filter_toggle" android:contentDescription="@string/pb_filter_toggle_description"/>
+            <LinearLayout android:id="@+id/pbFilters" style="@style/Widget.GrandMa.ProfileSection">
+                <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/pb_area" android:labelFor="@id/pbArea"/>
+                <androidx.appcompat.widget.AppCompatSpinner android:id="@+id/pbArea" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/pb_area"/>
+                <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/pb_category" android:labelFor="@id/pbCategory"/>
+                <androidx.appcompat.widget.AppCompatSpinner android:id="@+id/pbCategory" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/pb_category"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbApply" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/pb_apply"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbReset" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_reset"/>
+                <TextView android:id="@+id/pbCatalogMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbCatalogReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_catalog_reload" android:visibility="gone"/>
+            </LinearLayout>
+            <TextView android:id="@+id/pbSummary" style="@style/Widget.GrandMa.VerificationMessage" android:visibility="visible"/>
+            <TextView android:id="@+id/pbSource" style="@style/Widget.GrandMa.VerificationMessage"/>
+            <ProgressBar android:id="@+id/pbProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp"
+                android:layout_marginTop="16dp" android:visibility="gone" android:importantForAccessibility="no"/>
+            <TextView android:id="@+id/pbMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
+            <TextView android:id="@+id/pbCount" style="@style/Widget.GrandMa.VerificationMessage"/>
+            <LinearLayout android:id="@+id/pbBody" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbMore" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_more" android:visibility="gone"/>
+            <LinearLayout android:id="@+id/pbFuture" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <androidx.appcompat.widget.AppCompatButton style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_save_soon" android:enabled="false"/>
+                <androidx.appcompat.widget.AppCompatButton style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/pb_apply_soon" android:enabled="false"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <include layout="@layout/role_navigation"/>
+</LinearLayout>

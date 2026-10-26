@@ -26,6 +26,7 @@ public final class RoleHomePanel {
         click(R.id.homeReviewProfiles,verify);click(R.id.homeRefreshCounts,vm::loadCounts);
         click(R.id.homeMainFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))createDraft.run();});
         click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))navigate.accept(RoleNavigationBar.Action.WORK);});
+        click(R.id.homeOtherFuture,()->{if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role))navigate.accept(RoleNavigationBar.Action.OTHER);});
         click(R.id.accountHubBack,()->navigate.accept(RoleNavigationBar.Action.HOME));
         click(R.id.accountHubProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
         click(R.id.accountHubVerification,verify);click(R.id.accountHubSecurity,security);click(R.id.accountHubSignOut,signOut);
@@ -52,6 +53,10 @@ public final class RoleHomePanel {
         future(R.id.homeMainFuture,seeker?R.string.n_find_jobs:R.string.n_create_post);
         future(R.id.homeAttentionFuture,R.string.n_attention);future(R.id.homeWorkFuture,seeker?R.string.n_my_jobs:R.string.n_my_posts);
         future(R.id.homeOtherFuture,seeker?R.string.n_other_jobs:R.string.n_sessions);future(R.id.homeHelpFuture,R.string.n_help);
+        if(seeker)text(R.id.homeOtherFuture,activity.getString(R.string.n_other_jobs));
+        activity.findViewById(R.id.homeOtherFuture).setEnabled(seeker && !vm.busy && !auth.isBusy());
+        ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,
+                seeker?R.color.brand_green:R.color.button_disabled_text));
         boolean employer="EMPLOYER".equals(role);
         if(employer){text(R.id.homeMainFuture,activity.getString(R.string.jd_create));text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));}
         activity.findViewById(R.id.homeMainFuture).setEnabled(employer && active && !vm.busy && !auth.isBusy());

@@ -1,5 +1,7 @@
 # C07 — bàn giao gửi và duyệt tin tuyển
 
+**Nghiệm thu hiện hành 26/10/2026:** người dùng xác nhận bản sửa đã hoạt động bình thường và duyệt các luồng khác. Commit `08d2211` chứa đủ các file bàn giao, HEAD local và origin/main trùng nhau sau fetch. Xem [C07-ACCEPTANCE](C07-ACCEPTANCE.md); các trạng thái điều tra/chờ nghiệm thu bên dưới là lịch sử. Lần đối chiếu mới chỉ cập nhật tài liệu, không chạy lại app/test hoặc tự commit.
+
 **26/10/2026 — đã xác định và sửa lỗi Rules:** người dùng cho phép kiểm tra cục bộ lần này; Emulator tái hiện chính lỗi PERMISSION_DENIED do quá 1.000 biểu thức. Đã sửa jobShape/jobSkills và guard ghi ở Rules r4, kiểm 24/24 ca đạt. Xem [báo cáo r4](C07-EXPRESSION-LIMIT-FIX.md), [kết quả](C07-RULES-REGRESSION-RESULTS.json) và script tools/firestore. Chờ người dùng Publish r4 và nghiệm thu Firebase thật; chưa build/test app hoặc commit/deploy. Trạng thái điều tra bên dưới giữ làm lịch sử.
 
 **26/10/2026 — đang điều tra lỗi gửi tin:** người dùng gặp PERMISSION_DENIED dù đã duyệt hồ sơ EMPLOYER. Đã thêm mã chẩn đoán bước đọc/transaction và kiểm preflight khớp Rules; chưa xác định nguyên nhân trên Console hoặc xác nhận sửa thành công. Xem [C07-PERMISSION-DIAGNOSTICS](C07-PERMISSION-DIAGNOSTICS.md). Không tự coi C07 đã được nghiệm thu.

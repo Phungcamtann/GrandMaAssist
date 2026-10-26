@@ -1,5 +1,7 @@
 # C07 — điều tra lỗi bị từ chối khi gửi tin
 
+**Đã đóng lỗi theo xác nhận người dùng ngày 26/10/2026:** sau bản r4, gửi tin hoạt động bình thường và các luồng khác đã được duyệt. Commit `08d2211` đã khớp local/origin/main sau fetch; xem [C07-ACCEPTANCE](C07-ACCEPTANCE.md). Giữ các bước điều tra dưới đây làm lịch sử và giữ chẩn đoán tương thích APK hiện tại, không yêu cầu người dùng lặp lại các bước xử lý lỗi đã hết.
+
 **Kết luận cập nhật 26/10/2026:** sau mã C07_WRITE_CONTENT_OR_HISTORY, người dùng cho phép kiểm tra Rules cục bộ. Đã tái hiện trên Emulator: commit bị chặn vì **vượt 1.000 biểu thức đánh giá**. Rút gọn jobShape/jobSkills ở r4 đã làm cùng ca gửi thành công và 24/24 ca tập trung đạt. Xem [bằng chứng và bản sửa r4](C07-EXPRESSION-LIMIT-FIX.md). Các đoạn r3/giả thuyết trước dưới đây giữ làm lịch sử, không còn là trạng thái kết luận hiện hành. Chờ Publish r4/nghiệm thu Firebase thật.
 
 **Trạng thái mới nhất 26/10/2026:** người dùng thử sau bản giảm lượt đọc và vẫn nhận C07_SUBMIT_TRANSACTION; do đó chưa xác nhận giả thuyết giới hạn đọc là nguyên nhân. Đã bổ sung bản r3 chẩn đoán chỉ đọc trên chính các predicate Rules của owner (quyền, số, hồ sơ, hạn máy chủ). Cần cập nhật **cả app và Rules** cho r3; không được coi lỗi đã khắc phục khi chưa có kết quả người dùng.

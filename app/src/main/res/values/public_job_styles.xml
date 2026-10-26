@@ -1,0 +1,36 @@
+<resources>
+    <style name="Widget.GrandMa.PublicToolbarButton" parent="Widget.GrandMa.Button.Secondary">
+        <item name="android:minWidth">56dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="TextAppearance.GrandMa.PublicCardTitle" parent="TextAppearance.GrandMa.Title">
+        <item name="android:textSize">26sp</item>
+        <item name="lineHeight">34sp</item>
+    </style>
+    <style name="Widget.GrandMa.PublicCardBody" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.GrandMa.Body</item>
+        <item name="android:saveEnabled">false</item>
+    </style>
+    <style name="Widget.GrandMa.PublicBadge" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_semibold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/brand_green</item>
+        <item name="android:background">@drawable/public_job_badge</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:saveEnabled">false</item>
+    </style>
+    <color name="public_card_border">#D5DFD8</color>
+</resources>

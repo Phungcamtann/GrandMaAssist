@@ -1,0 +1,9 @@
+flowchart LR
+    ui["Android Java + XML"] --> vm["ViewModel"]
+    vm --> repo["Repository và lệnh Java"]
+    repo --> local["SQLiteOpenHelper: tin đã xem"]
+    repo --> auth["Firebase Auth: Google / OTP thật"]
+    repo --> db["Firestore và Security Rules"]
+    repo --> storage["Storage và Security Rules: ảnh riêng"]
+    ui --> qr["Đọc QR từ ảnh bằng ML Kit"]
+    ui --> tts["Android TTS"]

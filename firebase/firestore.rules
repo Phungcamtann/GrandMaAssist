@@ -316,13 +316,16 @@ service cloud.firestore {
         && d.reason == rev.reason && d.createdAt == request.time;
     }
     match /appConfig/public { allow get: if true; allow list, write: if false; }
+    // C08 revision 2026-10-26: public active catalogs; job/history r4 remains unchanged.
     match /areas/{code} {
-      allow get, list: if request.auth != null && resource.data.active == true;
+      // C08: active catalog entries are public; private profile rules remain unchanged.
+      allow get: if resource.data.active == true;
+      allow list: if resource.data.active == true && (request.auth != null || request.query.limit <= 100);
       allow write: if false;
     }
     match /jobCategories/{id} {
-      allow get: if request.auth != null && resource.data.active == true;
-      allow list: if request.auth != null && resource.data.active == true && request.query.limit <= 100;
+      allow get: if resource.data.active == true;
+      allow list: if resource.data.active == true && request.query.limit <= 100;
       allow write: if false;
     }
     match /adminAccess/{uid} {

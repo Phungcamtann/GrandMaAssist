@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor employer as Người thuê
+    actor seeker as Người làm
+    participant app as Java và Repository
+    participant db as Firestore và Rules
+    employer->>app: Xác nhận cấp tổng tiền mô phỏng
+    app->>db: Transaction đề nghị funding, event duy nhất và READY
+    db-->>app: Kiểm tra quyền, version, tổng và commit
+    Note over app,db: Timeout phải đọc lại kết quả, không ghi lần hai
+    seeker->>app: Báo xong sau khi ca bắt đầu hợp lệ
+    app->>db: Transaction COMPLETION_PENDING
+    employer->>app: Đồng ý kết quả
+    app->>db: Lưu xác nhận và SETTLEMENT_PENDING
+    app->>db: Transaction phân bổ, event duy nhất, trạng thái cuối
+    db-->>app: Rules kiểm tra bảo toàn tiền, commit hoặc từ chối

@@ -1,0 +1,24 @@
+digraph retirementFlow {graph [fontname="Arial", bgcolor="transparent", pad="0.2", nodesep="0.4", ranksep="0.65", splines=polyline]; node [fontname="Arial", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f2f8f4", color="#8caf9a", margin="0.15,0.12"]; edge [fontname="Arial", fontsize=10, color="#668071", arrowsize=0.7]; rankdir=TB; nodesep=0.3; ranksep=0.4;
+ start[label="Đăng nhập / OTP SMS thật
+Vai trò người tìm việc",fillcolor="#185b3e",fontcolor=white];
+ photo[label="Chụp CCCD / căn cước
+Đọc QR trên ảnh, kiểm tra thông tin"];
+ proof[label="Đính kèm chứng nhận nghỉ hưu
+hoặc ảnh BHXH mô phỏng"];
+ submit[label="Gửi hồ sơ — SUBMITTED
+Chờ duyệt, vẫn xem và tìm việc"];
+ admin[label="Admin xem hồ sơ và ảnh
+Tra cứu mô phỏng, ghi kết quả",fillcolor="#fff4da",color="#c9a14b"];
+ decision[label="Quyết định thủ công",shape=diamond];
+ approved[label="APPROVED
+Thông báo: đã được duyệt",fillcolor="#dcefe1"];
+ needs[label="NEEDS_INFO / REJECTED
+Thông báo kèm lý do",fillcolor="#fff4da"];
+ revise[label="Người dùng bổ sung / gửi bản mới
+Giữ lịch sử, không sửa bản đã gửi"];
+ apply[label="Được ứng tuyển
+OTP + hồ sơ đủ + APPROVED hiện hành",fillcolor="#185b3e",fontcolor=white];
+ start->photo; photo->proof; proof->submit; submit->admin; admin->decision;
+ decision->approved[label="Chấp thuận"]; decision->needs[label="Chưa chấp thuận"];
+ approved->apply; needs->revise; revise->submit;
+ }

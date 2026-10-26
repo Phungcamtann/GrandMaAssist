@@ -1,5 +1,7 @@
 # C07 — xác định và sửa giới hạn 1.000 biểu thức Rules
 
+**Kết quả cập nhật 26/10/2026:** người dùng xác nhận lỗi đã được khắc phục, ứng dụng chạy bình thường và các luồng hoạt động khác được duyệt. Bản sửa đã có trong commit `08d2211`, khớp local/origin/main sau fetch. Xem [C07-ACCEPTANCE](C07-ACCEPTANCE.md). Yêu cầu chờ nghiệm thu phía dưới là lịch sử; không cần chạy lại Emulator chỉ để xác nhận commit.
+
 26/10/2026. **Đã tái hiện lỗi và xác nhận bản sửa bằng Emulator: 24/24 ca đạt. Chờ người dùng Publish r4 và nghiệm thu trên Firebase thật.** Người dùng đã cho phép ngoại lệ kiểm tra Rules cục bộ lần này sau khi C07_WRITE_CONTENT_OR_HISTORY vẫn xuất hiện. Quyền này không thay thế nguyên tắc người dùng tự Sync/build/test ứng dụng ở các luồng khác.
 
 ## Bằng chứng nguyên nhân

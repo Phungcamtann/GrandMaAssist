@@ -6,6 +6,10 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
+    <exclude domain="database" path="public_jobs.db"/>
+    <exclude domain="database" path="public_jobs.db-journal"/>
+    <exclude domain="database" path="public_jobs.db-wal"/>
+    <exclude domain="database" path="public_jobs.db-shm"/>
     <exclude domain="database" path="job_drafts.db"/>
     <exclude domain="database" path="job_drafts.db-journal"/>
     <exclude domain="database" path="job_drafts.db-wal"/>

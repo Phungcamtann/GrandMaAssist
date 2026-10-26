@@ -1,4 +1,10 @@
-## C07 đã triển khai, chờ nghiệm thu — 25/10/2026
+## C08 đã triển khai, chờ nghiệm thu — 26/10/2026
+
+**Trạng thái mới nhất:** đã bổ sung xem/lọc/phân trang/chi tiết việc OPEN và cache SQLite công khai, gồm địa chỉ làm việc. Khách mở từ màn đăng nhập; SEEKER mở Việc khác. Người dùng thực hiện [Console và bốn index C08](docs/C08-CONSOLE-SCHEMA.md), sau đó tự Sync/Run và [checklist C08](docs/C08-CHECKLIST.md). Xem [bàn giao C08](docs/C08-FILES.md). Codex chỉ rà tĩnh, chưa build/test/app/Rules tests hoặc deploy/commit. Giữ nghiệm thu C07 và các thay đổi tài liệu từ lượt trước; các trạng thái cũ bên dưới là lịch sử.
+
+### C07 đã nghiệm thu
+
+**Trạng thái hiện hành:** người dùng xác nhận lỗi gửi tin đã hết, ứng dụng và các luồng hoạt động khác đều được duyệt. Đã fetch và đối chiếu commit `08d2211` — `Fix luồng Duyệt tin`: HEAD local trùng `origin/main`, working tree sạch trước cập nhật tài liệu này. Xem [nghiệm thu và kiểm tra commit C07](docs/C07-ACCEPTANCE.md). Chưa thấy cần dọn mã/cache trước C08; chỉ cập nhật tài liệu, không chạy lại app/test hoặc tự commit. Các câu chờ nghiệm thu bên dưới giữ làm lịch sử và được thay thế bởi xác nhận này.
 
 **26/10/2026 — sửa lỗi gửi tin:** với ngoại lệ kiểm tra Rules cục bộ được người dùng cho phép, đã tái hiện lỗi vượt 1.000 biểu thức và xác nhận Rules r4 đạt 24/24 ca bằng dữ liệu giả. Publish toàn bộ `firebase/firestore.rules` có mốc r4 rồi gửi lại nháp cũ; không cần Sync/Run mới chỉ cho bản Rules này. Xem [báo cáo nguyên nhân/bản sửa](docs/C07-EXPRESSION-LIMIT-FIX.md). Chưa chạy app Android hoặc thay đổi Firebase thật; C07 vẫn chờ người dùng nghiệm thu trên thiết bị. Phát biểu chưa kiểm thử Rules trong các bàn giao cũ dưới đây là lịch sử trước ngoại lệ này.
 

@@ -41,6 +41,7 @@ public final class ProfilePanel {
     private final RoleHomePanel homePanel;
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> verification;
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> jobDrafts;
+    private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> publicJobs;
 
     public ProfilePanel(AppCompatActivity activity, ProfileViewModel vm, AuthViewModel auth) {
         this.activity = activity; this.vm = vm; this.auth = auth;
@@ -51,6 +52,7 @@ public final class ProfilePanel {
                     && vm.snapshot.uid.equals(com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid())){
                 String route=data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
                 if("POSTS".equals(route)){openPosts();return;}
+                if("OTHER".equals(route)){openPublicJobs();return;}
                 if("WORK".equals(route) && "EMPLOYER".equals(vm.snapshot.role)){openDrafts(false);return;}
                 if("HOME".equals(route))vm.showHome();else if("ACCOUNT".equals(route))vm.showAccount();
                 else if("PROFILE".equals(route))vm.showProfile();
@@ -68,6 +70,15 @@ public final class ProfilePanel {
                 else if("ACCOUNT".equals(route)){if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();}
             }
             if(!vm.busy)vm.load();
+        });
+        publicJobs=activity.registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),result->{
+            com.google.firebase.auth.FirebaseUser user=com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if(user==null || vm.snapshot==null || !user.getUid().equals(vm.snapshot.uid))return;
+            android.content.Intent data=result.getData();
+            String route=data==null?"":data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+            if("HOME".equals(route))vm.showHome();
+            else if("PROFILE".equals(route)){vm.showProfile();vm.refreshVerification();}
+            else if("ACCOUNT".equals(route))vm.showAccount();
         });
         view(R.id.profileContent).setSaveFromParentEnabled(false);
         edit(R.id.profileDisplayName, value -> vm.draft.displayName = value);
@@ -141,8 +152,17 @@ public final class ProfilePanel {
             case ACCOUNT:vm.showAccount();scrollTop();break;
             case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
             case WORK:openDrafts(false);break;
+            case OTHER:openPublicJobs();break;
             default:break;
         }
+    }
+    private void openPublicJobs(){
+        AuthRepository.State state=auth.getState().getValue();
+        if(vm.busy || state.account==null || state.isBusy() || auth.methods().active() || vm.snapshot==null || !"SEEKER".equals(vm.snapshot.role))return;
+        discardThen(()->publicJobs.launch(new android.content.Intent(activity,
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.class)
+                .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.ROLE,vm.snapshot.role)
+                .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.NAVIGATION,true)));
     }
     private void openPosts(){
         AuthRepository.State state=auth.getState().getValue();

@@ -1,5 +1,7 @@
 # C07 — Firebase Console và schema
 
+**Trạng thái nghiệm thu hiện hành — 26/10/2026:** người dùng xác nhận lỗi gửi tin được khắc phục và duyệt các luồng hoạt động khác; commit `08d2211` khớp local/origin/main sau fetch. Không cần thực hiện lại các bước Console dưới đây chỉ để chốt C07. Xem [C07-ACCEPTANCE](C07-ACCEPTANCE.md); phần thiết lập và các trạng thái chờ bên dưới giữ làm tài liệu lịch sử/tham chiếu.
+
 25/10/2026. Mã nguồn đã triển khai, chờ người dùng Publish Rules/tạo index và Sync/Run. Codex chưa sửa Console, deploy hoặc chạy kiểm thử. Căn cứ dự án hiện hành `grandmaassist-a1dfa`, Firestore `(default)`; giữ Auth/C04/C05/danh mục/Storage hiện có.
 
 ## 1. Publish Rules

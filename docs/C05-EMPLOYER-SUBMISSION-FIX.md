@@ -1,5 +1,7 @@
 # C05 — sửa đường gửi xác minh danh tính người thuê
 
+**Xác nhận mới 26/10/2026:** người dùng ghi nhận ứng dụng chạy bình thường và duyệt các luồng hoạt động khác khi chốt C07. Bản sửa C05 này đã có trong commit `08d2211`, được đối chiếu khớp local/origin/main. Ghi nhận hồi quy theo xác nhận tổng thể của người dùng, không tự suy diễn từng EF/ca khó đã được tái hiện; các câu chờ và mô tả lỗi bên dưới là lịch sử. Xem [mốc nghiệm thu](C07-ACCEPTANCE.md).
+
 **Cập nhật hiện hành 26/10/2026:** người dùng xác nhận nút vẫn mờ, yêu cầu bỏ vùng ghim và trả vị trí cũ. Đã đưa Gửi hồ sơ/thông báo/tiến trình/Dừng chờ gửi về khối gửi trong ScrollView, bỏ toàn bộ logic di chuyển/ghim footer. Khi đang soạn, nút có thể bấm để kiểm điều kiện; chỉ vô hiệu trong lúc sending thật. Thiếu điều kiện hiển thị hộp thông báo cụ thể trước khi mở xác nhận gửi. Các mô tả footer/EF06/EF08 phía dưới giữ lịch sử và đã được thay bằng quyết định này. Bản hiện hành chưa được người dùng nghiệm thu.
 
 26/10/2026. Nền local HEAD `313c478` — Luồng duyệt tin tuyển dụng; working tree sạch trước sửa. Người dùng báo đã đọc QR CCCD nhưng không gửi được xác minh người thuê và thấy phần Cách xét duyệt dễ nhầm với nghỉ hưu; xác nhận cụ thể **nút Gửi hồ sơ bị mờ**, chưa phải báo lỗi sau upload. Bản sửa này chờ người dùng Sync/Run/nghiệm thu.

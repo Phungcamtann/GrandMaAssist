@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor seeker as Người tìm việc
+    participant ui as Màn hình xác nhận
+    participant java as Repository Java
+    participant db as Firestore và Rules
+    seeker->>ui: Xác nhận gửi đơn
+    ui->>java: applyToJob với requestId
+    java->>db: Transaction đọc user, request duyệt, hồ sơ, tin và đơn
+    java->>db: Đề nghị tạo đơn và snapshot
+    alt OTP, APPROVED hiện hành, tin hợp lệ, chưa có đơn
+        db-->>java: Rules chấp nhận và commit
+        java-->>ui: applicationId
+        ui-->>seeker: Đã ứng tuyển
+    else Thiếu duyệt hoặc sai điều kiện
+        db-->>java: Từ chối, không tạo đơn
+        java-->>ui: Đọc lại trạng thái được phép
+        ui-->>seeker: Giải thích và mở hồ sơ/tin phù hợp
+    end

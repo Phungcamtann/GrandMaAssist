@@ -271,7 +271,7 @@ public final class VerificationActivity extends AppCompatActivity {
         }
         String route=action==RoleNavigationBar.Action.HOME?"HOME":action==RoleNavigationBar.Action.ACCOUNT?"ACCOUNT":
                 action==RoleNavigationBar.Action.WORK && vm.home!=null && "EMPLOYER".equals(vm.home.role)?"WORK":
-                action==RoleNavigationBar.Action.PROFILE?"PROFILE":null;
+                  action==RoleNavigationBar.Action.PROFILE?"PROFILE":action==RoleNavigationBar.Action.OTHER && vm.home!=null && "SEEKER".equals(vm.home.role)?"OTHER":null;
         if(route==null)return;
         discardThen(()->{setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,route));finish();});
     }

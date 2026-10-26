@@ -5,6 +5,10 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="database" path="public_jobs.db"/>
+        <exclude domain="database" path="public_jobs.db-journal"/>
+        <exclude domain="database" path="public_jobs.db-wal"/>
+        <exclude domain="database" path="public_jobs.db-shm"/>
         <exclude domain="database" path="job_drafts.db"/>
         <exclude domain="database" path="job_drafts.db-journal"/>
         <exclude domain="database" path="job_drafts.db-wal"/>
@@ -15,6 +19,10 @@
         -->
     </cloud-backup>
     <device-transfer>
+        <exclude domain="database" path="public_jobs.db"/>
+        <exclude domain="database" path="public_jobs.db-journal"/>
+        <exclude domain="database" path="public_jobs.db-wal"/>
+        <exclude domain="database" path="public_jobs.db-shm"/>
         <exclude domain="database" path="job_drafts.db"/>
         <exclude domain="database" path="job_drafts.db-journal"/>
         <exclude domain="database" path="job_drafts.db-wal"/>
