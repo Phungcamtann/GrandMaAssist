@@ -3,17 +3,43 @@
     <include layout="@layout/role_topbar"/>
     <ScrollView android:id="@+id/jdScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
         <LinearLayout android:id="@+id/jdContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp" android:orientation="vertical" android:saveEnabled="false">
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdBack" style="@style/Widget.GrandMa.BackLink" android:text="@string/n_back"/>
-            <TextView android:id="@+id/jdTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/jd_title" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"/>
+            <LinearLayout android:id="@+id/jdToolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdBack" style="@style/Widget.GrandMa.PublicToolbarButton"
+                    android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+                    android:background="@drawable/public_back_button" android:textSize="18sp" android:text="@string/n_back"/>
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdListReload" style="@style/Widget.GrandMa.PublicToolbarButton"
+                    android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+                    android:paddingStart="14dp" android:paddingEnd="14dp"
+                    android:textSize="15sp" android:maxLines="1" android:singleLine="true"
+                    android:text="@string/p_reload" android:contentDescription="@string/p_reload"/>
+            </LinearLayout>
+            <TextView android:id="@+id/jdTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Nháp trên máy" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:textSize="26sp" android:accessibilityHeading="true"/>
             <TextView android:id="@+id/jdAccessNote" style="@style/Widget.GrandMa.VerificationMessage" android:text="@string/jd_offline"/>
             <ProgressBar android:id="@+id/jdProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="12dp" android:visibility="gone" android:importantForAccessibility="no"/>
             <TextView android:id="@+id/jdMessage" style="@style/Widget.GrandMa.VerificationMessage"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdRetryAccess" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_retry" android:visibility="gone"/>
             <LinearLayout android:id="@+id/jdListSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSent" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Tin đã gửi"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCreate" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/jd_create"/>
-                <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_saved_drafts" android:accessibilityHeading="true"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdListReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="8dp" android:layout_marginBottom="12dp">
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdSent"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:minHeight="48dp" android:layout_marginTop="0dp"
+                        android:paddingTop="10dp" android:paddingBottom="10dp"
+                        android:paddingStart="8dp" android:paddingEnd="8dp"
+                        android:includeFontPadding="false" android:gravity="center"
+                        android:layout_marginEnd="6dp" android:textSize="15sp" android:text="Tin đã đăng"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdCreate"
+                        style="@style/Widget.GrandMa.VerificationPrimary"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:minHeight="48dp" android:layout_marginTop="0dp"
+                        android:paddingTop="10dp" android:paddingBottom="10dp"
+                        android:paddingStart="8dp" android:paddingEnd="8dp"
+                        android:includeFontPadding="false" android:gravity="center"
+                        android:layout_marginStart="6dp" android:textSize="15sp" android:text="@string/jd_create"/>
+                </LinearLayout>
                 <LinearLayout android:id="@+id/jdList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
             </LinearLayout>
             <LinearLayout android:id="@+id/jdEditorSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">

@@ -15,6 +15,7 @@ public final class JobPostViewModel extends AndroidViewModel {
     public final String uid;
     public boolean started,ready,admin,busy,ended,more,reasonVisible;
     public String message="",reason="",pendingNotice="";
+    public String reasonAction = "REJECT";
     public JobPost selected;
     public List<JobPost> items=new ArrayList<>();
     public long pageEvent;
@@ -42,22 +43,41 @@ public final class JobPostViewModel extends AndroidViewModel {
             if(t.isSuccessful()){
                 LinkedHashMap<String,JobPost> merged=new LinkedHashMap<>();if(next)for(JobPost p:items)merged.put(p.content.id,p);
                 for(JobPost p:t.getResult().items)merged.put(p.content.id,p);items=new ArrayList<>(merged.values());cursor=t.getResult().cursor;more=t.getResult().more;
-                selected=null;reasonVisible=false;reason="";message=items.isEmpty()?"Chưa có tin trong danh sách.":"";++pageEvent;
+                selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Chưa có tin trong danh sách.":"";++pageEvent;
             }else message=JobPostRepository.error(t.getException());emit();
         });
     }
     public void open(String id){if(!ready||busy)return;busy=true;message="Đang tải tin…";long g=++generation;emit();
         repository.get(uid,id).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
-            if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";message=pendingNotice;pendingNotice="";++pageEvent;}
+            if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";reasonAction="REJECT";message=pendingNotice;pendingNotice="";++pageEvent;}
             else message=JobPostRepository.error(t.getException());emit();});
     }
-    public void backToList(){if(busy)return;selected=null;reasonVisible=false;reason="";message=items.isEmpty()?"Bấm Tải lại để xem danh sách tin.":"";++pageEvent;emit();}
+    public void backToList(){if(busy)return;selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Bấm Tải lại để xem danh sách tin.":"";++pageEvent;emit();}
     public void decide(boolean approve){if(!ready||busy||!admin||selected==null)return;
         if(!approve&&(reason.trim().isEmpty()||reason.trim().length()>1000)){message="Nhập lý do từ chối, tối đa 1.000 ký tự.";reasonVisible=true;emit();return;}
         JobPost expected=selected;busy=true;message="Đang lưu quyết định…";long g=++generation;emit();
         repository.decide(uid,expected,approve,reason).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
             if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";message=approve?"Đã chấp thuận tin.":"Đã từ chối tin.";}
             else message=JobPostRepository.error(t.getException());emit();});
+    }
+    public void closePost() {
+        if (!ready || busy || admin || selected == null || !"OPEN".equals(selected.status)) return;
+        JobPost expected = selected; busy = true; message = "Đang đóng tin…"; long g = ++generation; emit();
+        repository.close(uid, expected).addOnCompleteListener(t -> {
+            if (!valid(g)) return; busy = false;
+            if (t.isSuccessful()) { selected = t.getResult(); message = "Đã đóng tin tuyển dụng thành công."; }
+            else message = JobPostRepository.error(t.getException()); emit();
+        });
+    }
+    public void hidePost() {
+        if (!ready || busy || !admin || selected == null || !Arrays.asList("OPEN", "CLOSED").contains(selected.status)) return;
+        if (reason.trim().isEmpty() || reason.trim().length() > 1000) { message = "Nhập lý do ẩn tin, tối đa 1.000 ký tự."; reasonVisible = true; emit(); return; }
+        JobPost expected = selected; busy = true; message = "Đang ẩn tin…"; long g = ++generation; emit();
+        repository.hide(uid, expected, reason).addOnCompleteListener(t -> {
+            if (!valid(g)) return; busy = false;
+            if (t.isSuccessful()) { selected = t.getResult(); reasonVisible = false; reason = ""; message = "Đã ẩn tin tuyển dụng thành công."; }
+            else message = JobPostRepository.error(t.getException()); emit();
+        });
     }
     @Override protected void onCleared(){++generation;FirebaseAuth.getInstance().removeAuthStateListener(listener);super.onCleared();}
 }

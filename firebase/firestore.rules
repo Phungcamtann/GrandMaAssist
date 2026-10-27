@@ -456,7 +456,7 @@ service cloud.firestore {
         && d.physicalDemands.toSet().size() == d.physicalDemands.size() && d.demandsDeclared == true
         && d.payAmount is int && d.payAmount > 0 && d.payUnit in ['HOUR','SESSION','DAY']
         && d.expiresAt is timestamp && d.version is int && d.version >= 1
-        && d.status in ['PENDING_REVIEW','OPEN','REJECTED']
+        && d.status in ['PENDING_REVIEW','OPEN','REJECTED','CLOSED','HIDDEN']
         && d.lastSubmissionId.size() <= 80 && d.lastSubmissionId.matches('(?s).*[^\\s].*') && d.createdAt is timestamp && d.updatedAt == request.time
         && d.reviewedBy is string && d.reviewReason.matches('(?s).{0,1000}');
     }
@@ -473,24 +473,31 @@ service cloud.firestore {
       return e.jobId == d.id && e.version == d.version && e.actorId == request.auth.uid
         && e.action == action && e.createdAt == request.time && e.before == before && e.after == d;
     }
+    function jobHistoryUpdate(id, d, after) {
+      let before = get(jobPath(id)).data;
+      return d.before == before && d.version == before.version + 1
+        && ((before.status in ['REJECTED','OPEN'] && d.action == 'SUBMITTED'
+              && before.employerId == request.auth.uid && after.status == 'PENDING_REVIEW')
+          || (before.status == 'OPEN' && d.action == 'CLOSED'
+              && before.employerId == request.auth.uid && after.status == 'CLOSED')
+          || (admin() && before.employerId != request.auth.uid
+              && ((before.status == 'PENDING_REVIEW'
+                  && ((d.action == 'APPROVED' && after.status == 'OPEN')
+                    || (d.action == 'REJECTED' && after.status == 'REJECTED')))
+                || (before.status in ['OPEN','CLOSED']
+                  && d.action == 'HIDDEN' && after.status == 'HIDDEN'))));
+    }
     function jobHistoryCreate(id, v, d) {
       let path = jobPath(id);
-      let existed = exists(path);
-      let before = existed ? get(path).data : null;
       let after = getAfter(path).data;
       return d.keys().hasAll(['jobId','version','actorId','action','createdAt','before','after'])
         && d.keys().hasOnly(['jobId','version','actorId','action','createdAt','before','after'])
         && d.jobId == id && v == string(d.version) && d.actorId == request.auth.uid
         && d.createdAt == request.time && d.after == after && d.version == after.version
-        && (!existed
+        && (!exists(path)
           ? (d.before == null && d.version == 1 && d.action == 'SUBMITTED'
               && after.employerId == request.auth.uid && after.status == 'PENDING_REVIEW')
-          : (d.before == before && d.version == before.version + 1
-              && ((before.status == 'REJECTED' && d.action == 'SUBMITTED'
-                    && before.employerId == request.auth.uid && after.status == 'PENDING_REVIEW')
-                || (admin() && before.employerId != request.auth.uid && before.status == 'PENDING_REVIEW'
-                    && ((d.action == 'APPROVED' && after.status == 'OPEN')
-                      || (d.action == 'REJECTED' && after.status == 'REJECTED'))))));
+          : jobHistoryUpdate(id, d, after));
     }
     // Read-only owner diagnostics. These paths need no documents and can never be written.
     // They expose only predicates over data the owner can already read, never job content.
@@ -520,16 +527,23 @@ service cloud.firestore {
         && request.resource.data.employerId == resource.data.employerId
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.version == resource.data.version + 1
-        && ((resource.data.status == 'REJECTED' && submittedJob(request.resource.data)
+        && (((resource.data.status in ['REJECTED','OPEN']) && submittedJob(request.resource.data)
               && jobEvent(request.resource.data,'SUBMITTED',resource.data))
-          || (admin() && resource.data.employerId != request.auth.uid && resource.data.status == 'PENDING_REVIEW'
+          || (resource.data.status == 'OPEN' && request.resource.data.status == 'CLOSED'
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','version','updatedAt'])
+              && jobEvent(request.resource.data,'CLOSED',resource.data))
+          || (admin() && resource.data.employerId != request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','version','updatedAt','reviewedBy','reviewedAt','reviewReason'])
             && request.resource.data.reviewedBy == request.auth.uid && request.resource.data.reviewedAt == request.time
-            && ((request.resource.data.status == 'OPEN' && request.resource.data.reviewReason == ''
-                  && request.resource.data.expiresAt > request.time && jobCatalog(request.resource.data)
-                  && jobEvent(request.resource.data,'APPROVED',resource.data))
-              || (request.resource.data.status == 'REJECTED' && jobText(request.resource.data.reviewReason,1000,true)
-                  && jobEvent(request.resource.data,'REJECTED',resource.data)))));
+            && ((resource.data.status == 'PENDING_REVIEW'
+                && ((request.resource.data.status == 'OPEN' && request.resource.data.reviewReason == ''
+                      && request.resource.data.expiresAt > request.time && jobCatalog(request.resource.data)
+                      && jobEvent(request.resource.data,'APPROVED',resource.data))
+                  || (request.resource.data.status == 'REJECTED' && jobText(request.resource.data.reviewReason,1000,true)
+                      && jobEvent(request.resource.data,'REJECTED',resource.data))))
+              || (resource.data.status in ['OPEN','CLOSED']
+                && request.resource.data.status == 'HIDDEN' && jobText(request.resource.data.reviewReason,1000,true)
+                && jobEvent(request.resource.data,'HIDDEN',resource.data)))));
       allow delete: if false;
       match /history/{v} {
         allow get, list: if request.auth != null && (get(jobPath(id)).data.employerId == request.auth.uid || admin());

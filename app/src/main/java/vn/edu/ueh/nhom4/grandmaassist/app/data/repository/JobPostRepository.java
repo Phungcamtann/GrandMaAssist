@@ -106,7 +106,7 @@ public final class JobPostRepository {
                 boundedText(text(cat,"name"),120,"CATEGORY_NAME");boundedText(text(area,"name"),120,"AREA_NAME");
                 if(!d.validate(Collections.singleton(d.categoryId),Collections.singleton(d.areaCode),System.currentTimeMillis()).isEmpty())throw new Failure("FORM");
                 if(old.exists()){
-                    if(!uid.equals(old.getString("employerId"))||!"REJECTED".equals(old.getString("status"))||!Objects.equals(old.getLong("version"),d.serverBaseVersion))throw new Failure("CONFLICT");
+                    if(!uid.equals(old.getString("employerId"))||!Arrays.asList("REJECTED","OPEN").contains(old.getString("status"))||!Objects.equals(old.getLong("version"),d.serverBaseVersion))throw new Failure("CONFLICT");
                 }else if(d.serverBaseVersion!=0)throw new Failure("CONFLICT");
                 long version=d.serverBaseVersion+1;
                 Map<String,Object> m=new HashMap<>();m.put("id",d.id);m.put("employerId",uid);
@@ -155,6 +155,61 @@ public final class JobPostRepository {
             m.put("reviewedAt",FieldValue.serverTimestamp());m.put("updatedAt",FieldValue.serverTimestamp());
             tx.set(ref,m);tx.set(ref.collection("history").document(String.valueOf(expected.version+1)),event(m,old,uid,approve?"APPROVED":"REJECTED"));return null;
         }).continueWithTask(t->{if(!t.isSuccessful())throw t.getException();return get(uid,expected.content.id);});}));
+    }
+
+    public Task<JobPost> close(String uid, JobPost expected) {
+        return bounded(proof(uid).continueWithTask(p -> {
+            if (!p.isSuccessful()) throw p.getException();
+            return db.runTransaction(tx -> {
+                if (!same(uid)) throw new Failure("SESSION");
+                DocumentReference ref = db.collection("jobs").document(expected.content.id);
+                DocumentSnapshot old = tx.get(ref);
+                if (!old.exists() || !uid.equals(old.getString("employerId")) || !"OPEN".equals(old.getString("status")) || !Objects.equals(old.getLong("version"), expected.version))
+                    throw new Failure("CONFLICT");
+                long nextVersion = expected.version + 1;
+                Map<String, Object> m = new HashMap<>(Objects.requireNonNull(old.getData()));
+                m.put("version", nextVersion);
+                m.put("status", "CLOSED");
+                m.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(ref, m);
+                tx.set(ref.collection("history").document(String.valueOf(nextVersion)), event(m, old, uid, "CLOSED"));
+                return null;
+            }).continueWithTask(t -> {
+                if (!t.isSuccessful()) throw t.getException();
+                return get(uid, expected.content.id);
+            });
+        }));
+    }
+
+    public Task<JobPost> hide(String uid, JobPost expected, String reason) {
+        String note = reason == null ? "" : reason.trim();
+        if (note.isEmpty() || note.length() > 1000) return Tasks.forException(new Failure("REASON"));
+        return bounded(proof(uid).continueWithTask(p -> {
+            if (!p.isSuccessful()) throw p.getException();
+            return db.runTransaction(tx -> {
+                if (!same(uid)) throw new Failure("SESSION");
+                DocumentReference ref = db.collection("jobs").document(expected.content.id);
+                DocumentSnapshot old = tx.get(ref), u = tx.get(db.collection("users").document(uid)), a = tx.get(db.collection("adminAccess").document(uid));
+                active(u, "ADMIN");
+                if (!Boolean.TRUE.equals(a.getBoolean("enabled"))) throw new Failure("ACCESS");
+                if (!old.exists() || uid.equals(old.getString("employerId")) || !Arrays.asList("OPEN", "CLOSED").contains(old.getString("status")) || !Objects.equals(old.getLong("version"), expected.version))
+                    throw new Failure("CONFLICT");
+                long nextVersion = expected.version + 1;
+                Map<String, Object> m = new HashMap<>(Objects.requireNonNull(old.getData()));
+                m.put("version", nextVersion);
+                m.put("status", "HIDDEN");
+                m.put("reviewReason", note);
+                m.put("reviewedBy", uid);
+                m.put("reviewedAt", FieldValue.serverTimestamp());
+                m.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(ref, m);
+                tx.set(ref.collection("history").document(String.valueOf(nextVersion)), event(m, old, uid, "HIDDEN"));
+                return null;
+            }).continueWithTask(t -> {
+                if (!t.isSuccessful()) throw t.getException();
+                return get(uid, expected.content.id);
+            });
+        }));
     }
     public static String error(Exception ex){Throwable c=ex;for(int i=0;c!=null&&i<10;i++,c=c.getCause()){
         if(c instanceof DiagnosticFailure){

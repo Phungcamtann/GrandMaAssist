@@ -160,11 +160,11 @@ public final class JobDraftViewModel extends AndroidViewModel {
         });
     }
     public void openRejected(String id){
-        if(!ready||busy)return;busy=true;long e=generation,a=++formRequest;message="Đang mở tin bị từ chối…";emit();
+        if(!ready||busy)return;busy=true;long e=generation,a=++formRequest;message="Đang mở tin…";emit();
         posts.get(uid,id).addOnCompleteListener(t->{
             if(!valid(e)||a!=formRequest)return;
             if(!t.isSuccessful()){busy=false;message=JobPostRepository.error(t.getException());emit();return;}
-            if(!uid.equals(t.getResult().content.ownerUid)||!"REJECTED".equals(t.getResult().status)){
+            if(!uid.equals(t.getResult().content.ownerUid)||!Arrays.asList("REJECTED","OPEN").contains(t.getResult().status)){
                 busy=false;message="Tin đã thay đổi. Hãy tải lại trong Tin đã gửi.";emit();return;}
             LocalJobDraft value=t.getResult().content.copy();
             repository.read(uid,id).addOnCompleteListener(local->{
@@ -172,7 +172,7 @@ public final class JobDraftViewModel extends AndroidViewModel {
                 if(local.isSuccessful()){value.revision=local.getResult().revision;value.createdAt=local.getResult().createdAt;value.updatedAt=local.getResult().updatedAt;}
                 else{Throwable c=local.getException();boolean missing=false;for(int i=0;c!=null&&i<8;i++,c=c.getCause())if(c instanceof JobDraftStore.Failure&&"MISSING".equals(((JobDraftStore.Failure)c).code))missing=true;
                     if(!missing){message=JobDraftRepository.error(local.getException());emit();return;}}
-                draft=value;page=Page.EDIT;dirty=true;readRequired=false;errors.clear();message="Sửa nội dung rồi xem trước để gửi lại.";++pageEvent;emit();
+                draft=value;page=Page.EDIT;dirty=true;readRequired=false;errors.clear();message="Sửa nội dung rồi xem trước để gửi duyệt.";++pageEvent;emit();
             });
         });
     }

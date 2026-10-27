@@ -151,7 +151,7 @@ public final class ProfilePanel {
                 scrollTop();break;
             case ACCOUNT:vm.showAccount();scrollTop();break;
             case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
-            case WORK:openDrafts(false);break;
+            case WORK:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))openPosts();else openDrafts(false);break;
             case OTHER:openPublicJobs();break;
             default:break;
         }
@@ -166,7 +166,7 @@ public final class ProfilePanel {
     }
     private void openPosts(){
         AuthRepository.State state=auth.getState().getValue();
-        if(vm.busy||state.account==null||auth.methods().active()||vm.snapshot==null||!"ADMIN".equals(vm.snapshot.role)||!"ACTIVE".equals(vm.snapshot.status))return;
+        if(vm.busy||state.account==null||auth.methods().active()||vm.snapshot==null||!java.util.Arrays.asList("ADMIN","EMPLOYER").contains(vm.snapshot.role)||!"ACTIVE".equals(vm.snapshot.status))return;
         discardThen(()->jobDrafts.launch(new android.content.Intent(activity,vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.JobPostActivity.class)));
     }
     private void openDrafts(boolean create){
