@@ -35,7 +35,7 @@ public final class RoleHomePanel {
                 activity.startActivity(new Intent(activity, GuidedSearchActivity.class));
             }
         });
-        click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))navigate.accept(RoleNavigationBar.Action.WORK);});
+        click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && ("EMPLOYER".equals(vm.snapshot.role) || "SEEKER".equals(vm.snapshot.role)))navigate.accept(RoleNavigationBar.Action.WORK);});
         click(R.id.homeOtherFuture,()->{
             if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)) {
                 activity.startActivity(new Intent(activity, PublicJobsActivity.class).putExtra(PublicJobsActivity.ROLE, "SEEKER"));
@@ -90,6 +90,8 @@ public final class RoleHomePanel {
             text(R.id.homeOtherFuture, activity.getString(R.string.gs_seeker_other_jobs) + "\n" + activity.getString(R.string.gs_seeker_other_jobs_sub));
             text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support) + "\n" + activity.getString(R.string.gs_seeker_support_sub));
 
+            activity.findViewById(R.id.homeWorkFuture).setEnabled(!vm.busy && !auth.isBusy());
+            ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeOtherFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
         } else {

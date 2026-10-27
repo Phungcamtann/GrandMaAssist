@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_title_apply">Ứng tuyển công việc</string>
+    <string name="app_title_my_applications">Đơn của tôi</string>
+    <string name="app_apply_now">Ứng tuyển ngay</string>
+    <string name="app_already_applied">Đã nộp đơn</string>
+    <string name="app_confirm_apply">Xác nhận nộp đơn</string>
+    <string name="app_withdraw">Rút đơn</string>
+    <string name="app_withdrawn">Đã rút đơn</string>
+    <string name="app_message_label">Lời nhắn gửi nhà tuyển dụng (tùy chọn)</string>
+    <string name="app_message_hint">Giới thiệu ngắn hoặc mong muốn làm việc (tối đa 500 ký tự)…</string>
+    <string name="app_share_phone_consent">Tôi đồng ý chia sẻ số điện thoại đã xác minh để người thuê liên hệ khi cần.</string>
+    <string name="app_applicant_info">Thông tin người ứng tuyển</string>
+    <string name="app_empty_list">Cô/chú chưa nộp đơn cho công việc nào.</string>
+    <string name="app_empty_action">Xem danh sách việc làm</string>
+    <string name="app_withdraw_dialog_title">Rút đơn ứng tuyển?</string>
+    <string name="app_withdraw_dialog_message">Cô/chú có chắc muốn rút đơn ứng tuyển này không? Nhà tuyển dụng sẽ không thể xem xét đơn này nữa.</string>
+    <string name="app_withdraw_confirm">Rút đơn</string>
+    <string name="app_withdraw_cancel">Giữ lại</string>
+    <string name="app_applied_success">Nộp đơn ứng tuyển thành công!</string>
+    <string name="app_withdrawn_success">Đã rút đơn ứng tuyển thành công.</string>
+    <string name="app_need_retirement_approval_title">Cần hoàn tất hồ sơ nghỉ hưu</string>
+    <string name="app_need_retirement_approval_msg">Để đảm bảo quyền lợi và môi trường việc làm an toàn cho người cao tuổi, cô/chú cần hoàn thiện hồ sơ và được duyệt chế độ nghỉ hưu trước khi nộp đơn ứng tuyển.</string>
+    <string name="app_go_to_profile">Xem hồ sơ</string>
+    <string name="app_status_pending">Chờ phản hồi</string>
+    <string name="app_status_accepted">Được chấp nhận</string>
+    <string name="app_status_rejected">Bị từ chối</string>
+    <string name="app_status_withdrawn">Đã rút đơn</string>
+    <string name="app_consent_required">Vui lòng đồng ý chia sẻ số điện thoại để người thuê có thể liên hệ.</string>
+</resources>

@@ -6,6 +6,7 @@ import android.os.*;
 import android.view.*;
 import android.widget.*;
 import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.*;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
@@ -42,6 +43,7 @@ public final class PublicJobsActivity extends AppCompatActivity {
         vm=new ViewModelProvider(this).get(PublicJobsViewModel.class);scrollEvent=vm.scrollEvent;
         nav=new RoleNavigationBar(this,a->{
             if(a==RoleNavigationBar.Action.OTHER){if(!vm.detailId.isEmpty())back();return;}
+            if(a==RoleNavigationBar.Action.WORK){startActivity(new Intent(this, vn.edu.ueh.nhom4.grandmaassist.app.ui.applications.MyApplicationsActivity.class));return;}
             if(a==RoleNavigationBar.Action.HOME || a==RoleNavigationBar.Action.PROFILE || a==RoleNavigationBar.Action.ACCOUNT)leave(a.name());
         });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.pbRoot),(v,i)->{
@@ -72,6 +74,7 @@ public final class PublicJobsActivity extends AppCompatActivity {
             vm.toggleSave();
             Toast.makeText(this, wasSaved ? R.string.sj_unsaved_success : R.string.sj_saved_success, Toast.LENGTH_SHORT).show();
         });
+        click(R.id.pbBtnApply, this::handleApplyClick);
         bindSpinner(R.id.pbCategory,true);bindSpinner(R.id.pbArea,false);
         getOnBackPressedDispatcher().addCallback(this,new OnBackPressedCallback(true){public void handleOnBackPressed(){back();}});
         vm.changes.observe(this,n->render());
@@ -156,6 +159,19 @@ public final class PublicJobsActivity extends AppCompatActivity {
                 } else {
                     btnSave.setBackgroundResource(R.drawable.button_secondary);
                     btnSave.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+                }
+            }
+            androidx.appcompat.widget.AppCompatButton btnApply = findViewById(R.id.pbBtnApply);
+            if (btnApply != null) {
+                btnApply.setEnabled(!vm.busy && !vm.applyCheckBusy);
+                if (vm.hasApplied) {
+                    btnApply.setText(R.string.app_already_applied);
+                    btnApply.setBackgroundResource(R.drawable.button_secondary);
+                    btnApply.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+                } else {
+                    btnApply.setText(R.string.app_apply_now);
+                    btnApply.setBackgroundResource(R.drawable.button_primary);
+                    btnApply.setTextColor(Color.WHITE);
                 }
             }
         }
@@ -258,4 +274,122 @@ public final class PublicJobsActivity extends AppCompatActivity {
     private void show(int id,boolean b){findViewById(id).setVisibility(b?View.VISIBLE:View.GONE);}
     private void text(int id,String s){TextView v=findViewById(id);if(!v.getText().toString().equals(s))v.setText(s);}
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
+
+    private void handleApplyClick() {
+        if (vm.sessionUid.isEmpty()) {
+            Toast.makeText(this, R.string.sj_login_prompt, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!"SEEKER".equals(vm.role)) {
+            Toast.makeText(this, "Chỉ người tìm việc mới có thể nộp đơn ứng tuyển", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (vm.selected == null) return;
+
+        if (vm.hasApplied) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.app_already_applied)
+                    .setMessage("Cô/chú đã nộp đơn cho công việc này. Cô/chú có muốn chuyển đến mục Đơn của tôi để theo dõi không?")
+                    .setPositiveButton("Xem đơn của tôi", (d, w) -> {
+                        startActivity(new Intent(this, vn.edu.ueh.nhom4.grandmaassist.app.ui.applications.MyApplicationsActivity.class));
+                    })
+                    .setNegativeButton("Đóng", null)
+                    .show();
+            return;
+        }
+
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+        com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot> userTask =
+                db.collection("users").document(vm.sessionUid).get();
+        com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot> profileTask =
+                db.collection("jobSeekerProfiles").document(vm.sessionUid).get();
+
+        com.google.android.gms.tasks.Tasks.whenAllSuccess(userTask, profileTask).addOnCompleteListener(t -> {
+            if (!t.isSuccessful()) {
+                Toast.makeText(this, "Không thể tải thông tin hồ sơ: " + t.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            com.google.firebase.firestore.DocumentSnapshot userDoc = (com.google.firebase.firestore.DocumentSnapshot) t.getResult().get(0);
+            com.google.firebase.firestore.DocumentSnapshot profDoc = (com.google.firebase.firestore.DocumentSnapshot) t.getResult().get(1);
+
+            String retirement = userDoc.getString("retirementStatus");
+            if (!"APPROVED".equals(retirement)) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.app_need_retirement_approval_title)
+                        .setMessage(R.string.app_need_retirement_approval_msg)
+                        .setPositiveButton(R.string.app_go_to_profile, (d, w) -> leave("PROFILE"))
+                        .setNegativeButton(R.string.n_back, null)
+                        .show();
+                return;
+            }
+
+            String name = profDoc.exists() && profDoc.getString("displayName") != null ? profDoc.getString("displayName") : "";
+            if (name.isEmpty() && userDoc.contains("displayName")) name = userDoc.getString("displayName");
+            String phone = userDoc.getString("phoneE164");
+            String skills = "";
+            if (profDoc.exists() && profDoc.get("skills") instanceof List) {
+                skills = String.join(", ", (List<String>) profDoc.get("skills"));
+            }
+
+            showApplyDialog(vm.selected, name, phone, skills);
+        });
+    }
+
+    private void showApplyDialog(PublicJob job, String name, String phone, String skills) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_apply_job, null);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        TextView tvJobName = dialogView.findViewById(R.id.dialogApplyJobName);
+        TextView tvApplicantName = dialogView.findViewById(R.id.dialogApplyApplicantName);
+        TextView tvApplicantPhone = dialogView.findViewById(R.id.dialogApplyApplicantPhone);
+        TextView tvApplicantSkills = dialogView.findViewById(R.id.dialogApplyApplicantSkills);
+        EditText etMessage = dialogView.findViewById(R.id.dialogApplyMessage);
+        CheckBox cbConsent = dialogView.findViewById(R.id.dialogApplyConsent);
+        TextView tvError = dialogView.findViewById(R.id.dialogApplyError);
+        ProgressBar pbProgress = dialogView.findViewById(R.id.dialogApplyProgress);
+        Button btnCancel = dialogView.findViewById(R.id.dialogApplyBtnCancel);
+        Button btnSubmit = dialogView.findViewById(R.id.dialogApplyBtnSubmit);
+
+        tvJobName.setText(job.title);
+        tvApplicantName.setText("Họ tên: " + (name != null && !name.isEmpty() ? name : "Chưa cập nhật"));
+        tvApplicantPhone.setText("Số điện thoại: " + (phone != null && !phone.isEmpty() ? phone + " (Đã xác minh)" : "Chưa xác minh"));
+        tvApplicantSkills.setText("Kỹ năng: " + (skills != null && !skills.isEmpty() ? skills : "Chưa cập nhật"));
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSubmit.setOnClickListener(v -> {
+            if (!cbConsent.isChecked()) {
+                tvError.setText(R.string.app_consent_required);
+                tvError.setVisibility(View.VISIBLE);
+                return;
+            }
+            tvError.setVisibility(View.GONE);
+            pbProgress.setVisibility(View.VISIBLE);
+            btnCancel.setEnabled(false);
+            btnSubmit.setEnabled(false);
+
+            String note = etMessage.getText().toString().trim();
+            vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ApplicationRepository appRepo =
+                    new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ApplicationRepository();
+            appRepo.apply(vm.sessionUid, job.id, note, true).addOnCompleteListener(task -> {
+                pbProgress.setVisibility(View.GONE);
+                btnCancel.setEnabled(true);
+                btnSubmit.setEnabled(true);
+                if (task.isSuccessful()) {
+                    dialog.dismiss();
+                    Toast.makeText(this, R.string.app_applied_success, Toast.LENGTH_LONG).show();
+                    vm.hasApplied = true;
+                    vm.emit();
+                } else {
+                    String err = vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ApplicationRepository.error(task.getException());
+                    tvError.setText(err);
+                    tvError.setVisibility(View.VISIBLE);
+                }
+            });
+        });
+
+        dialog.show();
+    }
 }

@@ -551,6 +551,50 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+    function applicationShape(d, id) {
+      let keys = d.keys();
+      return keys.size() == 11 && keys.hasOnly(['id','jobId','seekerId','employerId','message','status','sharePhoneConsent','applicantSnapshot','jobSnapshot','createdAt','updatedAt'])
+        && d.id == id && d.id == d.jobId + '_' + d.seekerId
+        && d.seekerId == request.auth.uid
+        && d.message is string && d.message.size() <= 500
+        && d.status == 'PENDING'
+        && d.sharePhoneConsent == true
+        && d.applicantSnapshot is map && d.jobSnapshot is map
+        && d.createdAt == request.time && d.updatedAt == request.time;
+    }
+    function applicationCanApply(d) {
+      let u = get(userPath(request.auth.uid)).data;
+      let j = get(jobPath(d.jobId)).data;
+      return u.role == 'SEEKER' && u.accountStatus == 'ACTIVE'
+        && authPhone() != '' && u.phoneE164 == authPhone() && u.phoneVerificationMode == 'FIREBASE_AUTH'
+        && u.retirementStatus == 'APPROVED'
+        && exists(seekerPath(request.auth.uid))
+        && j.status == 'OPEN' && j.expiresAt > request.time
+        && j.employerId != request.auth.uid
+        && d.employerId == j.employerId;
+    }
+    function applicationPath(id) { return /databases/$(database)/documents/applications/$(id); }
+    match /applications/{applicationId} {
+      allow get: if (request.auth != null && !exists(applicationPath(applicationId)))
+        || (request.auth != null && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin()));
+      allow list: if request.auth != null && request.query.limit <= 20
+        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin());
+      allow create: if request.auth != null && resource == null
+        && applicationShape(request.resource.data, applicationId)
+        && applicationCanApply(request.resource.data);
+      allow update: if request.auth != null && resource != null
+        && ((resource.data.seekerId == request.auth.uid
+            && resource.data.status == 'PENDING'
+            && request.resource.data.status == 'WITHDRAWN'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+            && request.resource.data.updatedAt == request.time)
+          || (resource.data.employerId == request.auth.uid
+            && resource.data.status == 'PENDING'
+            && request.resource.data.status in ['ACCEPTED','REJECTED']
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','employerContactSnapshot'])
+            && request.resource.data.updatedAt == request.time));
+      allow delete: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

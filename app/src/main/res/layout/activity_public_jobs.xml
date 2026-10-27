@@ -53,7 +53,7 @@
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbMore" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_more" android:visibility="gone"/>
             <LinearLayout android:id="@+id/pbFuture" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbBtnSave" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/sj_save_job"/>
-                <androidx.appcompat.widget.AppCompatButton style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/pb_apply_soon" android:enabled="false"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbBtnApply" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/app_apply_now"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

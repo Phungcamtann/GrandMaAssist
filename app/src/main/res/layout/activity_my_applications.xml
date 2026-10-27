@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/myAppRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface_ivory">
+
+    <include layout="@layout/role_topbar"/>
+
+    <LinearLayout
+        android:id="@+id/myAppToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/myAppBack"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:background="@drawable/public_back_button"
+            android:textSize="18sp"
+            android:text="@string/n_back"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/myAppReload"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:textSize="16sp"
+            android:text="@string/pb_reload_short"
+            android:contentDescription="@string/pb_reload"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/myAppTitle"
+        style="@style/Widget.GrandMa.VerificationHeading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+        android:textSize="26sp"
+        android:text="@string/app_title_my_applications"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/myAppTabAll"
+            style="@style/Widget.GrandMa.VerificationPrimary"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:textSize="14sp"
+            android:text="@string/sj_tab_all"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/myAppTabPending"
+            style="@style/Widget.GrandMa.VerificationSecondary"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:textSize="14sp"
+            android:text="@string/app_status_pending"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/myAppTabResolved"
+            style="@style/Widget.GrandMa.VerificationSecondary"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:textSize="14sp"
+            android:text="Đã xử lý"/>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/myAppProgress"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/myAppMessage"
+        style="@style/Widget.GrandMa.VerificationMessage"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:visibility="gone"/>
+
+    <ScrollView
+        android:id="@+id/myAppScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/myAppContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:id="@+id/myAppEmptyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_nav_queue"
+                    app:tint="@color/brand_green"
+                    android:alpha="0.4"
+                    android:importantForAccessibility="no"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                    android:text="@string/app_title_my_applications"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                    android:text="@string/app_empty_list"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/myAppBtnBrowse"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:text="@string/app_empty_action"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/myAppListBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/role_navigation"/>
+</LinearLayout>

@@ -42,6 +42,7 @@ public final class ProfilePanel {
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> verification;
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> jobDrafts;
     private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> publicJobs;
+    private final androidx.activity.result.ActivityResultLauncher<android.content.Intent> myApplications;
 
     public ProfilePanel(AppCompatActivity activity, ProfileViewModel vm, AuthViewModel auth) {
         this.activity = activity; this.vm = vm; this.auth = auth;
@@ -79,6 +80,17 @@ public final class ProfilePanel {
             if("HOME".equals(route))vm.showHome();
             else if("PROFILE".equals(route)){vm.showProfile();vm.refreshVerification();}
             else if("ACCOUNT".equals(route))vm.showAccount();
+            else if("WORK".equals(route))openMyApplications();
+        });
+        myApplications=activity.registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),result->{
+            com.google.firebase.auth.FirebaseUser user=com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if(user==null || vm.snapshot==null || !user.getUid().equals(vm.snapshot.uid))return;
+            android.content.Intent data=result.getData();
+            String route=data==null?"":data.getStringExtra(RoleNavigationBar.RETURN_DESTINATION);
+            if("HOME".equals(route))vm.showHome();
+            else if("PROFILE".equals(route)){vm.showProfile();vm.refreshVerification();}
+            else if("ACCOUNT".equals(route))vm.showAccount();
+            else if("OTHER".equals(route))openPublicJobs();
         });
         view(R.id.profileContent).setSaveFromParentEnabled(false);
         edit(R.id.profileDisplayName, value -> vm.draft.displayName = value);
@@ -151,7 +163,7 @@ public final class ProfilePanel {
                 scrollTop();break;
             case ACCOUNT:vm.showAccount();scrollTop();break;
             case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
-            case WORK:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))openPosts();else openDrafts(false);break;
+            case WORK:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))openPosts();else if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role))openMyApplications();else openDrafts(false);break;
             case OTHER:openPublicJobs();break;
             default:break;
         }
@@ -163,6 +175,12 @@ public final class ProfilePanel {
                 vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.class)
                 .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.ROLE,vm.snapshot.role)
                 .putExtra(vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity.NAVIGATION,true)));
+    }
+    private void openMyApplications(){
+        AuthRepository.State state=auth.getState().getValue();
+        if(vm.busy || state.account==null || state.isBusy() || auth.methods().active() || vm.snapshot==null || !"SEEKER".equals(vm.snapshot.role))return;
+        discardThen(()->myApplications.launch(new android.content.Intent(activity,
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.applications.MyApplicationsActivity.class)));
     }
     private void openPosts(){
         AuthRepository.State state=auth.getState().getValue();
