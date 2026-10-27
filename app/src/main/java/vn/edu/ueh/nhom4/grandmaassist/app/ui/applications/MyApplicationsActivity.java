@@ -30,6 +30,7 @@ import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.Application;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.JobSnapshot;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.ShiftAgreementDetailActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ApplicationViewModel;
 
 public final class MyApplicationsActivity extends AppCompatActivity {
@@ -230,20 +231,33 @@ public final class MyApplicationsActivity extends AppCompatActivity {
         TextView empName = card.findViewById(R.id.appItemEmployerName);
         TextView empPhone = card.findViewById(R.id.appItemEmployerPhone);
         AppCompatButton btnCallEmp = card.findViewById(R.id.appItemBtnCallEmployer);
+        AppCompatButton btnViewAgreement = card.findViewById(R.id.appItemBtnViewAgreement);
 
-        if (app.isAccepted() && app.employerContactSnapshot != null) {
+        if (app.isAccepted()) {
             empSection.setVisibility(View.VISIBLE);
-            String empDisplayName = app.employerContactSnapshot.displayName;
-            empName.setText(empDisplayName != null && !empDisplayName.trim().isEmpty() ? empDisplayName : "Người tuyển dụng");
-            final String rawPhone = app.employerContactSnapshot.phoneE164;
-            if (rawPhone != null && !rawPhone.trim().isEmpty()) {
-                empPhone.setText(rawPhone);
-                btnCallEmp.setVisibility(View.VISIBLE);
-                btnCallEmp.setOnClickListener(v -> dialPhone(rawPhone));
+            if (app.employerContactSnapshot != null) {
+                String empDisplayName = app.employerContactSnapshot.displayName;
+                empName.setText(empDisplayName != null && !empDisplayName.trim().isEmpty() ? empDisplayName : "Người tuyển dụng");
+                final String rawPhone = app.employerContactSnapshot.phoneE164;
+                if (rawPhone != null && !rawPhone.trim().isEmpty()) {
+                    empPhone.setText(rawPhone);
+                    btnCallEmp.setVisibility(View.VISIBLE);
+                    btnCallEmp.setOnClickListener(v -> dialPhone(rawPhone));
+                } else {
+                    empPhone.setText("Chưa cập nhật số điện thoại");
+                    btnCallEmp.setVisibility(View.GONE);
+                }
             } else {
-                empPhone.setText("Chưa cập nhật số điện thoại");
+                empName.setText("Người tuyển dụng");
+                empPhone.setText("");
                 btnCallEmp.setVisibility(View.GONE);
             }
+
+            btnViewAgreement.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ShiftAgreementDetailActivity.class);
+                intent.putExtra(ShiftAgreementDetailActivity.EXTRA_APPLICATION_ID, app.id);
+                startActivity(intent);
+            });
         } else {
             empSection.setVisibility(View.GONE);
         }

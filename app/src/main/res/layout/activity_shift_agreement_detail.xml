@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/shiftAgreementDetailRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface_ivory">
+
+    <include layout="@layout/role_topbar"/>
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:id="@+id/shiftDetailToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/shiftDetailBack"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:background="@drawable/public_back_button"
+            android:textSize="18sp"
+            android:text="@string/n_back"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/shiftDetailReload"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:textSize="16sp"
+            android:text="@string/pb_reload_short"
+            android:contentDescription="@string/pb_reload"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp">
+
+            <!-- Header Section: Title on row 1, Badge + Version on row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/shiftDetailTitle"
+                    style="@style/Widget.GrandMa.VerificationHeading"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                    android:textSize="22sp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:text="@string/session_detail_title"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/shiftDetailBadge"
+                        style="@style/Widget.GrandMa.PublicBadge"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:textSize="13sp"/>
+
+                    <TextView
+                        android:id="@+id/shiftDetailVersionText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:textColor="#747775"
+                        android:textSize="13sp"
+                        android:text="Phiên bản: #1"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Main Content Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/public_card_stroke">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Tasks -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="@string/session_task_label"/>
+
+                    <TextView
+                        android:id="@+id/shiftDetailTasks"
+                        style="@style/Widget.GrandMa.PublicCardBody"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.PublicCardTitle"
+                        android:textColor="#1A1C19"/>
+
+                    <!-- Schedule -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="Thời gian làm việc"/>
+
+                    <TextView
+                        android:id="@+id/shiftDetailSchedule"
+                        style="@style/Widget.GrandMa.PublicCardBody"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#1A1C19"
+                        android:textSize="16sp"/>
+
+                    <!-- Address -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="@string/session_address_label"/>
+
+                    <TextView
+                        android:id="@+id/shiftDetailAddress"
+                        style="@style/Widget.GrandMa.PublicCardBody"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#1A1C19"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Financial Information Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/public_card_stroke">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="@string/session_fee_breakdown_title"/>
+
+                    <!-- Seeker View of Pay -->
+                    <LinearLayout
+                        android:id="@+id/layoutDetailSeekerPay"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:background="@drawable/bg_section_rounded">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                            android:textColor="#424940"
+                            android:text="Tiền công cô/chú thực nhận:"/>
+
+                        <TextView
+                            android:id="@+id/tvDetailSeekerPayAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                            android:textSize="22sp"
+                            android:textColor="#1C6758"
+                            android:layout_marginTop="2dp"
+                            android:text="0 đ"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textSize="13sp"
+                            android:textColor="#1C6758"
+                            android:text="✓ Nhận trọn vẹn 100% tiền công sau ca làm, không bị trừ bất kỳ khoản phí nào."/>
+                    </LinearLayout>
+
+                    <!-- Employer View of Pay & Fee -->
+                    <LinearLayout
+                        android:id="@+id/layoutDetailEmployerPay"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="10dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="@string/session_worker_pay"
+                                android:textColor="#424940"/>
+
+                            <TextView
+                                android:id="@+id/tvDetailWorkerPay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                                android:textColor="#1A1C19"
+                                android:text="0 đ"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="6dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="@string/session_platform_fee"
+                                android:textColor="#424940"/>
+
+                            <TextView
+                                android:id="@+id/tvDetailServiceFee"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                                android:textColor="#C62828"
+                                android:text="+0 đ"/>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@color/public_card_border"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                                android:textSize="18sp"
+                                android:textColor="#1A1C19"
+                                android:text="@string/session_total_due"/>
+
+                            <TextView
+                                android:id="@+id/tvDetailTotalDue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                                android:textSize="20sp"
+                                android:textColor="#1C6758"
+                                android:text="0 đ"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <ProgressBar
+                android:id="@+id/shiftDetailProgress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/shiftDetailMessage"
+                style="@style/Widget.GrandMa.VerificationMessage"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"/>
+
+            <!-- Action Section for Seeker -->
+            <LinearLayout
+                android:id="@+id/shiftDetailSeekerActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSeekerAccept"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="52dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:text="@string/session_btn_accept"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSeekerReject"
+                    style="@style/Widget.GrandMa.VerificationSecondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="52dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:layout_marginTop="10dp"
+                    android:textColor="#C62828"
+                    android:text="@string/session_btn_reject"/>
+            </LinearLayout>
+
+            <!-- Action Section for Employer -->
+            <LinearLayout
+                android:id="@+id/shiftDetailEmployerActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEmployerEdit"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="52dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:text="@string/session_btn_edit_proposal"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEmployerCancel"
+                    style="@style/Widget.GrandMa.VerificationSecondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="52dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:layout_marginTop="10dp"
+                    android:textColor="#C62828"
+                    android:text="Hủy đề xuất thỏa thuận"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

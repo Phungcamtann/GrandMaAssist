@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/shiftAgreementEditRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface_ivory">
+
+    <include layout="@layout/role_topbar"/>
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:id="@+id/shiftEditToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/shiftEditBack"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:background="@drawable/public_back_button"
+            android:textSize="18sp"
+            android:text="@string/n_back"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp">
+
+            <!-- Title & Subtitle -->
+            <TextView
+                android:id="@+id/shiftEditTitle"
+                style="@style/Widget.GrandMa.VerificationHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                android:textSize="26sp"
+                android:text="@string/session_edit_title"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                android:textColor="#424940"
+                android:text="@string/session_edit_subtitle"/>
+
+            <!-- 1. Task Description -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758"
+                android:text="@string/session_task_label"/>
+
+            <EditText
+                android:id="@+id/etShiftTask"
+                style="@style/Widget.GrandMa.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:minHeight="52dp"
+                android:hint="@string/session_task_label"
+                android:inputType="textMultiLine"
+                android:maxLines="4"/>
+
+            <!-- 2. Date of Shift -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758"
+                android:text="@string/session_date_label"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnPickShiftDate"
+                style="@style/Widget.GrandMa.VerificationSecondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:includeFontPadding="false"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical|start"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="16sp"
+                android:textColor="#1A1C19"
+                android:text="Chọn ngày làm việc…"/>
+
+            <!-- Time Start & End -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="@string/session_start_time_label"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPickStartTime"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:includeFontPadding="false"
+                        android:layout_marginTop="6dp"
+                        android:textSize="16sp"
+                        android:textColor="#1A1C19"
+                        android:text="08:00"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1C6758"
+                        android:text="@string/session_end_time_label"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPickEndTime"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:includeFontPadding="false"
+                        android:layout_marginTop="6dp"
+                        android:textSize="16sp"
+                        android:textColor="#1A1C19"
+                        android:text="11:30"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 3. Work Address & Area (Fixed from original job posting) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758"
+                android:text="@string/session_address_label"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical"
+                android:background="@drawable/verification_section"
+                android:padding="14dp">
+
+                <TextView
+                    android:id="@+id/tvShiftWorkAddress"
+                    style="@style/Widget.GrandMa.PublicCardBody"
+                    android:textColor="#1A1C19"
+                    android:textSize="16sp"
+                    android:text="Địa chỉ: ..."/>
+
+                <TextView
+                    android:id="@+id/tvShiftAreaName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#424940"
+                    android:textSize="14sp"
+                    android:text="Khu vực: ..."/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textSize="12sp"
+                    android:textColor="#747775"
+                    android:text="Địa chỉ làm việc và khu vực được giữ cố định theo tin tuyển dụng ban đầu"/>
+            </LinearLayout>
+
+            <!-- 4. Pay & 10% Fee Breakdown -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758"
+                android:text="@string/session_pay_label"/>
+
+            <EditText
+                android:id="@+id/etShiftPay"
+                style="@style/Widget.GrandMa.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:minHeight="52dp"
+                android:hint="240000"
+                android:inputType="number"/>
+
+            <!-- Fee Card (Clean, Transparent, No Demo Labels) -->
+            <LinearLayout
+                android:id="@+id/shiftFeeCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:padding="16dp"
+                android:background="@drawable/bg_section_rounded">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:textColor="#1C6758"
+                    android:text="@string/session_fee_breakdown_title"/>
+
+                <!-- Row 1: Worker Pay -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:textColor="#424940"
+                        android:text="@string/session_worker_pay"/>
+
+                    <TextView
+                        android:id="@+id/tvFeeWorkerPay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1A1C19"
+                        android:text="0 đ"/>
+                </LinearLayout>
+
+                <!-- Row 2: Service Fee 10% -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                            android:textColor="#424940"
+                            android:text="@string/session_platform_fee"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="#747775"
+                            android:text="@string/session_fee_payer_note"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvFeeService"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#C62828"
+                        android:text="+0 đ"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/public_card_border"/>
+
+                <!-- Row 3: Total Due -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="18sp"
+                        android:textColor="#1A1C19"
+                        android:text="@string/session_total_due"/>
+
+                    <TextView
+                        android:id="@+id/tvFeeTotalDue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="20sp"
+                        android:textColor="#1C6758"
+                        android:text="0 đ"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/shiftEditProgress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/shiftEditMessage"
+                style="@style/Widget.GrandMa.VerificationMessage"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSubmitShiftAgreement"
+                style="@style/Widget.GrandMa.VerificationPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="52dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:includeFontPadding="false"
+                android:layout_marginTop="24dp"
+                android:text="@string/session_btn_submit_proposal"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

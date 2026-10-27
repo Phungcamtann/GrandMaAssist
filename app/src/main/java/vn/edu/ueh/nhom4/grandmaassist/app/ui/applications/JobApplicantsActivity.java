@@ -28,7 +28,10 @@ import java.util.Locale;
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.ApplicantSnapshot;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.Application;
+import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.ShiftAgreementDetailActivity;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.ShiftAgreementEditActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.JobApplicantsViewModel;
 
 public final class JobApplicantsActivity extends AppCompatActivity {
@@ -258,14 +261,36 @@ public final class JobApplicantsActivity extends AppCompatActivity {
             noteSection.setVisibility(View.GONE);
         }
 
+        View acceptedSection = card.findViewById(R.id.applicantItemAcceptedSection);
+        AppCompatButton btnShiftAgreement = card.findViewById(R.id.applicantItemBtnShiftAgreement);
+
         if (app.isPending()) {
             divider.setVisibility(View.VISIBLE);
             actionSection.setVisibility(View.VISIBLE);
+            acceptedSection.setVisibility(View.GONE);
             btnReject.setOnClickListener(v -> confirmReject(app));
             btnAccept.setOnClickListener(v -> confirmAccept(app));
+        } else if (app.isAccepted()) {
+            divider.setVisibility(View.GONE);
+            actionSection.setVisibility(View.GONE);
+            acceptedSection.setVisibility(View.VISIBLE);
+            WorkSession ws = vm.sessionMap.get(app.id);
+            if (ws != null) {
+                btnShiftAgreement.setText(R.string.session_btn_view_agreement);
+                btnShiftAgreement.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, ShiftAgreementDetailActivity.class);
+                    intent.putExtra(ShiftAgreementDetailActivity.EXTRA_SESSION_ID, ws.id);
+                    intent.putExtra(ShiftAgreementDetailActivity.EXTRA_APPLICATION_ID, app.id);
+                    startActivity(intent);
+                });
+            } else {
+                btnShiftAgreement.setText(R.string.session_btn_create_agreement);
+                btnShiftAgreement.setOnClickListener(v -> openShiftAgreement(app));
+            }
         } else {
             divider.setVisibility(View.GONE);
             actionSection.setVisibility(View.GONE);
+            acceptedSection.setVisibility(View.GONE);
         }
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -339,6 +364,19 @@ public final class JobApplicantsActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.applicant_action_cancel, null)
                 .show();
+    }
+
+    private void openShiftAgreement(Application app) {
+        Intent intent = new Intent(this, ShiftAgreementEditActivity.class);
+        intent.putExtra(ShiftAgreementEditActivity.EXTRA_APPLICATION_ID, app.id);
+        if (app.jobSnapshot != null) {
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_TASK, app.jobSnapshot.title);
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_ADDRESS, app.jobSnapshot.workAddress);
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_AREA_NAME, app.jobSnapshot.areaName);
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_AREA_CODE, app.jobSnapshot.areaCode);
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_PAY, app.jobSnapshot.payAmount);
+        }
+        startActivity(intent);
     }
 
     private int dp(int n) {

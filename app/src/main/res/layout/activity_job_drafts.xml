@@ -100,6 +100,116 @@
                     <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_payment"/>
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_pay" android:labelFor="@id/jdPay"/>
                     <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdPay" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="24" android:inputType="numberSigned|numberDecimal" android:digits="0123456789., +-"/>
+
+                    <!-- Upfront Fee Calculation Container -->
+                    <LinearLayout
+                        android:id="@+id/jdFeeContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="8dp"
+                        android:padding="12dp"
+                        android:background="@drawable/verification_section">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                            android:textColor="#1C6758"
+                            android:text="Ước tính chi phí trả người làm và phí dịch vụ:"/>
+
+                        <!-- Row 1: Worker Pay -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="Tiền công người làm nhận:"
+                                android:textColor="#424940"/>
+
+                            <TextView
+                                android:id="@+id/jdTvWorkerPay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                                android:textColor="#1A1C19"
+                                android:text="0 đ"/>
+                        </LinearLayout>
+
+                        <!-- Row 2: Service Fee (10%) in Red -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="6dp">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Phí dịch vụ nền tảng (10%):"
+                                    android:textColor="#424940"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="12sp"
+                                    android:textColor="#747775"
+                                    android:text="Người thuê trả thêm khi thanh toán"/>
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/jdTvServiceFee"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                                android:textColor="#C62828"
+                                android:text="+0 đ"/>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@color/public_card_border"/>
+
+                        <!-- Row 3: Total estimated due -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                                android:textColor="#1A1C19"
+                                android:text="Tổng chi phí dự tính mỗi ca:"/>
+
+                            <TextView
+                                android:id="@+id/jdTvTotalDue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                                android:textSize="18sp"
+                                android:textColor="#1C6758"
+                                android:text="0 đ"/>
+                        </LinearLayout>
+                    </LinearLayout>
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_unit" android:labelFor="@id/jdUnit"/>
                     <Spinner android:id="@+id/jdUnit" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_unit"/>
                     <TextView android:id="@+id/jdUnitError" style="@style/Widget.GrandMa.DraftError"/>

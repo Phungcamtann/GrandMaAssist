@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ApplicationRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.Application;
+import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
 
 public final class JobApplicantsViewModel extends ViewModel {
     public static final int TAB_ALL = 0;
@@ -19,6 +23,7 @@ public final class JobApplicantsViewModel extends ViewModel {
     public final MutableLiveData<Long> changes = new MutableLiveData<>(0L);
     public final List<Application> items = new ArrayList<>();
     public final List<Application> displayList = new ArrayList<>();
+    public final Map<String, WorkSession> sessionMap = new HashMap<>();
 
     public boolean busy = false;
     public String message = "";
@@ -26,6 +31,7 @@ public final class JobApplicantsViewModel extends ViewModel {
     public String currentJobId = "";
 
     private final ApplicationRepository repository = new ApplicationRepository();
+    private final WorkSessionRepository workSessionRepository = new WorkSessionRepository();
 
     public void emit() {
         Long v = changes.getValue();
@@ -60,6 +66,17 @@ public final class JobApplicantsViewModel extends ViewModel {
                     items.addAll(t.getResult());
                 }
                 applyFilter();
+                workSessionRepository.getSessionsForUser(uid, "EMPLOYER").addOnCompleteListener(st -> {
+                    if (st.isSuccessful() && st.getResult() != null) {
+                        sessionMap.clear();
+                        for (WorkSession ws : st.getResult()) {
+                            if (ws.applicationId != null && !ws.isCancelled()) {
+                                sessionMap.put(ws.applicationId, ws);
+                            }
+                        }
+                    }
+                    emit();
+                });
             } else {
                 message = ApplicationRepository.error(t.getException());
             }

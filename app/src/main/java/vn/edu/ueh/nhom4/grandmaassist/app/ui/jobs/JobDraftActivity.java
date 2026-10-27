@@ -66,7 +66,7 @@ public final class JobDraftActivity extends AppCompatActivity {
         bindText("workAddress",R.id.jdWorkAddress,v->vm.draft.workAddress=v);
         bindText("title",R.id.jdName,v->vm.draft.title=v);bindText("description",R.id.jdDescription,v->vm.draft.description=v);
         bindText("requirements",R.id.jdRequirements,v->vm.draft.requirements=v);bindText("skillsInput",R.id.jdSkills,v->vm.draft.skillsInput=v);
-        bindText("schedule",R.id.jdScheduleText,v->vm.draft.schedule=v);bindText("payInput",R.id.jdPay,v->vm.draft.payInput=v);
+        bindText("schedule",R.id.jdScheduleText,v->vm.draft.schedule=v);bindText("payInput",R.id.jdPay,v->{vm.draft.payInput=v;updateFeeDisplay(vm.draft);});
         bindSpinner("categoryId",R.id.jdCategory,v->vm.draft.categoryId=v);bindSpinner("areaCode",R.id.jdArea,v->vm.draft.areaCode=v);
         bindSpinner("shift",R.id.jdShift,v->vm.draft.shift=v);bindSpinner("payUnit",R.id.jdUnit,v->vm.draft.payUnit=v);
         fields.put("days",R.id.jdMonday);fields.put("demands",R.id.jdDemandMode);fields.put("expiresAt",R.id.jdExpiry);
@@ -224,9 +224,18 @@ public final class JobDraftActivity extends AppCompatActivity {
                         +"\n"+choice(LocalJobDraft.SHIFTS,R.array.jd_shifts,d.shift)+"\n"+d.schedule.trim()+"\n\nYêu cầu thể lực: "
                         +("NONE".equals(d.demandMode)?"Không có các yêu cầu trong danh sách":labels(LocalJobDraft.DEMANDS,
                             Arrays.asList(getString(R.string.jd_lifting),getString(R.string.jd_standing),getString(R.string.jd_moving)),d.demands)));
-                Long amount=d.payAmount();set(R.id.jdPreviewPay,"Tiền công: "+(amount==null?d.payInput:NumberFormat.getIntegerInstance(new Locale("vi","VN")).format(amount))+" đ · "
-                        +choice(LocalJobDraft.UNITS,R.array.jd_units,d.payUnit)+"\n\nHạn nhận: "+date(d.expiresAt));
+                Long amount=d.payAmount();
+                long labor = amount != null ? amount : 0L;
+                long fee = Math.round(labor * 0.10);
+                long total = labor + fee;
+                NumberFormat nf = NumberFormat.getIntegerInstance(new Locale("vi","VN"));
+                set(R.id.jdPreviewPay, "Tiền công người làm: " + (amount == null ? d.payInput : nf.format(labor)) + " đ · "
+                        + choice(LocalJobDraft.UNITS, R.array.jd_units, d.payUnit)
+                        + "\nPhí dịch vụ nền tảng (10%): +" + nf.format(fee) + " đ (Người thuê trả thêm)"
+                        + "\nTổng chi phí dự tính mỗi ca: " + nf.format(total) + " đ"
+                        + "\n\nHạn nhận: " + date(d.expiresAt));
             }
+            updateFeeDisplay(d);
         }
         rendering=false;
         if(vm.pageEvent!=lastPageEvent){lastPageEvent=vm.pageEvent;findViewById(R.id.jdScroll).post(()->findViewById(R.id.jdScroll).scrollTo(0,0));}
@@ -257,4 +266,15 @@ public final class JobDraftActivity extends AppCompatActivity {
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);parent.addView(b,p);return b;
     }
     private void hideKeyboard(){View focus=getCurrentFocus();if(focus==null)return;android.view.inputmethod.InputMethodManager input=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);if(input!=null)input.hideSoftInputFromWindow(focus.getWindowToken(),0);focus.clearFocus();}
+    private void updateFeeDisplay(LocalJobDraft d) {
+        if (d == null) return;
+        Long amount = d.payAmount();
+        long labor = amount != null ? amount : 0L;
+        long fee = Math.round(labor * 0.10);
+        long total = labor + fee;
+        NumberFormat nf = NumberFormat.getIntegerInstance(new Locale("vi","VN"));
+        set(R.id.jdTvWorkerPay, (amount == null ? d.payInput : nf.format(labor)) + " đ");
+        set(R.id.jdTvServiceFee, "+" + nf.format(fee) + " đ");
+        set(R.id.jdTvTotalDue, nf.format(total) + " đ");
+    }
 }

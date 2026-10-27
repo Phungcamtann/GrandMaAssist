@@ -595,6 +595,49 @@ service cloud.firestore {
             && request.resource.data.updatedAt == request.time));
       allow delete: if false;
     }
+    function sessionPath(id) { return /databases/$(database)/documents/workSessions/$(id); }
+    function sessionShape(d, id) {
+      let keys = d.keys();
+      return keys.hasAll(['id','applicationId','jobId','seekerId','employerId','agreement','agreementVersion','employerAcceptedVersion','status','createdAt','updatedAt'])
+        && keys.hasOnly(['id','applicationId','jobId','seekerId','employerId','agreement','agreementVersion','employerAcceptedVersion','seekerAcceptedVersion','status','createdAt','updatedAt'])
+        && d.id == id
+        && d.employerId == request.auth.uid
+        && d.agreement is map
+        && d.agreementVersion == 1
+        && d.employerAcceptedVersion == 1
+        && d.status == 'PROPOSED'
+        && d.createdAt == request.time && d.updatedAt == request.time;
+    }
+    match /workSessions/{sessionId} {
+      allow get: if (request.auth != null && !exists(sessionPath(sessionId)))
+        || (request.auth != null && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin()));
+      allow list: if request.auth != null && request.query.limit <= 50
+        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin());
+      allow create: if request.auth != null && resource == null
+        && sessionShape(request.resource.data, sessionId)
+        && get(applicationPath(request.resource.data.applicationId)).data.status == 'ACCEPTED'
+        && get(applicationPath(request.resource.data.applicationId)).data.employerId == request.auth.uid;
+      allow update: if request.auth != null && resource != null
+        && ((resource.data.employerId == request.auth.uid
+            && resource.data.status == 'PROPOSED'
+            && request.resource.data.agreementVersion == resource.data.agreementVersion + 1
+            && request.resource.data.employerAcceptedVersion == request.resource.data.agreementVersion
+            && (!('seekerAcceptedVersion' in request.resource.data) || request.resource.data.seekerAcceptedVersion == null)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['agreement','agreementVersion','employerAcceptedVersion','seekerAcceptedVersion','updatedAt'])
+            && request.resource.data.updatedAt == request.time)
+          || (resource.data.seekerId == request.auth.uid
+            && resource.data.status == 'PROPOSED'
+            && request.resource.data.seekerAcceptedVersion == resource.data.agreementVersion
+            && request.resource.data.status in ['AWAITING_FUNDS', 'CANCELLED']
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seekerAcceptedVersion','status','updatedAt'])
+            && request.resource.data.updatedAt == request.time)
+          || ((resource.data.employerId == request.auth.uid || resource.data.seekerId == request.auth.uid)
+            && resource.data.status == 'PROPOSED'
+            && request.resource.data.status == 'CANCELLED'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+            && request.resource.data.updatedAt == request.time));
+      allow delete: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

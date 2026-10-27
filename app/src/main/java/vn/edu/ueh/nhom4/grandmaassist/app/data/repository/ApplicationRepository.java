@@ -337,6 +337,16 @@ public final class ApplicationRepository {
         }));
     }
 
+    public Task<Application> getApplication(String uid, String applicationId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+        return bounded(db.collection("applications").document(applicationId).get(Source.SERVER).continueWith(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            if (!same(uid)) throw new Failure("SESSION");
+            DocumentSnapshot doc = t.getResult();
+            return doc != null && doc.exists() ? Application.fromSnapshot(doc) : null;
+        }));
+    }
+
     public Task<Page> getMyApplications(String uid, DocumentSnapshot cursor) {
         if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
         Query q = db.collection("applications")
