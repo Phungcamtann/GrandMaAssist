@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sj_title">Việc đã lưu</string>
+    <string name="sj_saved_short">Đã lưu</string>
+    <string name="sj_tab_all">Tất cả (%d)</string>
+    <string name="sj_tab_open">Còn nhận (%d)</string>
+    <string name="sj_tab_closed">Đã đóng (%d)</string>
+    <string name="sj_empty_title">Cô/chú chưa lưu việc nào</string>
+    <string name="sj_empty_desc">Khi xem danh sách việc, cô/chú bấm nút "Lưu việc" để xem lại tại đây bất cứ lúc nào.</string>
+    <string name="sj_empty_tab">Không có công việc nào trong mục này</string>
+    <string name="sj_find_jobs">Xem việc làm ngay</string>
+    <string name="sj_unsave">Bỏ lưu</string>
+    <string name="sj_unsave_confirm_title">Bỏ lưu việc làm</string>
+    <string name="sj_unsave_confirm_msg">Cô/chú có chắc muốn bỏ lưu công việc \"%s\" không?</string>
+    <string name="sj_unsave_yes">Bỏ lưu</string>
+    <string name="sj_unsave_no">Giữ lại</string>
+    <string name="sj_unsaved_success">Đã bỏ lưu công việc</string>
+    <string name="sj_saved_success">Đã lưu việc thành công</string>
+    <string name="sj_status_open">Còn nhận đơn</string>
+    <string name="sj_status_expired">Hết hạn</string>
+    <string name="sj_status_closed">Đã đóng tin</string>
+    <string name="sj_save_job">Lưu việc này</string>
+    <string name="sj_saved_job">Đã lưu việc</string>
+    <string name="sj_login_prompt">Cô/chú cần đăng nhập để lưu việc làm.</string>
+    <string name="sj_saved_date">Đã lưu ngày %s</string>
+    <string name="sj_account_saved_jobs">Việc đã lưu</string>
+</resources>

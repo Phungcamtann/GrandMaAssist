@@ -7,14 +7,23 @@
         android:layout_gravity="center_horizontal" android:orientation="horizontal" android:gravity="center_vertical"
         android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="8dp" android:paddingBottom="8dp">
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbBack" style="@style/Widget.GrandMa.PublicToolbarButton"
-            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
             android:background="@drawable/public_back_button" android:gravity="start|center_vertical"
-            android:text="@string/n_back"/>
-        <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp">
+            android:textSize="18sp" android:text="@string/n_back"/>
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:gravity="end|center_vertical" android:orientation="horizontal">
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbSavedJobs" style="@style/Widget.GrandMa.PublicToolbarButton"
+                android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+                android:layout_marginEnd="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"
+                android:textSize="15sp" android:maxLines="1" android:singleLine="true"
+                android:text="@string/sj_saved_short" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbReload" style="@style/Widget.GrandMa.PublicToolbarButton"
-                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end|center_vertical"
+                android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+                android:paddingStart="12dp" android:paddingEnd="12dp"
+                android:textSize="15sp" android:maxLines="1" android:singleLine="true"
                 android:text="@string/pb_reload_short" android:contentDescription="@string/pb_reload" android:tooltipText="@string/pb_reload"/>
-        </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
     <ScrollView android:id="@+id/pbScroll" android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
@@ -43,7 +52,7 @@
             <LinearLayout android:id="@+id/pbBody" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbMore" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_more" android:visibility="gone"/>
             <LinearLayout android:id="@+id/pbFuture" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-                <androidx.appcompat.widget.AppCompatButton style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/pb_save_soon" android:enabled="false"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/pbBtnSave" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/sj_save_job"/>
                 <androidx.appcompat.widget.AppCompatButton style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/pb_apply_soon" android:enabled="false"/>
             </LinearLayout>
         </LinearLayout>

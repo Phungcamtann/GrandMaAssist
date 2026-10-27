@@ -10,6 +10,7 @@
         <TextView android:id="@+id/accountHubArea" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
     </LinearLayout>
     <androidx.appcompat.widget.AppCompatButton android:id="@+id/accountHubProfile" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_profile_open"/>
+    <androidx.appcompat.widget.AppCompatButton android:id="@+id/accountHubSavedJobs" style="@style/Widget.GrandMa.HomeButton" android:text="@string/sj_account_saved_jobs" android:visibility="gone"/>
     <androidx.appcompat.widget.AppCompatButton android:id="@+id/accountHubVerification" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_admin_review" android:visibility="gone"/>
     <androidx.appcompat.widget.AppCompatButton android:id="@+id/accountHubSecurity" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_security"/>
     <androidx.appcompat.widget.AppCompatButton android:id="@+id/accountHubSettings" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_settings"/>

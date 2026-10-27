@@ -296,6 +296,16 @@ service cloud.firestore {
         && (notice(uid, noticeId, request.resource.data) || revokeNotice(uid, noticeId, request.resource.data));
       allow update, delete: if false;
     }
+    match /users/{uid}/savedJobs/{jobId} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && request.resource.data.keys().hasAll(['seekerId', 'jobId', 'savedAt'])
+        && request.resource.data.keys().hasOnly(['seekerId', 'jobId', 'savedAt'])
+        && request.resource.data.seekerId == uid
+        && request.resource.data.jobId == jobId
+        && request.resource.data.savedAt == request.time;
+      allow delete: if owner(uid);
+      allow update: if false;
+    }
     function notice(uid, noticeId, d) {
       let u = get(userPath(uid)).data;
       let r = getAfter(requestPath(u.role, d.requestId)).data;

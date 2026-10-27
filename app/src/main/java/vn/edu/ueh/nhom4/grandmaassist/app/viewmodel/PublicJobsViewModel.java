@@ -9,6 +9,7 @@ import java.util.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PublicJobRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.SavedJobRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.PublicJob;
 
 /** Public browsing has no role/profile gate. An Auth change invalidates this screen's callbacks. */
@@ -22,14 +23,18 @@ public final class PublicJobsViewModel extends AndroidViewModel {
     public List<PublicJob> items=new ArrayList<>();
     public PublicJob selected;
     public long scrollEvent;
+    public boolean isSaved;
+    public boolean saveBusy;
+
     private long generation,catalogGeneration,referenceTime;
     private DocumentSnapshot cursor;
     private PublicJob localCursor;
     private final PublicJobRepository repository;
+    private final SavedJobRepository savedRepo;
     private final FirebaseAuth.AuthStateListener listener;
 
     public PublicJobsViewModel(@NonNull Application app){
-        super(app);repository=new PublicJobRepository(app);sessionUid=currentUid();
+        super(app);repository=new PublicJobRepository(app);savedRepo=new SavedJobRepository(app);sessionUid=currentUid();
         listener=a->{if(!sessionUid.equals(currentUid())){
             ended=true;++generation;++catalogGeneration;busy=catalogBusy=false;
             items=new ArrayList<>();selected=null;message=catalogMessage="";emit();
@@ -83,7 +88,6 @@ public final class PublicJobsViewModel extends AndroidViewModel {
                 if(!p.cacheSaved)message=s(R.string.pb_cache_write_error);
                 if(!next)++scrollEvent;emit();
             }else if(repository.network(t.getException())){
-                // Never append a cache page to a server cursor. Restart the same filter in cache mode.
                 loadCache(g,false);
             }else{busy=false;more=next && more;message=error(t.getException());emit();}
         });
@@ -115,7 +119,8 @@ public final class PublicJobsViewModel extends AndroidViewModel {
             if(!valid(g))return;
             if(t.isSuccessful()){
                 busy=false;selected=t.getResult().job;detailCached=false;
-                message=t.getResult().cacheSaved?"":s(R.string.pb_cache_write_error);emit();
+                message=t.getResult().cacheSaved?"":s(R.string.pb_cache_write_error);
+                if(selected!=null)checkSaved();else emit();
             }else if(repository.network(t.getException()))openCache(g,id);
             else{
                 busy=false;message=error(t.getException());
@@ -129,13 +134,45 @@ public final class PublicJobsViewModel extends AndroidViewModel {
     private void openCache(long g,String id){
         repository.cachedDetail(id).addOnCompleteListener(t->{
             if(!valid(g))return;busy=false;detailCached=true;
-            if(t.isSuccessful()){selected=t.getResult();message=selected==null?s(R.string.pb_detail_not_saved):"";}
-            else message=s(R.string.pb_cache_read_error);
-            emit();
+            if(t.isSuccessful()){
+                selected=t.getResult();
+                message=selected==null?s(R.string.pb_detail_not_saved):"";
+                if(selected!=null)checkSaved();else emit();
+            } else { message=s(R.string.pb_cache_read_error); emit(); }
         });
     }
+    public void checkSaved() {
+        if (sessionUid.isEmpty() || selected == null) { isSaved = false; emit(); return; }
+        savedRepo.isJobSaved(sessionUid, selected.id).addOnCompleteListener(t -> {
+            if (!ended && sessionUid.equals(currentUid())) {
+                isSaved = t.isSuccessful() && Boolean.TRUE.equals(t.getResult());
+                emit();
+            }
+        });
+    }
+    public void toggleSave() {
+        if (sessionUid.isEmpty() || selected == null || saveBusy) return;
+        saveBusy = true; emit();
+        if (isSaved) {
+            savedRepo.unsaveJob(sessionUid, selected.id).addOnCompleteListener(t -> {
+                if (!ended && sessionUid.equals(currentUid())) {
+                    saveBusy = false;
+                    if (t.isSuccessful()) isSaved = false;
+                    emit();
+                }
+            });
+        } else {
+            savedRepo.saveJob(sessionUid, selected).addOnCompleteListener(t -> {
+                if (!ended && sessionUid.equals(currentUid())) {
+                    saveBusy = false;
+                    if (t.isSuccessful()) isSaved = true;
+                    emit();
+                }
+            });
+        }
+    }
     public void backToList(){
-        ++generation;busy=false;selected=null;detailId="";
+        ++generation;busy=false;selected=null;detailId="";isSaved=false;saveBusy=false;
         message=items.isEmpty()?s(R.string.pb_choose_load):cached?s(R.string.pb_cache_scope):"";++scrollEvent;emit();
     }
     public void pruneExpired(){

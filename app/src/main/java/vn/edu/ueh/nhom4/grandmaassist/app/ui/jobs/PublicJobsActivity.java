@@ -1,6 +1,7 @@
 package vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
@@ -57,12 +58,27 @@ public final class PublicJobsActivity extends AppCompatActivity {
         click(R.id.pbBack,this::back);click(R.id.pbReload,vm::reload);click(R.id.pbFilterToggle,this::toggleFilters);
         click(R.id.pbApply,()->{hideKeyboard();vm.apply();});click(R.id.pbReset,vm::clearFilters);
         click(R.id.pbMore,vm::next);click(R.id.pbCatalogReload,vm::loadCatalog);
+        click(R.id.pbSavedJobs, () -> startActivity(new Intent(this, SavedJobsActivity.class)));
+        click(R.id.pbBtnSave, () -> {
+            if (vm.sessionUid.isEmpty()) {
+                Toast.makeText(this, R.string.sj_login_prompt, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!"SEEKER".equals(vm.role)) {
+                Toast.makeText(this, "Chỉ người tìm việc mới có thể lưu việc làm", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean wasSaved = vm.isSaved;
+            vm.toggleSave();
+            Toast.makeText(this, wasSaved ? R.string.sj_unsaved_success : R.string.sj_saved_success, Toast.LENGTH_SHORT).show();
+        });
         bindSpinner(R.id.pbCategory,true);bindSpinner(R.id.pbArea,false);
         getOnBackPressedDispatcher().addCallback(this,new OnBackPressedCallback(true){public void handleOnBackPressed(){back();}});
         vm.changes.observe(this,n->render());
         listScroll=saved==null?0:saved.getInt("list_scroll",0);
         filtersExpanded=saved!=null && saved.getBoolean("filters_expanded",false);
-        vm.initialize(getIntent().getStringExtra(ROLE),safe(saved,"category"),safe(saved,"area"),safe(saved,"detail"));
+        String initialDetail = saved != null ? safe(saved, "detail") : safe(getIntent().getExtras(), "detail");
+        vm.initialize(getIntent().getStringExtra(ROLE),safe(saved,"category"),safe(saved,"area"),initialDetail);
         if(saved!=null){int y=saved.getInt("scroll",0);findViewById(R.id.pbScroll).post(()->findViewById(R.id.pbScroll).scrollTo(0,y));}
         ViewCompat.requestApplyInsets(findViewById(R.id.pbRoot));
     }
@@ -116,6 +132,7 @@ public final class PublicJobsActivity extends AppCompatActivity {
         nav.render(vm.role,RoleNavigationBar.Action.OTHER,"SEEKER".equals(vm.role)&&!keyboard&&getIntent().getBooleanExtra(NAVIGATION,false),true);
         text(R.id.pbTitle,getString(detail?R.string.pb_detail:R.string.pb_title));
         show(R.id.pbFilterToggle,!detail);show(R.id.pbFilters,!detail&&filtersExpanded);
+        show(R.id.pbSavedJobs, "SEEKER".equals(vm.role) && !detail);
         spinner(R.id.pbCategory,vm.catalog.categories,vm.draftCategory,true);spinner(R.id.pbArea,vm.catalog.areas,vm.draftArea,false);
         text(R.id.pbCatalogMessage,vm.catalogMessage);show(R.id.pbCatalogMessage,!vm.catalogMessage.isEmpty());
         show(R.id.pbCatalogReload,!vm.catalogMessage.isEmpty());findViewById(R.id.pbCatalogReload).setEnabled(!vm.catalogBusy);
@@ -128,13 +145,26 @@ public final class PublicJobsActivity extends AppCompatActivity {
         text(R.id.pbMessage,vm.message);show(R.id.pbMessage,!vm.message.isEmpty());show(R.id.pbProgress,vm.busy);
         text(R.id.pbCount,getString(R.string.pb_count,vm.items.size()));show(R.id.pbCount,!detail&&!vm.items.isEmpty());
         show(R.id.pbMore,!detail&&vm.more);show(R.id.pbFuture,detail&&vm.selected!=null);
+        if (detail && vm.selected != null) {
+            androidx.appcompat.widget.AppCompatButton btnSave = findViewById(R.id.pbBtnSave);
+            if (btnSave != null) {
+                btnSave.setText(vm.isSaved ? R.string.sj_saved_job : R.string.sj_save_job);
+                btnSave.setEnabled(!vm.saveBusy && !vm.busy);
+                if (vm.isSaved) {
+                    btnSave.setBackgroundResource(R.drawable.button_primary);
+                    btnSave.setTextColor(Color.WHITE);
+                } else {
+                    btnSave.setBackgroundResource(R.drawable.button_secondary);
+                    btnSave.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+                }
+            }
+        }
         Object key=detail?vm.selected:vm.items;
         if(bodyKey!=key){
             bodyKey=key;LinearLayout body=findViewById(R.id.pbBody);body.removeAllViews();
             if(detail){if(vm.selected!=null)detail(body,vm.selected);}
             else for(PublicJob job:vm.items)card(body,job);
         }
-        // Update deadline labels on foreground/timer without rebuilding focused controls.
         if(vm.selected!=null && detail){
             TextView state=findViewById(R.id.pbDeadlineState);
             if(state!=null)state.setText(vm.selected.expiresAt<=System.currentTimeMillis()?getString(R.string.pb_expired):getString(R.string.pb_deadline,date(vm.selected.expiresAt)));

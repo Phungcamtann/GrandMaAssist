@@ -13,6 +13,7 @@ import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.AuthRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ProfileRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.GuidedSearchActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.PublicJobsActivity;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.jobs.SavedJobsActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ProfileViewModel;
 
 /** Presentation only. Navigation delegates to the profile owner so dirty forms are protected. */
@@ -43,6 +44,7 @@ public final class RoleHomePanel {
         click(R.id.homeAudioGuide, () -> Toast.makeText(activity, "Đang phát hướng dẫn bằng giọng nói...", Toast.LENGTH_SHORT).show());
         click(R.id.accountHubBack,()->navigate.accept(RoleNavigationBar.Action.HOME));
         click(R.id.accountHubProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
+        click(R.id.accountHubSavedJobs, () -> activity.startActivity(new Intent(activity, SavedJobsActivity.class)));
         click(R.id.accountHubVerification,verify);click(R.id.accountHubSecurity,security);click(R.id.accountHubSignOut,signOut);
     }
     private void click(int id,Runnable action){
@@ -142,8 +144,9 @@ public final class RoleHomePanel {
                 activity.getString("ORGANIZATION".equals(vm.snapshot.draft.employerType)?R.string.n_organization:R.string.n_individual):""));
         String area="";for(ProfileRepository.Area item:vm.areas)if(item.code.equals(vm.snapshot.draft.areaCode)){area=item.name;break;}
         text(R.id.accountHubArea,area);show(R.id.accountHubArea,!area.isEmpty());show(R.id.accountHubProfile,!admin);
+        show(R.id.accountHubSavedJobs, seeker);
         show(R.id.accountHubVerification,admin);
-        for(int id:new int[]{R.id.homeOpenProfile,R.id.accountHubProfile,R.id.accountHubSecurity,R.id.accountHubBack,R.id.accountHubSignOut}) {
+        for(int id:new int[]{R.id.homeOpenProfile,R.id.accountHubProfile,R.id.accountHubSavedJobs,R.id.accountHubSecurity,R.id.accountHubBack,R.id.accountHubSignOut}) {
             View v = activity.findViewById(id);
             if (v != null) v.setEnabled(!vm.busy && !auth.isBusy());
         }

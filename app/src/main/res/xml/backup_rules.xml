@@ -18,6 +18,10 @@
     <exclude domain="database" path="search_preferences.db-journal"/>
     <exclude domain="database" path="search_preferences.db-wal"/>
     <exclude domain="database" path="search_preferences.db-shm"/>
+    <exclude domain="database" path="saved_jobs.db"/>
+    <exclude domain="database" path="saved_jobs.db-journal"/>
+    <exclude domain="database" path="saved_jobs.db-wal"/>
+    <exclude domain="database" path="saved_jobs.db-shm"/>
     <!--
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>
