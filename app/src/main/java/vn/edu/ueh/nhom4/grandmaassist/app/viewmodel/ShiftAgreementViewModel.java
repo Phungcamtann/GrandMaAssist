@@ -367,4 +367,91 @@ public final class ShiftAgreementViewModel extends ViewModel {
             }
         });
     }
+
+    public void confirmCheckIn(String sessionId, String role, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang xử lý điểm danh ca làm việc...";
+        emit();
+
+        repository.confirmCheckIn(uid, sessionId, role).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                currentSession = t.getResult();
+                message = "";
+                emit();
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void reportCompletion(String sessionId, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang gửi báo cáo hoàn thành ca làm...";
+        emit();
+
+        repository.reportCompletion(uid, sessionId).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                currentSession = t.getResult();
+                message = "";
+                emit();
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void confirmCompletionAndSettle(String sessionId, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang xác nhận hoàn tất ca và quyết toán tiền công...";
+        emit();
+
+        repository.confirmCompletionAndSettle(uid, sessionId).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                currentSession = t.getResult();
+                message = "";
+                emit();
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void syncSettlementToWallet(String seekerId) {
+        if (currentSession != null && currentSession.isCompleted()) {
+            repository.syncSettlementToWallet(seekerId, currentSession);
+        }
+    }
 }

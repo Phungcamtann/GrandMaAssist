@@ -226,14 +226,6 @@
                             android:textColor="#1C6758"
                             android:layout_marginTop="2dp"
                             android:text="0 đ"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textSize="13sp"
-                            android:textColor="#1C6758"
-                            android:text="✓ Nhận trọn vẹn 100% tiền công sau ca làm, không bị trừ bất kỳ khoản phí nào."/>
                     </LinearLayout>
 
                     <!-- Employer View of Pay & Fee -->
@@ -473,6 +465,187 @@
                         android:textColor="#1B5E20"
                         android:textSize="15sp"
                         android:text="Đã tạm giữ cọc an toàn. Ca làm việc đã sẵn sàng."/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Check-in actions for Seeker (when READY) -->
+            <LinearLayout
+                android:id="@+id/layoutSeekerCheckIn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSeekerCheckIn"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="54dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:textSize="17sp"
+                    android:text="Tôi đã đến nơi / Điểm danh ca làm"/>
+
+                <TextView
+                    android:id="@+id/tvSeekerCheckInNotice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#1B5E20"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- Check-in actions for Employer (when READY) -->
+            <LinearLayout
+                android:id="@+id/layoutEmployerCheckIn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEmployerCheckIn"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="54dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:textSize="17sp"
+                    android:text="Xác nhận người làm đã đến"/>
+
+                <TextView
+                    android:id="@+id/tvEmployerCheckInNotice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#1B5E20"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- Card for IN_PROGRESS and COMPLETION_PENDING -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSessionLiveStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:strokeWidth="1dp"
+                app:strokeColor="#A5D6A7"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvLiveStatusHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="18sp"
+                        android:textColor="#1B5E20"
+                        android:text="🟢 Ca làm việc đang diễn ra"/>
+
+                    <TextView
+                        android:id="@+id/tvLiveStatusDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:textSize="14sp"
+                        android:textColor="#2E7D32"
+                        android:text="Ca làm đã được cả 2 bên xác nhận bắt đầu."/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnSeekerReportComplete"
+                        style="@style/Widget.GrandMa.VerificationPrimary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="52dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:layout_marginTop="14dp"
+                        android:includeFontPadding="false"
+                        android:text="Báo hoàn thành công việc"
+                        android:visibility="gone"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnEmployerConfirmComplete"
+                        style="@style/Widget.GrandMa.VerificationPrimary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="52dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:layout_marginTop="14dp"
+                        android:includeFontPadding="false"
+                        android:text="Xác nhận hoàn tất ca &amp; Quyết toán"
+                        android:visibility="gone"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card for COMPLETED -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSessionCompletedNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:strokeWidth="1dp"
+                app:strokeColor="#81C784"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="18sp"
+                        android:textColor="#1B5E20"
+                        android:text="✓ Ca làm việc đã hoàn thành"/>
+
+                    <TextView
+                        android:id="@+id/tvSessionCompletedMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:textSize="14sp"
+                        android:textColor="#2E7D32"
+                        android:text="Tiền công đã được quyết toán vào ví thành công."/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnOpenWalletAfterComplete"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="50dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:layout_marginTop="12dp"
+                        android:includeFontPadding="false"
+                        android:text="Mở Ví tiền của tôi"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

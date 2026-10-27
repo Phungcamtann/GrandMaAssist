@@ -170,7 +170,7 @@ public final class ProfilePanel {
             case ACCOUNT:vm.showAccount();scrollTop();break;
             case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
             case WORK:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))openPosts();else if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role))openMyApplications();else openDrafts(false);break;
-            case OTHER:openPublicJobs();break;
+            case OTHER:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))discardThen(()->vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.WorkSessionsActivity.start(activity,"EMPLOYER"));else openPublicJobs();break;
             default:break;
         }
     }

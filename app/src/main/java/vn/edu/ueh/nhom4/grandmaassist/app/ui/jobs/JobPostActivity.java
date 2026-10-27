@@ -39,6 +39,7 @@ public final class JobPostActivity extends AppCompatActivity {
         vm=new ViewModelProvider(this).get(JobPostViewModel.class);lastPage=vm.pageEvent;
         nav=new RoleNavigationBar(this,a->{if(vm.busy)return;
             if(a==RoleNavigationBar.Action.WORK||a==RoleNavigationBar.Action.PROCESS){if(vm.selected!=null)guard(vm::backToList);return;}
+            if(a==RoleNavigationBar.Action.OTHER){guard(()->vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.WorkSessionsActivity.start(this,"EMPLOYER"));return;}
             if(a==RoleNavigationBar.Action.HOME||a==RoleNavigationBar.Action.ACCOUNT||a==RoleNavigationBar.Action.PROFILE)guard(()->leave(a.name()));});
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.jpRoot),(v,i)->{
             androidx.core.graphics.Insets safe=i.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()|WindowInsetsCompat.Type.ime());

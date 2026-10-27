@@ -26,6 +26,10 @@ public final class WalletActivity extends AppCompatActivity {
     public static final String EXTRA_INITIAL_TOPUP_AMOUNT = "extra_initial_topup_amount";
     public static final String EXTRA_ROLE = "extra_role";
 
+    public static void start(Context context, String role) {
+        start(context, role, 0L);
+    }
+
     public static void start(Context context, String role, long prefillTopUpAmount) {
         Intent intent = new Intent(context, WalletActivity.class);
         intent.putExtra(EXTRA_ROLE, role);

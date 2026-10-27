@@ -13,7 +13,7 @@
     <string name="session_fee_breakdown_title">Chi tiết chi phí ca làm</string>
     <string name="session_worker_pay">Tiền công người làm nhận:</string>
     <string name="session_platform_fee">Phí dịch vụ nền tảng (10%):</string>
-    <string name="session_fee_payer_note">(Người thuê chi trả, người tìm việc nhận trọn vẹn)</string>
+    <string name="session_fee_payer_note">(Người thuê chi trả)</string>
     <string name="session_total_due">Tổng chi phí:</string>
     <string name="session_seeker_pay_note">Tiền công cô/chú nhận: %1$s (Không bị trừ bất kỳ khoản phí nào)</string>
     <string name="session_btn_submit_proposal">Gửi đề xuất thỏa thuận</string>

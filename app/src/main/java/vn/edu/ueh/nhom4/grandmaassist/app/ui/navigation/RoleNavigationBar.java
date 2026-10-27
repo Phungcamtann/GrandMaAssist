@@ -68,10 +68,11 @@ public final class RoleNavigationBar {
                 :seeker?new int[]{R.string.n_home,R.string.n_my_jobs,R.string.n_other_jobs,R.string.n_profile}
                 :new int[]{R.string.n_home,R.string.n_my_posts,R.string.n_sessions,R.string.n_profile};
         int[] icons=admin?new int[]{R.drawable.ic_nav_home,R.drawable.ic_nav_queue,R.drawable.ic_nav_stats,R.drawable.ic_nav_account}
-                :new int[]{R.drawable.ic_nav_home,R.drawable.ic_role_work,R.drawable.ic_nav_search,R.drawable.ic_nav_account};
+                :seeker?new int[]{R.drawable.ic_nav_home,R.drawable.ic_role_work,R.drawable.ic_nav_search,R.drawable.ic_nav_account}
+                :new int[]{R.drawable.ic_nav_home,R.drawable.ic_role_work,R.drawable.ic_nav_queue,R.drawable.ic_nav_account};
         for(int i=0;i<4;i++){
             Action action=routes[i];actions[i]=action;
-            boolean live=i==0 || i==3 || i==1 || (seeker && i==2);AppCompatButton b=buttons[i];
+            boolean live=i==0 || i==3 || i==1 || i==2;AppCompatButton b=buttons[i];
             String title=activity.getString(labels[i]);String value=title;
             if(!b.getText().toString().equals(value))b.setText(value);
             b.setEnabled(enabled && live);b.setSelected(live && selected==action);

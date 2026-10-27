@@ -35,12 +35,29 @@ public final class WorkSession {
     public final long totalFunded;
     public final Timestamp createdAt;
     public final Timestamp updatedAt;
+    public final Timestamp seekerCheckedInAt;
+    public final Timestamp employerCheckedInAt;
+    public final Timestamp startedAt;
+    public final Timestamp completedAt;
+    public final Timestamp settledAt;
 
     public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
                        AgreementSnapshot agreement, long agreementVersion,
                        Long employerAcceptedVersion, Long seekerAcceptedVersion,
                        String status, String paymentStatus, long heldAmount, long totalFunded,
                        Timestamp createdAt, Timestamp updatedAt) {
+        this(id, applicationId, jobId, seekerId, employerId, agreement, agreementVersion,
+                employerAcceptedVersion, seekerAcceptedVersion, status, paymentStatus,
+                heldAmount, totalFunded, createdAt, updatedAt, null, null, null, null, null);
+    }
+
+    public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
+                       AgreementSnapshot agreement, long agreementVersion,
+                       Long employerAcceptedVersion, Long seekerAcceptedVersion,
+                       String status, String paymentStatus, long heldAmount, long totalFunded,
+                       Timestamp createdAt, Timestamp updatedAt,
+                       Timestamp seekerCheckedInAt, Timestamp employerCheckedInAt,
+                       Timestamp startedAt, Timestamp completedAt, Timestamp settledAt) {
         this.id = id;
         this.applicationId = applicationId;
         this.jobId = jobId;
@@ -56,6 +73,11 @@ public final class WorkSession {
         this.totalFunded = totalFunded;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.seekerCheckedInAt = seekerCheckedInAt;
+        this.employerCheckedInAt = employerCheckedInAt;
+        this.startedAt = startedAt;
+        this.completedAt = completedAt;
+        this.settledAt = settledAt;
     }
 
     @SuppressWarnings("unchecked")
@@ -79,6 +101,11 @@ public final class WorkSession {
         Long tFund = (Long) data.get("totalFunded");
         Timestamp createdAt = (Timestamp) data.get("createdAt");
         Timestamp updatedAt = (Timestamp) data.get("updatedAt");
+        Timestamp seekerCheckedInAt = (Timestamp) data.get("seekerCheckedInAt");
+        Timestamp employerCheckedInAt = (Timestamp) data.get("employerCheckedInAt");
+        Timestamp startedAt = (Timestamp) data.get("startedAt");
+        Timestamp completedAt = (Timestamp) data.get("completedAt");
+        Timestamp settledAt = (Timestamp) data.get("settledAt");
 
         return new WorkSession(
                 id,
@@ -95,7 +122,12 @@ public final class WorkSession {
                 hAmt != null ? hAmt : 0L,
                 tFund != null ? tFund : 0L,
                 createdAt,
-                updatedAt
+                updatedAt,
+                seekerCheckedInAt,
+                employerCheckedInAt,
+                startedAt,
+                completedAt,
+                settledAt
         );
     }
 
@@ -104,8 +136,11 @@ public final class WorkSession {
     public boolean isReady() { return STATUS_READY.equals(status); }
     public boolean isFunded() { return PAYMENT_HELD.equals(paymentStatus); }
     public boolean isInProgress() { return STATUS_IN_PROGRESS.equals(status); }
+    public boolean isCompletionPending() { return STATUS_COMPLETION_PENDING.equals(status); }
     public boolean isCompleted() { return STATUS_COMPLETED.equals(status); }
     public boolean isCancelled() { return STATUS_CANCELLED.equals(status); }
+    public boolean isSeekerCheckedIn() { return seekerCheckedInAt != null; }
+    public boolean isEmployerCheckedIn() { return employerCheckedInAt != null; }
 
     public boolean isAgreementConfirmed() {
         return employerAcceptedVersion != null && seekerAcceptedVersion != null

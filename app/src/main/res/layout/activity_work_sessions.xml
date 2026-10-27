@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/workSessionsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface_ivory">
+
+    <include layout="@layout/role_topbar"/>
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:id="@+id/wsToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/wsBack"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:background="@drawable/public_back_button"
+            android:textSize="18sp"
+            android:text="@string/n_back"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/wsReload"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:textSize="16sp"
+            android:text="@string/pb_reload_short"
+            android:contentDescription="@string/pb_reload"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
+
+            <TextView
+                android:id="@+id/wsTitle"
+                style="@style/Widget.GrandMa.VerificationHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                android:textSize="24sp"
+                android:text="Ca làm việc"/>
+
+            <TextView
+                android:id="@+id/wsSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="10dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:text="Danh sách ca làm việc và thỏa thuận của bạn."/>
+
+            <!-- Filter Tabs -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnTabActive"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/button_primary"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false"
+                    android:text="Đang &amp; Sắp làm"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnTabHistory"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="#555555"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false"
+                    android:text="Lịch sử đã xong"/>
+            </LinearLayout>
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layoutEmptySessions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:src="@drawable/ic_nav_queue"
+                    app:tint="#A0A0A0"
+                    android:contentDescription="Trống"/>
+
+                <TextView
+                    android:id="@+id/tvEmptyTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                    android:textSize="18sp"
+                    android:textColor="#333333"
+                    android:text="Chưa có ca làm việc nào"/>
+
+                <TextView
+                    android:id="@+id/tvEmptySubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                    android:textSize="14sp"
+                    android:textColor="#777777"
+                    android:text="Khi có thỏa thuận ca làm việc, thông tin sẽ hiển thị tại đây để bạn tiện theo dõi."/>
+            </LinearLayout>
+
+            <!-- Sessions List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvWorkSessions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp"/>
+        </LinearLayout>
+
+        <!-- Progress Indicator -->
+        <ProgressBar
+            android:id="@+id/pbSessionsLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <include layout="@layout/role_navigation"/>
+
+</LinearLayout>

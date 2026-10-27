@@ -35,10 +35,17 @@ public final class RoleHomePanel {
                 activity.startActivity(new Intent(activity, GuidedSearchActivity.class));
             }
         });
+        click(R.id.homeAttentionFuture, () -> {
+            if (vm.snapshot != null) {
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.WorkSessionsActivity.start(activity, vm.snapshot.role);
+            }
+        });
         click(R.id.homeWorkFuture,()->{if(vm.snapshot!=null && ("EMPLOYER".equals(vm.snapshot.role) || "SEEKER".equals(vm.snapshot.role)))navigate.accept(RoleNavigationBar.Action.WORK);});
         click(R.id.homeOtherFuture,()->{
             if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)) {
                 activity.startActivity(new Intent(activity, PublicJobsActivity.class).putExtra(PublicJobsActivity.ROLE, "SEEKER"));
+            } else if (vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role)) {
+                vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.WorkSessionsActivity.start(activity, "EMPLOYER");
             }
         });
         click(R.id.homeAudioGuide, () -> Toast.makeText(activity, "Đang phát hướng dẫn bằng giọng nói...", Toast.LENGTH_SHORT).show());
@@ -95,6 +102,8 @@ public final class RoleHomePanel {
             text(R.id.homeOtherFuture, "Xem các việc khác");
             text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support));
 
+            activity.findViewById(R.id.homeAttentionFuture).setEnabled(!vm.busy && !auth.isBusy());
+            ((TextView)activity.findViewById(R.id.homeAttentionFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeWorkFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeOtherFuture).setEnabled(!vm.busy && !auth.isBusy());
@@ -119,11 +128,16 @@ public final class RoleHomePanel {
             show(R.id.homeIntro, !employerVerified);
             text(R.id.homeMainFuture,activity.getString(R.string.jd_create));
             text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));
+            text(R.id.homeOtherFuture,"Ca làm việc");
             activity.findViewById(R.id.homeMainFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             activity.findViewById(R.id.homeMainFuture).setBackgroundResource(R.drawable.button_primary);
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.button_primary_text));
+            activity.findViewById(R.id.homeAttentionFuture).setEnabled(active && !vm.busy && !auth.isBusy());
+            ((TextView)activity.findViewById(R.id.homeAttentionFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeWorkFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
+            activity.findViewById(R.id.homeOtherFuture).setEnabled(active && !vm.busy && !auth.isBusy());
+            ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
         }
 
         future(R.id.homePostsFuture,R.string.n_admin_posts);future(R.id.homeReportsFuture,R.string.n_admin_reports);

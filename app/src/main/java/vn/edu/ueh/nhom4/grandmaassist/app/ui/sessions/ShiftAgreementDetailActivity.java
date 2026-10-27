@@ -14,10 +14,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.AgreementSnapshot;
@@ -62,6 +64,23 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     private TextView tvEmployerWalletInfo;
     private View cardSessionReadyNotice;
     private TextView tvSessionReadyNotice;
+
+    // Check-in and In-Progress views
+    private View layoutSeekerCheckIn;
+    private AppCompatButton btnSeekerCheckIn;
+    private TextView tvSeekerCheckInNotice;
+    private View layoutEmployerCheckIn;
+    private AppCompatButton btnEmployerCheckIn;
+    private TextView tvEmployerCheckInNotice;
+    private View cardSessionLiveStatus;
+    private TextView tvLiveStatusHeader;
+    private TextView tvLiveStatusDetail;
+    private AppCompatButton btnSeekerReportComplete;
+    private AppCompatButton btnEmployerConfirmComplete;
+    private View cardSessionCompletedNotice;
+    private TextView tvSessionCompletedMessage;
+    private AppCompatButton btnOpenWalletAfterComplete;
+
     private final WalletRepository walletRepo = new WalletRepository();
     private long currentWalletBalance = 0L;
 
@@ -113,6 +132,21 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         cardSessionReadyNotice = findViewById(R.id.cardSessionReadyNotice);
         tvSessionReadyNotice = findViewById(R.id.tvSessionReadyNotice);
 
+        layoutSeekerCheckIn = findViewById(R.id.layoutSeekerCheckIn);
+        btnSeekerCheckIn = findViewById(R.id.btnSeekerCheckIn);
+        tvSeekerCheckInNotice = findViewById(R.id.tvSeekerCheckInNotice);
+        layoutEmployerCheckIn = findViewById(R.id.layoutEmployerCheckIn);
+        btnEmployerCheckIn = findViewById(R.id.btnEmployerCheckIn);
+        tvEmployerCheckInNotice = findViewById(R.id.tvEmployerCheckInNotice);
+        cardSessionLiveStatus = findViewById(R.id.cardSessionLiveStatus);
+        tvLiveStatusHeader = findViewById(R.id.tvLiveStatusHeader);
+        tvLiveStatusDetail = findViewById(R.id.tvLiveStatusDetail);
+        btnSeekerReportComplete = findViewById(R.id.btnSeekerReportComplete);
+        btnEmployerConfirmComplete = findViewById(R.id.btnEmployerConfirmComplete);
+        cardSessionCompletedNotice = findViewById(R.id.cardSessionCompletedNotice);
+        tvSessionCompletedMessage = findViewById(R.id.tvSessionCompletedMessage);
+        btnOpenWalletAfterComplete = findViewById(R.id.btnOpenWalletAfterComplete);
+
         findViewById(R.id.shiftDetailBack).setOnClickListener(v -> finish());
         findViewById(R.id.shiftDetailReload).setOnClickListener(v -> reload());
 
@@ -132,6 +166,17 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
         btnCancel.setOnClickListener(v -> confirmEmployerCancel());
+
+        btnSeekerCheckIn.setOnClickListener(v -> confirmSeekerCheckIn());
+        btnEmployerCheckIn.setOnClickListener(v -> confirmEmployerCheckIn());
+        btnSeekerReportComplete.setOnClickListener(v -> confirmSeekerReportComplete());
+        btnEmployerConfirmComplete.setOnClickListener(v -> confirmEmployerConfirmComplete());
+        btnOpenWalletAfterComplete.setOnClickListener(v -> {
+            if (vm.currentSession != null) {
+                boolean isSeeker = currentUid.equals(vm.currentSession.seekerId);
+                WalletActivity.start(this, isSeeker ? "SEEKER" : "EMPLOYER");
+            }
+        });
 
         vm.changes.observe(this, n -> render());
 
@@ -203,7 +248,8 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             scheduleStr = dateStr + "\n" + startStr + " - " + endStr;
         }
         tvSchedule.setText(scheduleStr);
-                String workAddr = "";
+
+        String workAddr = "";
         String area = "";
         if (vm.currentApplication != null && vm.currentApplication.jobSnapshot != null) {
             workAddr = vm.currentApplication.jobSnapshot.workAddress != null ? vm.currentApplication.jobSnapshot.workAddress.trim() : "";
@@ -233,26 +279,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         boolean isSeeker = currentUid.equals(session.seekerId);
         boolean isEmployer = currentUid.equals(session.employerId);
 
+        // Role-based Topbar and Pay display
         if (isSeeker) {
             RoleNavigationBar.topbar(this, "SEEKER");
             layoutSeekerPay.setVisibility(View.VISIBLE);
             layoutEmployerPay.setVisibility(View.GONE);
             tvSeekerPayAmount.setText(formatMoney(ag.laborAmount));
-
-            if (session.isProposed()) {
-                layoutSeekerActions.setVisibility(View.VISIBLE);
-                cardSessionReadyNotice.setVisibility(View.GONE);
-            } else {
-                layoutSeekerActions.setVisibility(View.GONE);
-                if (session.isReady()) {
-                    cardSessionReadyNotice.setVisibility(View.VISIBLE);
-                    tvSessionReadyNotice.setText("✓ Người thuê đã nạp đủ " + formatMoney(ag.totalDue) + " tiền cọc bảo chứng trên hệ thống. Cô/chú an tâm chuẩn bị đến ca làm đúng giờ.");
-                } else {
-                    cardSessionReadyNotice.setVisibility(View.GONE);
-                }
-            }
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
         } else {
             RoleNavigationBar.topbar(this, "EMPLOYER");
             layoutSeekerPay.setVisibility(View.GONE);
@@ -260,29 +292,139 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             tvWorkerPay.setText(formatMoney(ag.laborAmount));
             tvServiceFee.setText("+" + formatMoney(ag.serviceFee));
             tvTotalDue.setText(formatMoney(ag.totalDue));
+        }
 
-            if (session.isProposed()) {
-                layoutEmployerActions.setVisibility(View.VISIBLE);
-                layoutEmployerFunding.setVisibility(View.GONE);
-                cardSessionReadyNotice.setVisibility(View.GONE);
-            } else if (session.isAwaitingFunds()) {
-                layoutEmployerActions.setVisibility(View.GONE);
-                layoutEmployerFunding.setVisibility(View.VISIBLE);
-                cardSessionReadyNotice.setVisibility(View.GONE);
+        // State machine UI
+        if (session.isProposed()) {
+            layoutSeekerActions.setVisibility(isSeeker ? View.VISIBLE : View.GONE);
+            layoutEmployerActions.setVisibility(isEmployer ? View.VISIBLE : View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.GONE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
+        } else if (session.isAwaitingFunds()) {
+            layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(isEmployer ? View.VISIBLE : View.GONE);
+            if (isEmployer) {
                 btnEmployerFund.setText("Cấp tiền ca làm (" + formatMoney(ag.totalDue) + ")");
                 tvEmployerWalletInfo.setText("Số dư ví hiện tại: " + formatMoney(currentWalletBalance));
                 btnEmployerFund.setOnClickListener(v -> handleEmployerFund(ag.totalDue));
-            } else if (session.isReady()) {
-                layoutEmployerActions.setVisibility(View.GONE);
-                layoutEmployerFunding.setVisibility(View.GONE);
-                cardSessionReadyNotice.setVisibility(View.VISIBLE);
-                tvSessionReadyNotice.setText("✓ Đã tạm giữ cọc " + formatMoney(ag.totalDue) + " an toàn trên hệ thống. Ca làm việc đã sẵn sàng.");
-            } else {
-                layoutEmployerActions.setVisibility(View.GONE);
-                layoutEmployerFunding.setVisibility(View.GONE);
-                cardSessionReadyNotice.setVisibility(View.GONE);
             }
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.GONE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
+        } else if (session.isReady()) {
             layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.VISIBLE);
+            cardSessionLiveStatus.setVisibility(View.GONE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
+
+            if (isSeeker) {
+                tvSessionReadyNotice.setText("✓ Người thuê đã nạp đủ " + formatMoney(ag.totalDue) + " tiền cọc bảo chứng trên hệ thống. Cô/chú an tâm chuẩn bị đến ca làm đúng giờ.");
+                layoutSeekerCheckIn.setVisibility(View.VISIBLE);
+                layoutEmployerCheckIn.setVisibility(View.GONE);
+                if (session.isSeekerCheckedIn()) {
+                    btnSeekerCheckIn.setVisibility(View.GONE);
+                    tvSeekerCheckInNotice.setVisibility(View.VISIBLE);
+                    String timeStr = session.seekerCheckedInAt != null ? formatTime(session.seekerCheckedInAt) : "";
+                    tvSeekerCheckInNotice.setText("✓ Cô/chú đã điểm danh thành công lúc " + timeStr + ".\nĐang chờ Người thuê bấm xác nhận trên máy của họ để bắt đầu ca làm.");
+                } else {
+                    btnSeekerCheckIn.setVisibility(View.VISIBLE);
+                    btnSeekerCheckIn.setEnabled(true);
+                    tvSeekerCheckInNotice.setVisibility(View.GONE);
+                }
+            } else {
+                tvSessionReadyNotice.setText("✓ Đã tạm giữ cọc " + formatMoney(ag.totalDue) + " an toàn trên hệ thống. Ca làm việc đã sẵn sàng.");
+                layoutSeekerCheckIn.setVisibility(View.GONE);
+                layoutEmployerCheckIn.setVisibility(View.VISIBLE);
+                if (session.isEmployerCheckedIn()) {
+                    btnEmployerCheckIn.setVisibility(View.GONE);
+                    tvEmployerCheckInNotice.setVisibility(View.VISIBLE);
+                    String timeStr = session.employerCheckedInAt != null ? formatTime(session.employerCheckedInAt) : "";
+                    tvEmployerCheckInNotice.setText("✓ Bạn đã xác nhận người làm đến lúc " + timeStr + ".\nĐang chờ cô/chú bấm điểm danh trên điện thoại của họ để bắt đầu ca làm.");
+                } else {
+                    btnEmployerCheckIn.setVisibility(View.VISIBLE);
+                    btnEmployerCheckIn.setEnabled(true);
+                    tvEmployerCheckInNotice.setVisibility(View.GONE);
+                }
+            }
+        } else if (session.isInProgress()) {
+            layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.VISIBLE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
+
+            tvLiveStatusHeader.setText("🟢 Ca làm việc đang diễn ra");
+            String startStr = session.startedAt != null ? formatDateTime(session.startedAt) : "Đã bắt đầu";
+            tvLiveStatusDetail.setText("Ca làm đã được cả 2 bên xác nhận bắt đầu lúc " + startStr + ".");
+
+            if (isSeeker) {
+                btnSeekerReportComplete.setVisibility(View.VISIBLE);
+                btnSeekerReportComplete.setEnabled(true);
+                btnEmployerConfirmComplete.setVisibility(View.GONE);
+            } else {
+                btnSeekerReportComplete.setVisibility(View.GONE);
+                btnEmployerConfirmComplete.setVisibility(View.VISIBLE);
+                btnEmployerConfirmComplete.setEnabled(true);
+            }
+        } else if (session.isCompletionPending()) {
+            layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.VISIBLE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
+
+            tvLiveStatusHeader.setText("⏳ Đang chờ xác nhận hoàn tất ca");
+            if (isSeeker) {
+                tvLiveStatusDetail.setText("Cô/chú đã báo hoàn thành công việc. Vui lòng chờ Người thuê kiểm tra và xác nhận để nhận tiền vào ví.");
+                btnSeekerReportComplete.setVisibility(View.GONE);
+                btnEmployerConfirmComplete.setVisibility(View.GONE);
+            } else {
+                tvLiveStatusDetail.setText("Người làm đã báo hoàn thành công việc. Hãy bấm nút bên dưới để xác nhận hoàn tất ca và giải phóng tiền công vào ví người làm.");
+                btnSeekerReportComplete.setVisibility(View.GONE);
+                btnEmployerConfirmComplete.setVisibility(View.VISIBLE);
+                btnEmployerConfirmComplete.setEnabled(true);
+            }
+        } else if (session.isCompleted()) {
+            layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.GONE);
+            cardSessionCompletedNotice.setVisibility(View.VISIBLE);
+
+            if (isSeeker) {
+                tvSessionCompletedMessage.setText("Tiền công " + formatMoney(ag.laborAmount) + " đã được cộng vào Ví tiền của cô/chú. Cô/chú có thể mở ví để kiểm tra hoặc rút tiền về tài khoản ngân hàng.");
+                vm.syncSettlementToWallet(currentUid);
+            } else {
+                tvSessionCompletedMessage.setText("Đã hoàn tất thanh toán tiền công " + formatMoney(ag.laborAmount) + " cho người làm và phí nền tảng " + formatMoney(ag.serviceFee) + " thành công.");
+            }
+        } else {
+            // Cancelled or disputed
+            layoutSeekerActions.setVisibility(View.GONE);
+            layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
+            cardSessionReadyNotice.setVisibility(View.GONE);
+            layoutSeekerCheckIn.setVisibility(View.GONE);
+            layoutEmployerCheckIn.setVisibility(View.GONE);
+            cardSessionLiveStatus.setVisibility(View.GONE);
+            cardSessionCompletedNotice.setVisibility(View.GONE);
         }
     }
 
@@ -299,6 +441,18 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             badge.setText(R.string.session_status_ready);
             badge.setBackgroundColor(Color.parseColor("#E8F5E9"));
             badge.setTextColor(Color.parseColor("#1C6758"));
+        } else if (WorkSession.STATUS_IN_PROGRESS.equals(status)) {
+            badge.setText("Đang thực hiện");
+            badge.setBackgroundColor(Color.parseColor("#E8F5E9"));
+            badge.setTextColor(Color.parseColor("#1C6758"));
+        } else if (WorkSession.STATUS_COMPLETION_PENDING.equals(status)) {
+            badge.setText("Chờ xác nhận xong");
+            badge.setBackgroundColor(Color.parseColor("#FFF3E0"));
+            badge.setTextColor(Color.parseColor("#E65100"));
+        } else if (WorkSession.STATUS_COMPLETED.equals(status)) {
+            badge.setText("Đã hoàn thành");
+            badge.setBackgroundColor(Color.parseColor("#E8F5E9"));
+            badge.setTextColor(Color.parseColor("#1C6758"));
         } else if (WorkSession.STATUS_CANCELLED.equals(status)) {
             badge.setText(R.string.session_status_cancelled);
             badge.setBackgroundColor(Color.parseColor("#EEEEEE"));
@@ -308,6 +462,83 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             badge.setBackgroundColor(Color.parseColor("#EEEEEE"));
             badge.setTextColor(Color.parseColor("#616161"));
         }
+    }
+
+    private void confirmSeekerCheckIn() {
+        if (vm.currentSession == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Điểm danh ca làm việc")
+                .setMessage("Cô/chú xác nhận đã đến nơi làm việc và sẵn sàng bắt đầu ca?")
+                .setPositiveButton("Xác nhận điểm danh", (d, w) -> {
+                    btnSeekerCheckIn.setEnabled(false);
+                    vm.confirmCheckIn(vm.currentSession.id, "SEEKER", () -> {
+                        Toast.makeText(this, "Điểm danh thành công!", Toast.LENGTH_SHORT).show();
+                        reload();
+                    }, err -> {
+                        btnSeekerCheckIn.setEnabled(true);
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void confirmEmployerCheckIn() {
+        if (vm.currentSession == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận người làm đã đến")
+                .setMessage("Bạn xác nhận người làm đã đến địa điểm làm việc?")
+                .setPositiveButton("Xác nhận", (d, w) -> {
+                    btnEmployerCheckIn.setEnabled(false);
+                    vm.confirmCheckIn(vm.currentSession.id, "EMPLOYER", () -> {
+                        Toast.makeText(this, "Đã xác nhận người làm đến nơi!", Toast.LENGTH_SHORT).show();
+                        reload();
+                    }, err -> {
+                        btnEmployerCheckIn.setEnabled(true);
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void confirmSeekerReportComplete() {
+        if (vm.currentSession == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Báo hoàn thành ca làm")
+                .setMessage("Cô/chú đã hoàn thành các nhiệm vụ được giao trong ca làm này?")
+                .setPositiveButton("Báo hoàn thành", (d, w) -> {
+                    btnSeekerReportComplete.setEnabled(false);
+                    vm.reportCompletion(vm.currentSession.id, () -> {
+                        Toast.makeText(this, "Đã gửi báo hoàn thành! Đang chờ Người thuê xác nhận.", Toast.LENGTH_LONG).show();
+                        reload();
+                    }, err -> {
+                        btnSeekerReportComplete.setEnabled(true);
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Chưa xong", null)
+                .show();
+    }
+
+    private void confirmEmployerConfirmComplete() {
+        if (vm.currentSession == null || vm.currentSession.agreement == null) return;
+        long pay = vm.currentSession.agreement.laborAmount;
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận hoàn tất ca & Quyết toán")
+                .setMessage("Hệ thống sẽ chuyển " + formatMoney(pay) + " từ tiền cọc tạm giữ vào Ví tiền của người làm và kết thúc ca. Bạn có chắc chắn muốn xác nhận?")
+                .setPositiveButton("Xác nhận & Quyết toán", (d, w) -> {
+                    btnEmployerConfirmComplete.setEnabled(false);
+                    vm.confirmCompletionAndSettle(vm.currentSession.id, () -> {
+                        Toast.makeText(this, "Đã hoàn tất ca và quyết toán tiền công thành công!", Toast.LENGTH_LONG).show();
+                        reload();
+                    }, err -> {
+                        btnEmployerConfirmComplete.setEnabled(true);
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private void confirmSeekerAccept() {
@@ -364,6 +595,16 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         return NumberFormat.getIntegerInstance(new Locale("vi", "VN")).format(amount) + " đ";
     }
 
+    private String formatTime(Timestamp ts) {
+        if (ts == null) return "";
+        return new SimpleDateFormat("HH:mm", new Locale("vi", "VN")).format(ts.toDate());
+    }
+
+    private String formatDateTime(Timestamp ts) {
+        if (ts == null) return "";
+        return new SimpleDateFormat("HH:mm, dd/MM/yyyy", new Locale("vi", "VN")).format(ts.toDate());
+    }
+
     private void handleEmployerFund(long totalDue) {
         if (vm.currentSession == null) return;
         if (currentWalletBalance < totalDue) {
@@ -394,5 +635,4 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     .show();
         }
     }
-
 }

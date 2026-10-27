@@ -346,6 +346,234 @@ public final class WorkSessionRepository {
         }));
     }
 
+    public Task<WorkSession> confirmCheckIn(String uid, String sessionId, String role) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+
+            String seekerId = session.getString("seekerId");
+            String employerId = session.getString("employerId");
+            String status = session.getString("status");
+            String paymentStatus = session.getString("paymentStatus");
+
+            if (!WorkSession.STATUS_READY.equals(status) && !WorkSession.STATUS_IN_PROGRESS.equals(status)) {
+                throw new Failure("NOT_READY");
+            }
+            if (!WorkSession.PAYMENT_HELD.equals(paymentStatus)) {
+                throw new Failure("NOT_FUNDED");
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            boolean isSeeker = uid.equals(seekerId);
+            boolean isEmployer = uid.equals(employerId);
+
+            if (!isSeeker && !isEmployer) {
+                throw new Failure("FORBIDDEN");
+            }
+
+            Timestamp existingSeekerCheckIn = session.getTimestamp("seekerCheckedInAt");
+            Timestamp existingEmployerCheckIn = session.getTimestamp("employerCheckedInAt");
+
+            if (isSeeker) {
+                if (existingSeekerCheckIn != null) {
+                    throw new Failure("ALREADY_CHECKED_IN");
+                }
+                updates.put("seekerCheckedInAt", FieldValue.serverTimestamp());
+                if (existingEmployerCheckIn != null) {
+                    updates.put("status", WorkSession.STATUS_IN_PROGRESS);
+                    updates.put("startedAt", FieldValue.serverTimestamp());
+                }
+            } else {
+                if (existingEmployerCheckIn != null) {
+                    throw new Failure("ALREADY_CHECKED_IN");
+                }
+                updates.put("employerCheckedInAt", FieldValue.serverTimestamp());
+                if (existingSeekerCheckIn != null) {
+                    updates.put("status", WorkSession.STATUS_IN_PROGRESS);
+                    updates.put("startedAt", FieldValue.serverTimestamp());
+                }
+            }
+
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+            tx.update(sessionRef, updates);
+            return null;
+        }).continueWithTask(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            return getSession(sessionId);
+        }));
+    }
+
+    public Task<WorkSession> reportCompletion(String uid, String sessionId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+
+            String seekerId = session.getString("seekerId");
+            if (!uid.equals(seekerId)) throw new Failure("FORBIDDEN");
+
+            String status = session.getString("status");
+            if (!WorkSession.STATUS_IN_PROGRESS.equals(status)) {
+                throw new Failure("NOT_IN_PROGRESS");
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", WorkSession.STATUS_COMPLETION_PENDING);
+            updates.put("completedAt", FieldValue.serverTimestamp());
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            tx.update(sessionRef, updates);
+            return null;
+        }).continueWithTask(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            return getSession(sessionId);
+        }));
+    }
+
+    public Task<WorkSession> confirmCompletionAndSettle(String uid, String sessionId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+
+            String employerId = session.getString("employerId");
+            if (!uid.equals(employerId)) throw new Failure("FORBIDDEN");
+
+            String status = session.getString("status");
+            if (!WorkSession.STATUS_COMPLETION_PENDING.equals(status) && !WorkSession.STATUS_IN_PROGRESS.equals(status)) {
+                throw new Failure("CANNOT_SETTLE");
+            }
+
+            String seekerId = session.getString("seekerId");
+            Object agObj = session.get("agreement");
+            long laborAmount = 0L;
+            long serviceFee = 0L;
+            if (agObj instanceof Map) {
+                Object la = ((Map<?, ?>) agObj).get("laborAmount");
+                if (la instanceof Number) laborAmount = ((Number) la).longValue();
+                Object sf = ((Map<?, ?>) agObj).get("serviceFee");
+                if (sf instanceof Number) serviceFee = ((Number) sf).longValue();
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", WorkSession.STATUS_COMPLETED);
+            updates.put("paymentStatus", WorkSession.PAYMENT_SETTLED);
+            updates.put("heldAmount", 0L);
+            updates.put("settledLaborAmount", laborAmount);
+            updates.put("settledServiceFee", serviceFee);
+            updates.put("settledAt", FieldValue.serverTimestamp());
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            tx.update(sessionRef, updates);
+            return null;
+        }).continueWithTask(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            return getSession(sessionId);
+        }).continueWith(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            WorkSession s = t.getResult();
+            if (s != null && s.seekerId != null) {
+                tryCreditSeekerWallet(s);
+            }
+            return s;
+        }));
+    }
+
+    private void tryCreditSeekerWallet(WorkSession session) {
+        if (session == null || session.seekerId == null || session.agreement == null) return;
+        long laborAmount = session.agreement.laborAmount;
+        if (laborAmount <= 0) return;
+        String seekerId = session.seekerId;
+        String txId = "tx_settle_" + session.id;
+
+        DocumentReference txRef = db.collection("wallets").document(seekerId)
+                .collection("transactions").document(txId);
+        txRef.get().addOnSuccessListener(doc -> {
+            if (doc != null && doc.exists()) return;
+            DocumentReference wRef = db.collection("wallets").document(seekerId);
+            wRef.get().addOnSuccessListener(wDoc -> {
+                long curBalance = 0L;
+                if (wDoc != null && wDoc.exists()) {
+                    Long b = wDoc.getLong("balance");
+                    if (b != null) curBalance = b;
+                }
+                long newBalance = curBalance + laborAmount;
+                Map<String, Object> wData = new HashMap<>();
+                wData.put("balance", newBalance);
+                wData.put("updatedAt", FieldValue.serverTimestamp());
+                wRef.set(wData, SetOptions.merge()).addOnSuccessListener(v -> {
+                    String displayId = session.id.startsWith("session_") ? session.id.substring("session_".length()) : session.id;
+                    Map<String, Object> txData = new HashMap<>();
+                    txData.put("id", txId);
+                    txData.put("type", "PAYMENT_RECEIVED");
+                    txData.put("amount", laborAmount);
+                    txData.put("balanceAfter", newBalance);
+                    txData.put("description", "Nhận tiền công hoàn thành ca làm việc #" + displayId);
+                    txData.put("refId", session.id);
+                    txData.put("createdAt", FieldValue.serverTimestamp());
+                    txRef.set(txData);
+                });
+            });
+        });
+    }
+
+    public Task<Void> syncSettlementToWallet(String seekerId, WorkSession session) {
+        if (!same(seekerId) || session == null || !session.isCompleted()) return Tasks.forResult(null);
+        if (session.agreement == null || session.agreement.laborAmount <= 0) return Tasks.forResult(null);
+
+        String txId = "tx_settle_" + session.id;
+        DocumentReference txRef = db.collection("wallets").document(seekerId)
+                .collection("transactions").document(txId);
+
+        return bounded(txRef.get().continueWithTask(t -> {
+            if (t.isSuccessful() && t.getResult() != null && t.getResult().exists()) {
+                // Already synced
+                return Tasks.forResult(null);
+            }
+            // Need to credit wallet
+            long laborAmount = session.agreement.laborAmount;
+            return db.runTransaction(tx -> {
+                DocumentReference wRef = db.collection("wallets").document(seekerId);
+                DocumentSnapshot wSnap = tx.get(wRef);
+                long curBalance = 0L;
+                if (wSnap.exists()) {
+                    Long b = wSnap.getLong("balance");
+                    if (b != null) curBalance = b;
+                }
+                long newBalance = curBalance + laborAmount;
+                Map<String, Object> wData = new HashMap<>();
+                wData.put("balance", newBalance);
+                wData.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(wRef, wData, SetOptions.merge());
+
+                String displayId = session.id.startsWith("session_") ? session.id.substring("session_".length()) : session.id;
+                Map<String, Object> txData = new HashMap<>();
+                txData.put("id", txId);
+                txData.put("type", "PAYMENT_RECEIVED");
+                txData.put("amount", laborAmount);
+                txData.put("balanceAfter", newBalance);
+                txData.put("description", "Nhận tiền công hoàn thành ca làm việc #" + displayId);
+                txData.put("refId", session.id);
+                txData.put("createdAt", FieldValue.serverTimestamp());
+                tx.set(txRef, txData);
+                return null;
+            });
+        }));
+    }
+
     public Task<WorkSession> getSession(String sessionId) {
         return bounded(db.collection("workSessions").document(sessionId).get(Source.SERVER).continueWith(t -> {
             if (!t.isSuccessful()) throw t.getException();
@@ -499,6 +727,16 @@ public final class WorkSessionRepository {
                         return "Thỏa thuận ca làm chưa được cả hai bên xác nhận cùng một phiên bản.";
                     case "INVALID_TOTAL_DUE":
                         return "Số tiền cần thanh toán cho ca làm không hợp lệ.";
+                    case "NOT_READY":
+                        return "Ca làm việc chưa ở trạng thái sẵn sàng để điểm danh.";
+                    case "NOT_FUNDED":
+                        return "Ca làm việc chưa được người thuê nạp cọc bảo chứng.";
+                    case "ALREADY_CHECKED_IN":
+                        return "Bạn đã điểm danh trước đó rồi.";
+                    case "NOT_IN_PROGRESS":
+                        return "Ca làm việc chưa bắt đầu hoặc đã kết thúc.";
+                    case "CANNOT_SETTLE":
+                        return "Ca làm việc chưa ở trạng thái để xác nhận hoàn tất.";
                     default:
                         return "Thao tác chưa hoàn thành. Hãy thử lại.";
                 }
