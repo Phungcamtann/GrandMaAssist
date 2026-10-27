@@ -22,12 +22,20 @@ import java.util.Locale;
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.AgreementSnapshot;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WalletRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.wallet.WalletActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ShiftAgreementViewModel;
 
 public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     public static final String EXTRA_SESSION_ID = "session_id";
     public static final String EXTRA_APPLICATION_ID = "application_id";
+
+    public static void start(android.content.Context context, String sessionId) {
+        android.content.Intent intent = new android.content.Intent(context, ShiftAgreementDetailActivity.class);
+        intent.putExtra(EXTRA_SESSION_ID, sessionId);
+        context.startActivity(intent);
+    }
 
     private ShiftAgreementViewModel vm;
     private String sessionId = "";
@@ -49,6 +57,13 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     private View layoutEmployerActions;
     private ProgressBar pb;
     private TextView tvMessage;
+    private View layoutEmployerFunding;
+    private AppCompatButton btnEmployerFund;
+    private TextView tvEmployerWalletInfo;
+    private View cardSessionReadyNotice;
+    private TextView tvSessionReadyNotice;
+    private final WalletRepository walletRepo = new WalletRepository();
+    private long currentWalletBalance = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +107,11 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         layoutEmployerActions = findViewById(R.id.shiftDetailEmployerActions);
         pb = findViewById(R.id.shiftDetailProgress);
         tvMessage = findViewById(R.id.shiftDetailMessage);
+        layoutEmployerFunding = findViewById(R.id.shiftDetailEmployerFunding);
+        btnEmployerFund = findViewById(R.id.btnEmployerFund);
+        tvEmployerWalletInfo = findViewById(R.id.tvEmployerWalletInfo);
+        cardSessionReadyNotice = findViewById(R.id.cardSessionReadyNotice);
+        tvSessionReadyNotice = findViewById(R.id.tvSessionReadyNotice);
 
         findViewById(R.id.shiftDetailBack).setOnClickListener(v -> finish());
         findViewById(R.id.shiftDetailReload).setOnClickListener(v -> reload());
@@ -125,6 +145,17 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     }
 
     private void reload() {
+        if (!currentUid.isEmpty()) {
+            walletRepo.getWallet(currentUid).addOnSuccessListener(doc -> {
+                if (doc != null && doc.exists()) {
+                    Long b = doc.getLong("balance");
+                    currentWalletBalance = b != null ? b : 0L;
+                } else {
+                    currentWalletBalance = 0L;
+                }
+                render();
+            });
+        }
         if (sessionId != null && !sessionId.isEmpty()) {
             vm.loadSession(sessionId);
         } else if (applicationId != null && !applicationId.isEmpty()) {
@@ -210,10 +241,18 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
 
             if (session.isProposed()) {
                 layoutSeekerActions.setVisibility(View.VISIBLE);
+                cardSessionReadyNotice.setVisibility(View.GONE);
             } else {
                 layoutSeekerActions.setVisibility(View.GONE);
+                if (session.isReady()) {
+                    cardSessionReadyNotice.setVisibility(View.VISIBLE);
+                    tvSessionReadyNotice.setText("✓ Người thuê đã nạp đủ " + formatMoney(ag.totalDue) + " tiền cọc bảo chứng trên hệ thống. Cô/chú an tâm chuẩn bị đến ca làm đúng giờ.");
+                } else {
+                    cardSessionReadyNotice.setVisibility(View.GONE);
+                }
             }
             layoutEmployerActions.setVisibility(View.GONE);
+            layoutEmployerFunding.setVisibility(View.GONE);
         } else {
             RoleNavigationBar.topbar(this, "EMPLOYER");
             layoutSeekerPay.setVisibility(View.GONE);
@@ -224,8 +263,24 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
 
             if (session.isProposed()) {
                 layoutEmployerActions.setVisibility(View.VISIBLE);
+                layoutEmployerFunding.setVisibility(View.GONE);
+                cardSessionReadyNotice.setVisibility(View.GONE);
+            } else if (session.isAwaitingFunds()) {
+                layoutEmployerActions.setVisibility(View.GONE);
+                layoutEmployerFunding.setVisibility(View.VISIBLE);
+                cardSessionReadyNotice.setVisibility(View.GONE);
+                btnEmployerFund.setText("Cấp tiền ca làm (" + formatMoney(ag.totalDue) + ")");
+                tvEmployerWalletInfo.setText("Số dư ví hiện tại: " + formatMoney(currentWalletBalance));
+                btnEmployerFund.setOnClickListener(v -> handleEmployerFund(ag.totalDue));
+            } else if (session.isReady()) {
+                layoutEmployerActions.setVisibility(View.GONE);
+                layoutEmployerFunding.setVisibility(View.GONE);
+                cardSessionReadyNotice.setVisibility(View.VISIBLE);
+                tvSessionReadyNotice.setText("✓ Đã tạm giữ cọc " + formatMoney(ag.totalDue) + " an toàn trên hệ thống. Ca làm việc đã sẵn sàng.");
             } else {
                 layoutEmployerActions.setVisibility(View.GONE);
+                layoutEmployerFunding.setVisibility(View.GONE);
+                cardSessionReadyNotice.setVisibility(View.GONE);
             }
             layoutSeekerActions.setVisibility(View.GONE);
         }
@@ -308,4 +363,36 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     private String formatMoney(long amount) {
         return NumberFormat.getIntegerInstance(new Locale("vi", "VN")).format(amount) + " đ";
     }
+
+    private void handleEmployerFund(long totalDue) {
+        if (vm.currentSession == null) return;
+        if (currentWalletBalance < totalDue) {
+            long missing = totalDue - currentWalletBalance;
+            new AlertDialog.Builder(this)
+                    .setTitle("Số dư ví không đủ")
+                    .setMessage("Ví của bạn hiện có " + formatMoney(currentWalletBalance) + " (còn thiếu " + formatMoney(missing) + "). Vui lòng nạp thêm tiền vào ví để cấp tiền cho ca làm này.")
+                    .setPositiveButton("Nạp tiền ngay", (d, w) -> {
+                        WalletActivity.start(this, "EMPLOYER", missing);
+                    })
+                    .setNegativeButton("Để sau", null)
+                    .show();
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Xác nhận cấp tiền ca làm")
+                    .setMessage("Hệ thống sẽ trích " + formatMoney(totalDue) + " từ ví của bạn để tạm giữ cọc an toàn cho ca làm này. Tiền chỉ chuyển cho người làm khi bạn xác nhận hoàn thành.")
+                    .setPositiveButton("Xác nhận cấp tiền", (d, w) -> {
+                        btnEmployerFund.setEnabled(false);
+                        vm.fundSession(vm.currentSession.id, () -> {
+                            Toast.makeText(this, "Cấp tiền ca làm thành công! Ca làm đã sẵn sàng.", Toast.LENGTH_LONG).show();
+                            reload();
+                        }, err -> {
+                            btnEmployerFund.setEnabled(true);
+                            Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                        });
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+        }
+    }
+
 }

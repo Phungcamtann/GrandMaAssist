@@ -57,6 +57,7 @@
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpApprove" style="@style/Widget.GrandMa.VerificationPrimary" android:text="Chấp thuận" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpReject" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Từ chối" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpHide" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Ẩn tin tuyển dụng" android:visibility="gone"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpViewSession" style="@style/Widget.GrandMa.VerificationPrimary" android:text="Xem thỏa thuận ca" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpViewApplicants" style="@style/Widget.GrandMa.VerificationPrimary" android:text="Xem danh sách ứng viên" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpEdit" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Sửa tin tuyển dụng" android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpClose" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Đóng tin (Ngừng nhận đơn)" android:textColor="@color/text_error" android:visibility="gone"/>

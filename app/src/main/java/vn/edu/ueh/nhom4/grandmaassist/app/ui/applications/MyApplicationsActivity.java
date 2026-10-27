@@ -275,6 +275,7 @@ public final class MyApplicationsActivity extends AppCompatActivity {
             Intent intent = new Intent(this, PublicJobsActivity.class);
             intent.putExtra(PublicJobsActivity.ROLE, "SEEKER");
             intent.putExtra("detail", app.jobId);
+            intent.putExtra("finish_on_back", true);
             startActivity(intent);
         });
 

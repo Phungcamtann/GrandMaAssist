@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_title_apply">Ứng tuyển công việc</string>
-    <string name="app_title_my_applications">Đơn của tôi</string>
+    <string name="app_title_my_applications">Việc của tôi</string>
     <string name="app_apply_now">Ứng tuyển ngay</string>
     <string name="app_already_applied">Đã nộp đơn</string>
     <string name="app_confirm_apply">Xác nhận nộp đơn</string>

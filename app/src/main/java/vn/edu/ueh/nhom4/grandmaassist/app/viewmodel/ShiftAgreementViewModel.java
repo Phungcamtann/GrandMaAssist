@@ -342,4 +342,29 @@ public final class ShiftAgreementViewModel extends ViewModel {
             }
         });
     }
+
+    public void fundSession(String sessionId, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang xử lý trích tiền ví và giữ cọc cho ca làm…";
+        emit();
+
+        repository.fundSession(uid, sessionId).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                loadSession(sessionId);
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
 }

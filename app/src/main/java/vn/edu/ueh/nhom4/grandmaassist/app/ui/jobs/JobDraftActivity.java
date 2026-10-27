@@ -23,6 +23,12 @@ import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.JobDraftViewModel;
 
 /** Local composition and explicit online submission; no writes from rendering. */
 public final class JobDraftActivity extends AppCompatActivity {
+    private int workType = 0; // 0: ONE_TIME, 1: RECURRING
+    private final Calendar jobCalendar = Calendar.getInstance();
+    private int startHour = 8, startMinute = 0;
+    private int endHour = 11, endMinute = 30;
+    private boolean customExpiryPicked = false;
+    private boolean scheduleInitialized = false;
     public static final String CREATE_NEW="create_new_draft",EDIT_POST="edit_rejected_post";
     private JobDraftViewModel vm;
     private final androidx.activity.result.ActivityResultLauncher<Intent> posts=registerForActivityResult(
@@ -50,7 +56,7 @@ public final class JobDraftActivity extends AppCompatActivity {
         vm=new ViewModelProvider(this).get(JobDraftViewModel.class);
         navigation=new RoleNavigationBar(this,a->{
             if(a==RoleNavigationBar.Action.WORK)guard("LIST");
-            else if(a==RoleNavigationBar.Action.HOME)guard("HOME");else if(a==RoleNavigationBar.Action.ACCOUNT)guard("ACCOUNT");
+            else if(a==RoleNavigationBar.Action.HOME)guard("HOME");else if(a==RoleNavigationBar.Action.ACCOUNT||a==RoleNavigationBar.Action.PROFILE)guard(a.name());
         });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.jdRoot),(v,insets)->{
             androidx.core.graphics.Insets safe=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()|WindowInsetsCompat.Type.ime());
@@ -90,6 +96,50 @@ public final class JobDraftActivity extends AppCompatActivity {
         click(R.id.jdRetryAccess,vm::retry);click(R.id.jdCatalogRefresh,vm::refreshCatalog);
         click(R.id.jdSave,()->{hideKeyboard();vm.saveThen("");});click(R.id.jdPreview,()->{hideKeyboard();vm.preview();});
         click(R.id.jdEdit,vm::edit);click(R.id.jdExpiry,this::pickExpiry);
+        click(R.id.btnPickJobDate, this::pickJobDate);
+        click(R.id.btnPickStartDate, this::pickJobDate);
+        click(R.id.btnPickStartTime, this::pickStartTime);
+        click(R.id.btnPickEndTime, this::pickEndTime);
+
+        Spinner spWorkType = findViewById(R.id.jdWorkType);
+        if (spWorkType != null) {
+            ArrayAdapter<String> wtAdapter = new ArrayAdapter<>(this, R.layout.profile_spinner_item,
+                    new String[]{"Làm 1 lần (Một ngày duy nhất)", "Lặp lại ngắn hạn (Theo các ngày trong tuần)"});
+            wtAdapter.setDropDownViewResource(R.layout.profile_spinner_item);
+            spWorkType.setAdapter(wtAdapter);
+            spWorkType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onNothingSelected(AdapterView<?> p) {}
+                public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                    if (!canEdit() || pos == workType) return;
+                    workType = pos;
+                    updateScheduleAndExpiry();
+                }
+            });
+        }
+
+        Spinner spDemands = findViewById(R.id.jdDemandSpinner);
+        if (spDemands != null) {
+            ArrayAdapter<String> dmAdapter = new ArrayAdapter<>(this, R.layout.profile_spinner_item,
+                    new String[]{"Không yêu cầu thể lực riêng", "Khuân vác nặng", "Đứng lâu", "Đi lại nhiều"});
+            dmAdapter.setDropDownViewResource(R.layout.profile_spinner_item);
+            spDemands.setAdapter(dmAdapter);
+            spDemands.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onNothingSelected(AdapterView<?> p) {}
+                public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                    if (!canEdit()) return;
+                    vm.draft.demands.clear();
+                    if (pos == 0) {
+                        vm.draft.demandMode = "NONE";
+                    } else {
+                        vm.draft.demandMode = "SELECT";
+                        if (pos == 1) vm.draft.demands.add("HEAVY_LIFTING");
+                        else if (pos == 2) vm.draft.demands.add("PROLONGED_STANDING");
+                        else if (pos == 3) vm.draft.demands.add("FREQUENT_MOVEMENT");
+                    }
+                    vm.edited("demands");
+                }
+            });
+        }
         click(R.id.jdFormReload,()->{
             if(vm.draft==null)return;String id=vm.draft.id;
             new AlertDialog.Builder(this).setMessage("Bỏ các thay đổi và đọc lại nháp đã lưu?").setNegativeButton("Tiếp tục sửa",null)
@@ -144,17 +194,178 @@ public final class JobDraftActivity extends AppCompatActivity {
         if(!vm.readRequired)dialog.setPositiveButton("Lưu nháp",(d,w)->{if(vm.draft!=null&&id.equals(vm.draft.id))vm.saveThen(action);});
         dialog.show();
     }
+    private void initScheduleFromDraft() {
+        if (vm.draft == null) return;
+        if (vm.draft.schedule != null && !vm.draft.schedule.isEmpty()) {
+            if (vm.draft.schedule.contains("Bắt đầu:")) {
+                workType = 1;
+            } else if (vm.draft.schedule.contains("Làm 1 lần:")) {
+                workType = 0;
+            }
+            java.util.regex.Matcher dm = java.util.regex.Pattern.compile("(\\d{1,2})/(\\d{1,2})/(\\d{4})").matcher(vm.draft.schedule);
+            if (dm.find()) {
+                int d = Integer.parseInt(dm.group(1));
+                int m = Integer.parseInt(dm.group(2)) - 1;
+                int y = Integer.parseInt(dm.group(3));
+                jobCalendar.set(y, m, d);
+            }
+            java.util.regex.Matcher tm = java.util.regex.Pattern.compile("(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})").matcher(vm.draft.schedule);
+            if (tm.find()) {
+                startHour = Integer.parseInt(tm.group(1));
+                startMinute = Integer.parseInt(tm.group(2));
+                endHour = Integer.parseInt(tm.group(3));
+                endMinute = Integer.parseInt(tm.group(4));
+            }
+            if (vm.draft.expiresAt > 0) {
+                customExpiryPicked = true;
+            }
+        } else {
+            jobCalendar.setTimeInMillis(System.currentTimeMillis());
+            jobCalendar.add(Calendar.DAY_OF_MONTH, 2);
+            workType = 0;
+            updateScheduleAndExpiry();
+        }
+        scheduleInitialized = true;
+    }
+
+    private void updateScheduleAndExpiry() {
+        if (vm.draft == null) return;
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String dateStr = df.format(jobCalendar.getTime());
+        String timeStr = String.format(Locale.getDefault(), "%02d:%02d - %02d:%02d", startHour, startMinute, endHour, endMinute);
+
+        if (workType == 0) {
+            vm.draft.schedule = "Làm 1 lần: " + dateStr + " (" + timeStr + ")";
+            int dow = jobCalendar.get(Calendar.DAY_OF_WEEK);
+            String dayKey;
+            switch (dow) {
+                case Calendar.MONDAY: dayKey = "MONDAY"; break;
+                case Calendar.TUESDAY: dayKey = "TUESDAY"; break;
+                case Calendar.WEDNESDAY: dayKey = "WEDNESDAY"; break;
+                case Calendar.THURSDAY: dayKey = "THURSDAY"; break;
+                case Calendar.FRIDAY: dayKey = "FRIDAY"; break;
+                case Calendar.SATURDAY: dayKey = "SATURDAY"; break;
+                default: dayKey = "SUNDAY"; break;
+            }
+            vm.draft.days.clear();
+            vm.draft.days.add(dayKey);
+        } else {
+            vm.draft.schedule = "Bắt đầu: " + dateStr + " (" + timeStr + ")";
+            if (vm.draft.days.isEmpty()) {
+                vm.draft.days.add("MONDAY");
+                vm.draft.days.add("WEDNESDAY");
+                vm.draft.days.add("FRIDAY");
+            }
+        }
+
+        if (!customExpiryPicked) {
+            Calendar shiftStart = (Calendar) jobCalendar.clone();
+            shiftStart.set(Calendar.HOUR_OF_DAY, startHour);
+            shiftStart.set(Calendar.MINUTE, startMinute);
+            shiftStart.set(Calendar.SECOND, 0);
+            shiftStart.set(Calendar.MILLISECOND, 0);
+
+            long startMs = shiftStart.getTimeInMillis();
+            long now = System.currentTimeMillis();
+            long diff = startMs - now;
+
+            if (diff >= 48 * 3600 * 1000L) {
+                Calendar exp = (Calendar) jobCalendar.clone();
+                exp.add(Calendar.DAY_OF_MONTH, -1);
+                exp.set(Calendar.HOUR_OF_DAY, 18);
+                exp.set(Calendar.MINUTE, 0);
+                exp.set(Calendar.SECOND, 0);
+                exp.set(Calendar.MILLISECOND, 0);
+                vm.draft.expiresAt = exp.getTimeInMillis();
+            } else {
+                long candidate = startMs - 2 * 3600 * 1000L;
+                if (candidate > now) {
+                    vm.draft.expiresAt = candidate;
+                } else {
+                    vm.draft.expiresAt = Math.max(now + 15 * 60 * 1000L, startMs - 30 * 60 * 1000L);
+                }
+            }
+            vm.edited("expiresAt");
+        }
+
+        vm.edited("schedule");
+        vm.edited("days");
+        updateScheduleUI();
+    }
+
+    private void updateScheduleUI() {
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String dateStr = df.format(jobCalendar.getTime());
+        set(R.id.btnPickJobDate, "Ngày làm: " + dateStr);
+        set(R.id.btnPickStartDate, "Bắt đầu: " + dateStr);
+        set(R.id.btnPickStartTime, String.format(Locale.getDefault(), "Bắt đầu: %02d:%02d", startHour, startMinute));
+        set(R.id.btnPickEndTime, String.format(Locale.getDefault(), "Kết thúc: %02d:%02d", endHour, endMinute));
+        show(R.id.jdOneTimeContainer, workType == 0);
+        show(R.id.jdRecurringContainer, workType == 1);
+        set(R.id.jdScheduleText, vm.draft != null ? vm.draft.schedule : "");
+    }
+
+    private void pickJobDate() {
+        if (!canEdit()) return;
+        DatePickerDialog dp = new DatePickerDialog(this, (picker, year, month, day) -> {
+            jobCalendar.set(year, month, day);
+            updateScheduleAndExpiry();
+        }, jobCalendar.get(Calendar.YEAR), jobCalendar.get(Calendar.MONTH), jobCalendar.get(Calendar.DAY_OF_MONTH));
+        dp.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+        dp.show();
+    }
+
+    private void pickStartTime() {
+        if (!canEdit()) return;
+        new TimePickerDialog(this, (view, hour, minute) -> {
+            startHour = hour; startMinute = minute;
+            updateScheduleAndExpiry();
+        }, startHour, startMinute, true).show();
+    }
+
+    private void pickEndTime() {
+        if (!canEdit()) return;
+        new TimePickerDialog(this, (view, hour, minute) -> {
+            endHour = hour; endMinute = minute;
+            updateScheduleAndExpiry();
+        }, endHour, endMinute, true).show();
+    }
+
     private void pickExpiry(){
-        if(!canEdit())return;String id=vm.draft.id;Calendar date=Calendar.getInstance();
-        if(vm.draft.expiresAt>0)date.setTimeInMillis(vm.draft.expiresAt);else{date.add(Calendar.DAY_OF_MONTH,7);date.set(Calendar.HOUR_OF_DAY,18);date.set(Calendar.MINUTE,0);}
-        new DatePickerDialog(this,(picker,year,month,day)->{
-            date.set(year,month,day);
-            new TimePickerDialog(this,(time,hour,minute)->{
-                if(!canEdit()||!id.equals(vm.draft.id))return;
-                date.set(Calendar.HOUR_OF_DAY,hour);date.set(Calendar.MINUTE,minute);date.set(Calendar.SECOND,0);date.set(Calendar.MILLISECOND,0);
-                vm.draft.expiresAt=date.getTimeInMillis();vm.edited("expiresAt");
-            },date.get(Calendar.HOUR_OF_DAY),date.get(Calendar.MINUTE),true).show();
-        },date.get(Calendar.YEAR),date.get(Calendar.MONTH),date.get(Calendar.DAY_OF_MONTH)).show();
+        if(!canEdit() || vm.draft == null) return;
+        Calendar shiftStart = (Calendar) jobCalendar.clone();
+        shiftStart.set(Calendar.HOUR_OF_DAY, startHour);
+        shiftStart.set(Calendar.MINUTE, startMinute);
+        long maxMs = shiftStart.getTimeInMillis();
+
+        Calendar date = Calendar.getInstance();
+        if(vm.draft.expiresAt > 0) date.setTimeInMillis(vm.draft.expiresAt);
+        else date.setTimeInMillis(Math.min(System.currentTimeMillis() + 86400000L, maxMs));
+
+        DatePickerDialog dp = new DatePickerDialog(this, (picker, year, month, day) -> {
+            date.set(year, month, day);
+            new TimePickerDialog(this, (time, hour, minute) -> {
+                if(!canEdit() || vm.draft == null) return;
+                date.set(Calendar.HOUR_OF_DAY, hour);
+                date.set(Calendar.MINUTE, minute);
+                date.set(Calendar.SECOND, 0);
+                date.set(Calendar.MILLISECOND, 0);
+                if (date.getTimeInMillis() >= maxMs) {
+                    Toast.makeText(this, "Hạn nhận hồ sơ phải trước giờ bắt đầu ca làm!", Toast.LENGTH_SHORT).show();
+                    vm.draft.expiresAt = Math.max(System.currentTimeMillis() + 15 * 60 * 1000L, maxMs - 30 * 60 * 1000L);
+                } else {
+                    vm.draft.expiresAt = date.getTimeInMillis();
+                }
+                customExpiryPicked = true;
+                vm.edited("expiresAt");
+                render();
+            }, date.get(Calendar.HOUR_OF_DAY), date.get(Calendar.MINUTE), true).show();
+        }, date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
+        dp.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+        if (maxMs > System.currentTimeMillis()) {
+            dp.getDatePicker().setMaxDate(maxMs);
+        }
+        dp.show();
     }
     private void render(){
         if(vm.sessionEnded){finish();return;}
@@ -197,6 +408,22 @@ public final class JobDraftActivity extends AppCompatActivity {
         }
         if(form){
             LocalJobDraft d=vm.draft;
+            if (!scheduleInitialized) {
+                initScheduleFromDraft();
+            }
+            updateScheduleUI();
+            Spinner spWt = findViewById(R.id.jdWorkType);
+            if (spWt != null && spWt.getSelectedItemPosition() != workType) {
+                spWt.setSelection(workType);
+            }
+            Spinner spDm = findViewById(R.id.jdDemandSpinner);
+            if (spDm != null) {
+                int dmIdx = 0;
+                if (d.demands.contains("HEAVY_LIFTING")) dmIdx = 1;
+                else if (d.demands.contains("PROLONGED_STANDING")) dmIdx = 2;
+                else if (d.demands.contains("FREQUENT_MOVEMENT")) dmIdx = 3;
+                if (spDm.getSelectedItemPosition() != dmIdx) spDm.setSelection(dmIdx);
+            }
             set(R.id.jdWorkAddress,d.workAddress);set(R.id.jdName,d.title);set(R.id.jdDescription,d.description);set(R.id.jdRequirements,d.requirements);set(R.id.jdSkills,d.skillsInput);set(R.id.jdScheduleText,d.schedule);set(R.id.jdPay,d.payInput);
             catalogOptions(R.id.jdCategory,vm.catalog.categories,d.categoryId);catalogOptions(R.id.jdArea,vm.catalog.areas,d.areaCode);
             options(R.id.jdShift,LocalJobDraft.SHIFTS,Arrays.asList(getResources().getStringArray(R.array.jd_shifts)),d.shift);
@@ -205,7 +432,7 @@ public final class JobDraftActivity extends AppCompatActivity {
             ((RadioGroup)findViewById(R.id.jdDemandMode)).check("NONE".equals(d.demandMode)?R.id.jdNoDemands:"SELECT".equals(d.demandMode)?R.id.jdSomeDemands:View.NO_ID);
             show(R.id.jdDemandChoices,"SELECT".equals(d.demandMode));
             for(int i=0;i<demands.length;i++)((CheckBox)findViewById(demands[i])).setChecked(d.demands.contains(LocalJobDraft.DEMANDS.get(i)));
-            set(R.id.jdExpiry,d.expiresAt>0?date(d.expiresAt):getString(R.string.jd_pick_expiry));
+            set(R.id.jdExpiry,d.expiresAt>0?("Hạn nhận: " + date(d.expiresAt) + (customExpiryPicked?"":" (Tự động chốt trước ca làm)")):getString(R.string.jd_pick_expiry));
             findViewById(R.id.jdExpiry).setContentDescription("Hạn nhận hồ sơ: "+(d.expiresAt>0?date(d.expiresAt):getString(R.string.jd_pick_expiry)));
             String catalog=(vm.fromCache?getString(R.string.jd_cache)+"\n":"")+vm.catalogMessage;
             set(R.id.jdCatalogStatus,catalog.trim());show(R.id.jdCatalogStatus,!catalog.trim().isEmpty());

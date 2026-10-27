@@ -18,6 +18,7 @@ import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.applications.JobApplicantsActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.ShiftAgreementDetailActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.JobPostViewModel;
 
 public final class JobPostActivity extends AppCompatActivity {
@@ -38,7 +39,7 @@ public final class JobPostActivity extends AppCompatActivity {
         vm=new ViewModelProvider(this).get(JobPostViewModel.class);lastPage=vm.pageEvent;
         nav=new RoleNavigationBar(this,a->{if(vm.busy)return;
             if(a==RoleNavigationBar.Action.WORK||a==RoleNavigationBar.Action.PROCESS){if(vm.selected!=null)guard(vm::backToList);return;}
-            if(a==RoleNavigationBar.Action.HOME||a==RoleNavigationBar.Action.ACCOUNT)guard(()->leave(a.name()));});
+            if(a==RoleNavigationBar.Action.HOME||a==RoleNavigationBar.Action.ACCOUNT||a==RoleNavigationBar.Action.PROFILE)guard(()->leave(a.name()));});
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.jpRoot),(v,i)->{
             androidx.core.graphics.Insets safe=i.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()|WindowInsetsCompat.Type.ime());
             v.setPadding(safe.left,safe.top,safe.right,safe.bottom);render();return i;});
@@ -60,6 +61,13 @@ public final class JobPostActivity extends AppCompatActivity {
         click(R.id.jpHide, () -> showReasonInput("HIDE", "Lý do ẩn tin"));
         click(R.id.jpConfirmAction, () -> { if ("HIDE".equals(vm.reasonAction)) vm.hidePost(); else vm.decide(false); });
         click(R.id.jpCancelReject,()->{vm.reasonVisible=false;vm.reason="";vm.message="";vm.emit();});
+        click(R.id.jpViewSession, () -> {
+            if (vm.selected == null || vm.busy) return;
+            WorkSession session = vm.jobSessions.get(vm.selected.content.id);
+            if (session != null) {
+                ShiftAgreementDetailActivity.start(this, session.id);
+            }
+        });
         click(R.id.jpViewApplicants, () -> {
             if (vm.selected == null || vm.busy) return;
             openApplicants(vm.selected.content.id, vm.selected.content.title);
@@ -135,12 +143,33 @@ public final class JobPostActivity extends AppCompatActivity {
 
                     text(c,p.areaName+"\n"+money(p.content),false);
                     button(c,"Xem tin",()->vm.open(p.content.id));
+                    WorkSession itemSession = vm.jobSessions.get(p.content.id);
                     if (!vm.admin && ("OPEN".equals(p.status) || "CLOSED".equals(p.status))) {
-                        button(c, "Xem danh sách ứng viên", () -> openApplicants(p.content.id, p.content.title));
+                        if (itemSession != null) {
+                            button(c, "Xem thỏa thuận ca", () -> ShiftAgreementDetailActivity.start(this, itemSession.id));
+                        } else {
+                            button(c, "Xem danh sách ứng viên", () -> openApplicants(p.content.id, p.content.title));
+                        }
                     }
                 }
             }else{
-                JobPost p=vm.selected;LocalJobDraft d=p.content;LinearLayout c=card(body);
+                JobPost p=vm.selected;LocalJobDraft d=p.content;
+                int ill = illustration(d.categoryId);
+                if (ill != 0) {
+                    com.google.android.material.card.MaterialCardView cardImg = new com.google.android.material.card.MaterialCardView(this);
+                    cardImg.setRadius(dp(16));
+                    cardImg.setCardElevation(dp(2));
+                    cardImg.setStrokeWidth(0);
+                    ImageView iv = new ImageView(this);
+                    iv.setImageResource(ill);
+                    iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    cardImg.addView(iv, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(180)));
+                    LinearLayout.LayoutParams lpImg = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lpImg.bottomMargin = dp(16);
+                    body.addView(cardImg, lpImg);
+                }
+
+                LinearLayout c=card(body);
                 LinearLayout header=new LinearLayout(this);
                 header.setOrientation(LinearLayout.HORIZONTAL);
                 header.setGravity(Gravity.CENTER_VERTICAL);
@@ -148,8 +177,10 @@ public final class JobPostActivity extends AppCompatActivity {
                 hp.topMargin=dp(4);
 
                 TextView title=new TextView(this);
-                title.setTextAppearance(R.style.TextAppearance_GrandMa_Label);
                 title.setText(d.title);
+                title.setTextSize(22);
+                title.setTypeface(null, android.graphics.Typeface.BOLD);
+                title.setTextColor(Color.parseColor("#1C6758"));
                 title.setSaveEnabled(false);
                 ViewCompat.setAccessibilityHeading(title,true);
                 header.addView(title,new LinearLayout.LayoutParams(0,-2,1f));
@@ -157,14 +188,51 @@ public final class JobPostActivity extends AppCompatActivity {
                 header.addView(statusBadge(p.status));
                 c.addView(header,hp);
 
-                text(c,"Phiên bản "+p.version+" · "+p.employerName,false);
-                if(!p.reason.isEmpty()){LinearLayout reason=card(body);text(reason,"HIDDEN".equals(p.status)?"Lý do ẩn tin":"Lý do từ chối",true);text(reason,p.reason,false);}
-                c=card(body);text(c,"Công việc",true);text(c,p.categoryName+"\n\n"+d.description,false);if(!d.requirements.isEmpty())text(c,"Yêu cầu: "+d.requirements,false);
-                if(!d.skills().isEmpty())text(c,"Kỹ năng: "+String.join(", ",d.skills()),false);
-                c=card(body);text(c,"Địa điểm và lịch",true);text(c,p.areaName+"\n"+d.workAddress,false);
-                text(c,labels(LocalJobDraft.DAYS,getResources().getStringArray(R.array.jd_days),d.days)+"\n"+label(LocalJobDraft.SHIFTS,getResources().getStringArray(R.array.jd_shifts),d.shift)+"\n"+d.schedule,false);
-                c=card(body);text(c,"Yêu cầu thể lực",true);text(c,d.demands.isEmpty()?"Không có các yêu cầu trong danh sách":labels(LocalJobDraft.DEMANDS,new String[]{getString(R.string.jd_lifting),getString(R.string.jd_standing),getString(R.string.jd_moving)},d.demands),false);
-                c=card(body);text(c,"Tiền công và hạn nhận",true);text(c,money(d)+"\n\nHạn nhận: "+DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT,new Locale("vi","VN")).format(new Date(d.expiresAt)),false);
+                TextView tvSub = labelBody(c, p.employerName + " · " + p.categoryName);
+                tvSub.setTextColor(Color.parseColor("#747775"));
+
+                TextView tvPay = labelHeading(c, "Tiền công: " + money(d));
+                tvPay.setTextSize(18);
+                tvPay.setTextColor(Color.parseColor("#2E7D32"));
+
+                if(!p.reason.isEmpty()){
+                    addDetailDivider(c);
+                    labelHeading(c, "HIDDEN".equals(p.status) ? "Lý do ẩn tin" : "Lý do từ chối");
+                    labelBody(c, p.reason);
+                }
+
+                addDetailDivider(c);
+                labelHeading(c, "Địa chỉ làm việc");
+                String addrText = (d.workAddress != null && !d.workAddress.trim().isEmpty() ? d.workAddress.trim() + "\n" : "") + "Khu vực: " + p.areaName;
+                labelBody(c, addrText);
+
+                addDetailDivider(c);
+                labelHeading(c, "Thời gian làm việc");
+                String schedText = labels(LocalJobDraft.DAYS, getResources().getStringArray(R.array.jd_days), d.days) + "\n" +
+                        label(LocalJobDraft.SHIFTS, getResources().getStringArray(R.array.jd_shifts), d.shift) + " · " + d.schedule;
+                labelBody(c, schedText);
+
+                addDetailDivider(c);
+                labelHeading(c, "Công việc cần làm");
+                labelBody(c, d.description);
+
+                addDetailDivider(c);
+                labelHeading(c, "Yêu cầu");
+                StringBuilder reqSb = new StringBuilder();
+                if (!d.requirements.isEmpty()) reqSb.append(d.requirements);
+                if (!d.skills().isEmpty()) {
+                    if (reqSb.length() > 0) reqSb.append("\n");
+                    reqSb.append("Kỹ năng: ").append(String.join(", ", d.skills()));
+                }
+                if (!d.demands.isEmpty()) {
+                    if (reqSb.length() > 0) reqSb.append("\n");
+                    reqSb.append("Thể lực: ").append(labels(LocalJobDraft.DEMANDS, new String[]{getString(R.string.jd_lifting), getString(R.string.jd_standing), getString(R.string.jd_moving)}, d.demands));
+                }
+                labelBody(c, reqSb.length() > 0 ? reqSb.toString() : "Không có yêu cầu đặc biệt");
+
+                addDetailDivider(c);
+                labelHeading(c, "Hạn nhận hồ sơ");
+                labelBody(c, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, new Locale("vi", "VN")).format(new Date(d.expiresAt)) + "\nPhiên bản tin: " + p.version);
             }
         }
         boolean isOwner = vm.selected != null && !vm.admin && vm.uid.equals(vm.selected.content.ownerUid);
@@ -178,7 +246,9 @@ public final class JobPostActivity extends AppCompatActivity {
         show(R.id.jpReject, pending && !vm.reasonVisible);
         show(R.id.jpHide, canHide && !vm.reasonVisible);
         show(R.id.jpReasonSection, vm.reasonVisible);
-        show(R.id.jpViewApplicants, isOwner && (isOpen || isClosed) && !vm.reasonVisible);
+        WorkSession curSession = vm.selected != null ? vm.jobSessions.get(vm.selected.content.id) : null;
+        show(R.id.jpViewSession, isOwner && curSession != null && !vm.reasonVisible);
+        show(R.id.jpViewApplicants, isOwner && (isOpen || isClosed) && curSession == null && !vm.reasonVisible);
         show(R.id.jpEdit, isOwner && (isRejected || isOpen) && !vm.reasonVisible);
         show(R.id.jpClose, isOwner && isOpen && !vm.reasonVisible);
         show(R.id.jpMore, vm.ready && vm.selected == null && vm.more);
@@ -189,9 +259,48 @@ public final class JobPostActivity extends AppCompatActivity {
             set(R.id.jpEdit, "Sửa và gửi lại");
         }
 
-        set(R.id.jpReason,vm.reason);for(int id:new int[]{R.id.jpReload,R.id.jpMore,R.id.jpApprove,R.id.jpReject,R.id.jpHide,R.id.jpConfirmAction,R.id.jpCancelReject,R.id.jpReason,R.id.jpViewApplicants,R.id.jpEdit,R.id.jpClose,R.id.jpDrafts,R.id.jpCreate,R.id.jpProfiles,R.id.jpBack})findViewById(id).setEnabled(!vm.busy);
+        set(R.id.jpReason,vm.reason);for(int id:new int[]{R.id.jpReload,R.id.jpMore,R.id.jpApprove,R.id.jpReject,R.id.jpHide,R.id.jpConfirmAction,R.id.jpCancelReject,R.id.jpReason,R.id.jpViewSession,R.id.jpViewApplicants,R.id.jpEdit,R.id.jpClose,R.id.jpDrafts,R.id.jpCreate,R.id.jpProfiles,R.id.jpBack})findViewById(id).setEnabled(!vm.busy);
         enabled(findViewById(R.id.jpBody),!vm.busy);rendering=false;
         if(lastPage!=vm.pageEvent){lastPage=vm.pageEvent;findViewById(R.id.jpScroll).post(()->findViewById(R.id.jpScroll).scrollTo(0,0));}
+    }
+        private int illustration(String categoryId){
+        if (categoryId == null) return 0;
+        switch(categoryId){
+            case "GARDEN_CARE":return R.drawable.job_illustration_garden;
+            case "KITCHEN_HELP":return R.drawable.job_illustration_kitchen;
+            case "LIBRARY_HELP":return R.drawable.job_illustration_library;
+            case "SHOP_HELP":return R.drawable.job_illustration_shop;
+            default:return 0;
+        }
+    }
+    private void addDetailDivider(LinearLayout parent) {
+        View v = new View(this);
+        v.setBackgroundColor(Color.parseColor("#E0E4E1"));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
+        lp.topMargin = dp(14);
+        lp.bottomMargin = dp(4);
+        parent.addView(v, lp);
+    }
+    private TextView labelHeading(LinearLayout parent, String title) {
+        TextView tv = new TextView(this);
+        tv.setText(title);
+        tv.setTextSize(16);
+        tv.setTypeface(null, android.graphics.Typeface.BOLD);
+        tv.setTextColor(Color.parseColor("#1C6758"));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        parent.addView(tv, lp);
+        return tv;
+    }
+    private TextView labelBody(LinearLayout parent, String body) {
+        TextView tv = new TextView(this);
+        tv.setText(body);
+        tv.setTextSize(15);
+        tv.setTextColor(Color.parseColor("#2C3332"));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(4);
+        parent.addView(tv, lp);
+        return tv;
     }
     private String money(LocalJobDraft d){Long amount=d.payAmount();return (amount==null?d.payInput:NumberFormat.getIntegerInstance(new Locale("vi","VN")).format(amount))+" đ · "+label(LocalJobDraft.UNITS,getResources().getStringArray(R.array.jd_units),d.payUnit);}
     private String label(List<String> ids,String[] labels,String value){int i=ids.indexOf(value);return i>=0?labels[i]:value;}

@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.JobPost;
+import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
 
 /** Retains network operation and review form across rotation; never retains an Activity. */
 public final class JobPostViewModel extends AndroidViewModel {
@@ -18,6 +19,8 @@ public final class JobPostViewModel extends AndroidViewModel {
     public String reasonAction = "REJECT";
     public JobPost selected;
     public List<JobPost> items=new ArrayList<>();
+    public final Map<String, WorkSession> jobSessions=new HashMap<>();
+    private final WorkSessionRepository sessionRepository=new WorkSessionRepository();
     public long pageEvent;
     private long generation;
     private DocumentSnapshot cursor;
@@ -44,12 +47,14 @@ public final class JobPostViewModel extends AndroidViewModel {
                 LinkedHashMap<String,JobPost> merged=new LinkedHashMap<>();if(next)for(JobPost p:items)merged.put(p.content.id,p);
                 for(JobPost p:t.getResult().items)merged.put(p.content.id,p);items=new ArrayList<>(merged.values());cursor=t.getResult().cursor;more=t.getResult().more;
                 selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Chưa có tin trong danh sách.":"";++pageEvent;
+                if(!admin&&!uid.isEmpty()){sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{jobSessions.clear();for(WorkSession s:sessions)if(s.jobId!=null&&!s.jobId.isEmpty())jobSessions.put(s.jobId,s);emit();});}
             }else message=JobPostRepository.error(t.getException());emit();
         });
     }
     public void open(String id){if(!ready||busy)return;busy=true;message="Đang tải tin…";long g=++generation;emit();
         repository.get(uid,id).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
-            if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";reasonAction="REJECT";message=pendingNotice;pendingNotice="";++pageEvent;}
+            if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";reasonAction="REJECT";message=pendingNotice;pendingNotice="";++pageEvent;
+                if(!admin&&!uid.isEmpty()){sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{jobSessions.clear();for(WorkSession s:sessions)if(s.jobId!=null&&!s.jobId.isEmpty())jobSessions.put(s.jobId,s);emit();});}}
             else message=JobPostRepository.error(t.getException());emit();});
     }
     public void backToList(){if(busy)return;selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Bấm Tải lại để xem danh sách tin.":"";++pageEvent;emit();}

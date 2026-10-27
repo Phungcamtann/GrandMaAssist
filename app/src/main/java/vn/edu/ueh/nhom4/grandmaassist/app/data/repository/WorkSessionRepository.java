@@ -113,6 +113,9 @@ public final class WorkSessionRepository {
             data.put("agreementVersion", 1L);
             data.put("employerAcceptedVersion", 1L);
             data.put("status", WorkSession.STATUS_PROPOSED);
+            data.put("paymentStatus", WorkSession.PAYMENT_UNFUNDED);
+            data.put("heldAmount", 0L);
+            data.put("totalFunded", 0L);
             data.put("createdAt", FieldValue.serverTimestamp());
             data.put("updatedAt", FieldValue.serverTimestamp());
 
@@ -243,6 +246,102 @@ public final class WorkSessionRepository {
             updates.put("updatedAt", FieldValue.serverTimestamp());
 
             tx.update(sessionRef, updates);
+            return null;
+        }));
+    }
+
+    public Task<Void> fundSession(String uid, String sessionId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(session.getString("employerId"))) throw new Failure("FORBIDDEN");
+
+            String status = session.getString("status");
+            String paymentStatus = session.getString("paymentStatus");
+
+            if (!WorkSession.STATUS_AWAITING_FUNDS.equals(status)) {
+                throw new Failure("NOT_AWAITING_FUNDS");
+            }
+            if (WorkSession.PAYMENT_HELD.equals(paymentStatus)) {
+                // Idempotent: already funded
+                return null;
+            }
+
+            Long agVer = session.getLong("agreementVersion");
+            Long empVer = session.getLong("employerAcceptedVersion");
+            Long seekVer = session.getLong("seekerAcceptedVersion");
+            if (agVer == null || !agVer.equals(empVer) || !agVer.equals(seekVer)) {
+                throw new Failure("VERSION_MISMATCH");
+            }
+
+            Object agObj = session.get("agreement");
+            long totalDue = 0L;
+            if (agObj instanceof Map) {
+                Object tdObj = ((Map<?, ?>) agObj).get("totalDue");
+                if (tdObj instanceof Number) {
+                    totalDue = ((Number) tdObj).longValue();
+                }
+            }
+            if (totalDue <= 0) throw new Failure("INVALID_TOTAL_DUE");
+
+            DocumentReference wRef = db.collection("wallets").document(uid);
+            DocumentSnapshot wSnap = tx.get(wRef);
+            long curBalance = 0L;
+            if (wSnap.exists()) {
+                Long b = wSnap.getLong("balance");
+                if (b != null) curBalance = b;
+            }
+
+            if (curBalance < totalDue) {
+                throw new Failure("INSUFFICIENT_FUNDS");
+            }
+
+            long newBalance = curBalance - totalDue;
+            Map<String, Object> wUpdates = new HashMap<>();
+            wUpdates.put("balance", newBalance);
+            wUpdates.put("updatedAt", FieldValue.serverTimestamp());
+            tx.set(wRef, wUpdates, SetOptions.merge());
+
+            String txId = "tx_escrow_" + sessionId;
+            DocumentReference txRef = db.collection("wallets").document(uid)
+                    .collection("transactions").document(txId);
+            Map<String, Object> txData = new HashMap<>();
+            txData.put("id", txId);
+            txData.put("type", "HOLD_ESCROW");
+            txData.put("amount", totalDue);
+            txData.put("balanceAfter", newBalance);
+            String displayId = sessionId.startsWith("session_") ? sessionId.substring("session_".length()) : sessionId;
+            txData.put("description", "Tạm giữ cọc ca làm việc #" + displayId);
+            txData.put("refId", sessionId);
+            txData.put("createdAt", FieldValue.serverTimestamp());
+            tx.set(txRef, txData);
+
+            Map<String, Object> sUpdates = new HashMap<>();
+            sUpdates.put("status", WorkSession.STATUS_READY);
+            sUpdates.put("paymentStatus", WorkSession.PAYMENT_HELD);
+            sUpdates.put("heldAmount", totalDue);
+            sUpdates.put("totalFunded", totalDue);
+            sUpdates.put("fundedAt", FieldValue.serverTimestamp());
+            sUpdates.put("updatedAt", FieldValue.serverTimestamp());
+            tx.update(sessionRef, sUpdates);
+
+            String eventId = "pe_fund_" + sessionId;
+            DocumentReference eventRef = sessionRef.collection("paymentEvents").document(eventId);
+            Map<String, Object> peData = new HashMap<>();
+            peData.put("id", eventId);
+            peData.put("sessionId", sessionId);
+            peData.put("operationId", "funding_" + sessionId);
+            peData.put("type", "FUNDING_SUCCEEDED");
+            peData.put("fundingDelta", totalDue);
+            peData.put("actorId", uid);
+            peData.put("createdAt", FieldValue.serverTimestamp());
+            tx.set(eventRef, peData);
+
             return null;
         }));
     }
@@ -392,6 +491,14 @@ public final class WorkSessionRepository {
                         return "Đã có thỏa thuận ca làm việc cho đơn ứng tuyển này.";
                     case "CANNOT_CANCEL":
                         return "Ca làm việc hiện không thể hủy.";
+                    case "INSUFFICIENT_FUNDS":
+                        return "Số dư ví không đủ để cấp tiền ca làm này. Vui lòng nạp thêm tiền vào ví.";
+                    case "NOT_AWAITING_FUNDS":
+                        return "Ca làm việc chưa ở trạng thái sẵn sàng để cấp tiền.";
+                    case "VERSION_MISMATCH":
+                        return "Thỏa thuận ca làm chưa được cả hai bên xác nhận cùng một phiên bản.";
+                    case "INVALID_TOTAL_DUE":
+                        return "Số tiền cần thanh toán cho ca làm không hợp lệ.";
                     default:
                         return "Thao tác chưa hoàn thành. Hãy thử lại.";
                 }

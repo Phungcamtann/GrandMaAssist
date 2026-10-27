@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/brand_logo_surface">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#1C6758"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="Nạp tiền vào ví"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#747775"
+        android:textSize="14sp"
+        android:text="Chọn số tiền hoặc tự nhập số tiền bạn muốn nạp."/>
+
+    <!-- Quick preset chips -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnChip100k"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:includeFontPadding="false"
+            android:text="100.000 đ"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnChip200k"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:includeFontPadding="false"
+            android:text="200.000 đ"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnChip500k"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:includeFontPadding="false"
+            android:text="500.000 đ"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnChip1m"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:includeFontPadding="false"
+            android:text="1.000.000 đ"/>
+    </LinearLayout>
+
+    <!-- Custom amount input -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="#1C6758"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Hoặc nhập số tiền khác (VNĐ)"/>
+
+    <EditText
+        android:id="@+id/etTopUpAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:minHeight="52dp"
+        android:padding="12dp"
+        android:background="@drawable/input_background"
+        android:inputType="number"
+        android:textColor="#1A1C19"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:hint="Ví dụ: 330000"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnProceedTopUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:minHeight="52dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:background="@drawable/button_primary"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:text="Tiếp tục thanh toán QR"/>
+</LinearLayout>

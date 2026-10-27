@@ -44,6 +44,10 @@ public final class RoleHomePanel {
         click(R.id.homeAudioGuide, () -> Toast.makeText(activity, "Đang phát hướng dẫn bằng giọng nói...", Toast.LENGTH_SHORT).show());
         click(R.id.accountHubBack,()->navigate.accept(RoleNavigationBar.Action.HOME));
         click(R.id.accountHubProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
+        click(R.id.accountHubWallet, () -> {
+            String role = vm.snapshot != null ? vm.snapshot.role : "EMPLOYER";
+            vn.edu.ueh.nhom4.grandmaassist.app.ui.wallet.WalletActivity.start(activity, role, 0L);
+        });
         click(R.id.accountHubSavedJobs, () -> activity.startActivity(new Intent(activity, SavedJobsActivity.class)));
         click(R.id.accountHubVerification,verify);click(R.id.accountHubSecurity,security);click(R.id.accountHubSignOut,signOut);
     }
@@ -59,7 +63,7 @@ public final class RoleHomePanel {
         TextView view=activity.findViewById(id);
         if(view != null && !view.getText().toString().equals(value))view.setText(value);
     }
-    private void future(int id,int label){text(id,activity.getString(label)+"\n"+activity.getString(R.string.n_soon));}
+    private void future(int id,int label){text(id,activity.getString(label));}
 
     public void render(AuthRepository.State auth,boolean known,boolean home,boolean hub,RoleNavigationBar.Action selected){
         String role=auth.account!=null && vm.snapshot!=null?vm.snapshot.role:"";
@@ -75,7 +79,7 @@ public final class RoleHomePanel {
         boolean active="ACTIVE".equals(vm.snapshot.status);
 
         if (seeker) {
-            text(R.id.homeTitle, activity.getString(R.string.gs_seeker_home_title));
+            text(R.id.homeTitle, "Chào cô chú");
             text(R.id.homeIntro, activity.getString(R.string.gs_seeker_home_intro));
             show(R.id.homeIntro, true);
             show(R.id.homeAudioGuide, false);
@@ -84,11 +88,12 @@ public final class RoleHomePanel {
             activity.findViewById(R.id.homeMainFuture).setEnabled(!vm.busy && !auth.isBusy());
             activity.findViewById(R.id.homeMainFuture).setBackgroundResource(R.drawable.button_primary);
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.white));
+            ((androidx.appcompat.widget.AppCompatButton)activity.findViewById(R.id.homeMainFuture)).setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
 
-            text(R.id.homeAttentionFuture, activity.getString(R.string.gs_seeker_pending) + "\n" + activity.getString(R.string.gs_seeker_pending_sub));
-            text(R.id.homeWorkFuture, activity.getString(R.string.gs_seeker_my_jobs) + "\n" + activity.getString(R.string.gs_seeker_my_jobs_sub));
-            text(R.id.homeOtherFuture, activity.getString(R.string.gs_seeker_other_jobs) + "\n" + activity.getString(R.string.gs_seeker_other_jobs_sub));
-            text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support) + "\n" + activity.getString(R.string.gs_seeker_support_sub));
+            text(R.id.homeAttentionFuture, activity.getString(R.string.gs_seeker_pending));
+            text(R.id.homeWorkFuture, activity.getString(R.string.gs_seeker_my_jobs));
+            text(R.id.homeOtherFuture, "Xem các việc khác");
+            text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support));
 
             activity.findViewById(R.id.homeWorkFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
@@ -109,6 +114,9 @@ public final class RoleHomePanel {
         show(R.id.homeMember,!admin);show(R.id.homeAdmin,admin);
 
         if(employer){
+            text(R.id.homeTitle, "Bạn đang muốn tìm người giúp việc ?");
+            boolean employerVerified = (vm.snapshot != null && "VERIFIED".equals(vm.snapshot.verificationStatus)) || "VERIFIED".equals(vm.verificationStatus);
+            show(R.id.homeIntro, !employerVerified);
             text(R.id.homeMainFuture,activity.getString(R.string.jd_create));
             text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));
             activity.findViewById(R.id.homeMainFuture).setEnabled(active && !vm.busy && !auth.isBusy());
@@ -120,7 +128,7 @@ public final class RoleHomePanel {
 
         future(R.id.homePostsFuture,R.string.n_admin_posts);future(R.id.homeReportsFuture,R.string.n_admin_reports);
         future(R.id.homeDisputesFuture,R.string.n_admin_disputes);future(R.id.homeOverdueFuture,R.string.n_admin_overdue);
-        future(R.id.accountHubSettings,R.string.n_settings);future(R.id.accountHubHelp,R.string.n_help);
+        
 
         if(admin){
             text(R.id.homePostsFuture,"Duyệt tin tuyển");activity.findViewById(R.id.homePostsFuture).setEnabled(active&&!vm.busy&&!auth.isBusy());
@@ -145,10 +153,27 @@ public final class RoleHomePanel {
         text(R.id.accountHubRole,activity.getString(RoleNavigationBar.roleText(role))+("EMPLOYER".equals(role)?" · "+
                 activity.getString("ORGANIZATION".equals(vm.snapshot.draft.employerType)?R.string.n_organization:R.string.n_individual):""));
         String area="";for(ProfileRepository.Area item:vm.areas)if(item.code.equals(vm.snapshot.draft.areaCode)){area=item.name;break;}
-        text(R.id.accountHubArea,area);show(R.id.accountHubArea,!area.isEmpty());show(R.id.accountHubProfile,!admin);
-        show(R.id.accountHubSavedJobs, seeker);
-        show(R.id.accountHubVerification,admin);
-        for(int id:new int[]{R.id.homeOpenProfile,R.id.accountHubProfile,R.id.accountHubSavedJobs,R.id.accountHubSecurity,R.id.accountHubBack,R.id.accountHubSignOut}) {
+        text(R.id.accountHubArea,area);show(R.id.accountHubArea,!area.isEmpty());show(R.id.accountHubProfile,false);
+
+        String authMethod = "";
+        if (auth != null && auth.account != null) {
+            if (auth.account.google && auth.account.googleEmail != null && !auth.account.googleEmail.isEmpty()) {
+                authMethod += "Google: " + auth.account.googleEmail;
+            }
+            if (auth.account.phone && auth.account.phoneNumber != null && !auth.account.phoneNumber.isEmpty()) {
+                if (!authMethod.isEmpty()) authMethod += "\n";
+                authMethod += "Số điện thoại: " + auth.account.phoneNumber;
+            }
+            if (authMethod.isEmpty() && auth.account.email != null && !auth.account.email.isEmpty()) {
+                authMethod = "Email: " + auth.account.email;
+            }
+        }
+        if (authMethod.isEmpty()) authMethod = "Đăng nhập an toàn";
+        text(R.id.accountHubAuthMethod, authMethod);
+
+        show(R.id.accountHubSavedJobs,false);
+        show(R.id.accountHubVerification,false);
+        for(int id:new int[]{R.id.homeOpenProfile,R.id.accountHubProfile,R.id.accountHubWallet,R.id.accountHubSavedJobs,R.id.accountHubSecurity,R.id.accountHubBack,R.id.accountHubSignOut}) {
             View v = activity.findViewById(id);
             if (v != null) v.setEnabled(!vm.busy && !auth.isBusy());
         }

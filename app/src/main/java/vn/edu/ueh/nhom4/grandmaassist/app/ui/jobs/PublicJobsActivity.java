@@ -96,7 +96,7 @@ public final class PublicJobsActivity extends AppCompatActivity {
     }
     private void leave(String route){setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,route));finish();}
     private void back(){
-        if(vm.detailId.isEmpty()){finish();return;}
+        if(getIntent().getBooleanExtra("finish_on_back", false) || vm.detailId.isEmpty()){finish();return;}
         vm.backToList();findViewById(R.id.pbScroll).post(()->findViewById(R.id.pbScroll).scrollTo(0,listScroll));
     }
     private void bindSpinner(int id,boolean category){
@@ -132,7 +132,7 @@ public final class PublicJobsActivity extends AppCompatActivity {
         boolean detail=!vm.detailId.isEmpty();RoleNavigationBar.topbar(this,vm.role);
         WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(findViewById(R.id.pbRoot));
         boolean keyboard=insets!=null && insets.isVisible(WindowInsetsCompat.Type.ime());
-        nav.render(vm.role,RoleNavigationBar.Action.OTHER,"SEEKER".equals(vm.role)&&!keyboard&&getIntent().getBooleanExtra(NAVIGATION,false),true);
+        nav.render(vm.role,RoleNavigationBar.Action.OTHER,"SEEKER".equals(vm.role)&&!keyboard,true);
         text(R.id.pbTitle,getString(detail?R.string.pb_detail:R.string.pb_title));
         show(R.id.pbFilterToggle,!detail);show(R.id.pbFilters,!detail&&filtersExpanded);
         show(R.id.pbSavedJobs, "SEEKER".equals(vm.role) && !detail);
@@ -240,21 +240,99 @@ public final class PublicJobsActivity extends AppCompatActivity {
             default:return 0;
         }
     }
-    private void detail(LinearLayout body,PublicJob j){
-        LinearLayout c=section(body);label(c,j.title,true);label(c,j.employerName+"\n"+j.categoryName,false);
-        TextView deadline=label(c,"",false);deadline.setId(R.id.pbDeadlineState);
-        label(c,getString(vm.detailCached?R.string.pb_offline:R.string.pb_public_time,date(j.cachedAt)),false);
-        c=section(body);label(c,getString(R.string.pb_duties),true);label(c,j.description,false);
-        c=section(body);label(c,getString(R.string.pb_place),true);label(c,j.areaName+"\n"+j.workAddress,false);
-        c=section(body);label(c,getString(R.string.pb_schedule),true);
-        label(c,labels(LocalJobDraft.DAYS,getResources().getStringArray(R.array.jd_days),j.days)+"\n"+
-                label(LocalJobDraft.SHIFTS,getResources().getStringArray(R.array.jd_shifts),j.shift)+"\n"+j.schedule,false);
-        c=section(body);label(c,getString(R.string.pb_requirements),true);
-        if(!j.requirements.isEmpty())label(c,j.requirements,false);
-        if(!j.skills.isEmpty())label(c,getString(R.string.pb_skills,String.join(", ",j.skills)),false);
-        label(c,j.demands.isEmpty()?getString(R.string.pb_no_demands):labels(LocalJobDraft.DEMANDS,
-                new String[]{getString(R.string.jd_lifting),getString(R.string.jd_standing),getString(R.string.jd_moving)},j.demands),false);
-        c=section(body);label(c,getString(R.string.pb_pay),true);label(c,money(j),false);
+    private void detail(LinearLayout body, PublicJob j) {
+        int illustration = illustration(j.categoryId);
+        if (illustration != 0) {
+            com.google.android.material.card.MaterialCardView cardImg = new com.google.android.material.card.MaterialCardView(this);
+            cardImg.setRadius(dp(16));
+            cardImg.setCardElevation(dp(2));
+            cardImg.setStrokeWidth(0);
+
+            ImageView iv = new ImageView(this);
+            iv.setImageResource(illustration);
+            iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            cardImg.addView(iv, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(180)));
+
+            LinearLayout.LayoutParams lpImg = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lpImg.bottomMargin = dp(16);
+            body.addView(cardImg, lpImg);
+        }
+
+        LinearLayout c = section(body);
+
+        TextView tvTitle = label(c, j.title, true);
+        tvTitle.setTextSize(22);
+        tvTitle.setTextColor(Color.parseColor("#1C6758"));
+
+        TextView tvSub = label(c, j.employerName + " · " + j.categoryName, false);
+        tvSub.setTextColor(Color.parseColor("#747775"));
+
+        TextView tvPay = label(c, "Tiền công: " + money(j), true);
+        tvPay.setTextSize(18);
+        tvPay.setTextColor(Color.parseColor("#2E7D32"));
+
+        addDetailDivider(c);
+
+        labelHeading(c, "Địa chỉ làm việc");
+        String addrText = (j.workAddress != null && !j.workAddress.trim().isEmpty() ? j.workAddress.trim() + "\n" : "") + "Khu vực: " + j.areaName;
+        labelBody(c, addrText);
+
+        addDetailDivider(c);
+
+        labelHeading(c, "Thời gian làm việc");
+        String scheduleText = labels(LocalJobDraft.DAYS, getResources().getStringArray(R.array.jd_days), j.days) + "\n" +
+                label(LocalJobDraft.SHIFTS, getResources().getStringArray(R.array.jd_shifts), j.shift) + " · " + j.schedule;
+        labelBody(c, scheduleText);
+
+        addDetailDivider(c);
+
+        labelHeading(c, getString(R.string.pb_duties));
+        labelBody(c, j.description);
+
+        addDetailDivider(c);
+
+        labelHeading(c, getString(R.string.pb_requirements));
+        StringBuilder reqSb = new StringBuilder();
+        if (!j.requirements.isEmpty()) reqSb.append(j.requirements);
+        if (!j.skills.isEmpty()) {
+            if (reqSb.length() > 0) reqSb.append("\n");
+            reqSb.append(getString(R.string.pb_skills, String.join(", ", j.skills)));
+        }
+        if (!j.demands.isEmpty()) {
+            if (reqSb.length() > 0) reqSb.append("\n");
+            reqSb.append(labels(LocalJobDraft.DEMANDS,
+                    new String[]{getString(R.string.jd_lifting), getString(R.string.jd_standing), getString(R.string.jd_moving)}, j.demands));
+        }
+        labelBody(c, reqSb.length() > 0 ? reqSb.toString() : "Không có yêu cầu đặc biệt");
+
+        addDetailDivider(c);
+
+        TextView deadline = labelBody(c, "");
+        deadline.setId(R.id.pbDeadlineState);
+        labelBody(c, getString(vm.detailCached ? R.string.pb_offline : R.string.pb_public_time, date(j.cachedAt)));
+    }
+
+    private void addDetailDivider(LinearLayout parent) {
+        View v = new View(this);
+        v.setBackgroundColor(Color.parseColor("#E0E4E1"));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1));
+        lp.topMargin = dp(14);
+        lp.bottomMargin = dp(4);
+        parent.addView(v, lp);
+    }
+
+    private TextView labelHeading(LinearLayout parent, String text) {
+        TextView tv = label(parent, text, true);
+        tv.setTextSize(15);
+        tv.setTextColor(Color.parseColor("#1C6758"));
+        return tv;
+    }
+
+    private TextView labelBody(LinearLayout parent, String text) {
+        TextView tv = label(parent, text, false);
+        tv.setTextSize(15);
+        tv.setTextColor(Color.parseColor("#1A1C19"));
+        return tv;
     }
     private LinearLayout section(LinearLayout body){
         LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(dp(16),dp(16),dp(16),dp(16));

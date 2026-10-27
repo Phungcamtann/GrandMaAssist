@@ -63,10 +63,10 @@ public final class RoleNavigationBar {
         host.setVisibility(visible?View.VISIBLE:View.GONE);if(!visible)return;
         boolean admin="ADMIN".equals(role),seeker="SEEKER".equals(role);
         Action[] routes=admin?new Action[]{Action.HOME,Action.PROCESS,Action.STATS,Action.ACCOUNT}
-                :new Action[]{Action.HOME,Action.WORK,Action.OTHER,seeker?Action.PROFILE:Action.ACCOUNT};
+                :new Action[]{Action.HOME,Action.WORK,Action.OTHER,Action.PROFILE};
         int[] labels=admin?new int[]{R.string.n_overview,R.string.n_process,R.string.n_stats,R.string.n_account}
                 :seeker?new int[]{R.string.n_home,R.string.n_my_jobs,R.string.n_other_jobs,R.string.n_profile}
-                :new int[]{R.string.n_home,R.string.n_my_posts,R.string.n_sessions,R.string.n_account};
+                :new int[]{R.string.n_home,R.string.n_my_posts,R.string.n_sessions,R.string.n_profile};
         int[] icons=admin?new int[]{R.drawable.ic_nav_home,R.drawable.ic_nav_queue,R.drawable.ic_nav_stats,R.drawable.ic_nav_account}
                 :new int[]{R.drawable.ic_nav_home,R.drawable.ic_role_work,R.drawable.ic_nav_search,R.drawable.ic_nav_account};
         for(int i=0;i<4;i++){

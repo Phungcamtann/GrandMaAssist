@@ -14,6 +14,12 @@ public final class WorkSession {
     public static final String STATUS_CANCELLED = "CANCELLED";
     public static final String STATUS_DISPUTED = "DISPUTED";
 
+    public static final String PAYMENT_UNFUNDED = "UNFUNDED";
+    public static final String PAYMENT_FUNDING = "FUNDING";
+    public static final String PAYMENT_HELD = "HELD";
+    public static final String PAYMENT_SETTLING = "SETTLING";
+    public static final String PAYMENT_SETTLED = "SETTLED";
+
     public final String id;
     public final String applicationId;
     public final String jobId;
@@ -24,13 +30,17 @@ public final class WorkSession {
     public final Long employerAcceptedVersion;
     public final Long seekerAcceptedVersion;
     public final String status;
+    public final String paymentStatus;
+    public final long heldAmount;
+    public final long totalFunded;
     public final Timestamp createdAt;
     public final Timestamp updatedAt;
 
     public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
                        AgreementSnapshot agreement, long agreementVersion,
                        Long employerAcceptedVersion, Long seekerAcceptedVersion,
-                       String status, Timestamp createdAt, Timestamp updatedAt) {
+                       String status, String paymentStatus, long heldAmount, long totalFunded,
+                       Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.applicationId = applicationId;
         this.jobId = jobId;
@@ -41,6 +51,9 @@ public final class WorkSession {
         this.employerAcceptedVersion = employerAcceptedVersion;
         this.seekerAcceptedVersion = seekerAcceptedVersion;
         this.status = status == null ? STATUS_PROPOSED : status;
+        this.paymentStatus = paymentStatus == null ? PAYMENT_UNFUNDED : paymentStatus;
+        this.heldAmount = heldAmount;
+        this.totalFunded = totalFunded;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -61,6 +74,9 @@ public final class WorkSession {
         Long empVer = (Long) data.get("employerAcceptedVersion");
         Long seekVer = (Long) data.get("seekerAcceptedVersion");
         String status = (String) data.get("status");
+        String paymentStatus = (String) data.get("paymentStatus");
+        Long hAmt = (Long) data.get("heldAmount");
+        Long tFund = (Long) data.get("totalFunded");
         Timestamp createdAt = (Timestamp) data.get("createdAt");
         Timestamp updatedAt = (Timestamp) data.get("updatedAt");
 
@@ -75,6 +91,9 @@ public final class WorkSession {
                 empVer,
                 seekVer,
                 status,
+                paymentStatus,
+                hAmt != null ? hAmt : 0L,
+                tFund != null ? tFund : 0L,
                 createdAt,
                 updatedAt
         );
@@ -83,6 +102,7 @@ public final class WorkSession {
     public boolean isProposed() { return STATUS_PROPOSED.equals(status); }
     public boolean isAwaitingFunds() { return STATUS_AWAITING_FUNDS.equals(status); }
     public boolean isReady() { return STATUS_READY.equals(status); }
+    public boolean isFunded() { return PAYMENT_HELD.equals(paymentStatus); }
     public boolean isInProgress() { return STATUS_IN_PROGRESS.equals(status); }
     public boolean isCompleted() { return STATUS_COMPLETED.equals(status); }
     public boolean isCancelled() { return STATUS_CANCELLED.equals(status); }

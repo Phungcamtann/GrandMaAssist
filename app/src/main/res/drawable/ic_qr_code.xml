@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="180dp"
+    android:viewportWidth="180"
+    android:viewportHeight="180">
+    <!-- Outer borders and finder patterns -->
+    <path
+        android:fillColor="#1A1C19"
+        android:pathData="M20,20h45v45h-45z M30,30v25h25v-25z M37,37h11v11h-11z
+                          M115,20h45v45h-45z M125,30v25h25v-25z M132,37h11v11h-11z
+                          M20,115h45v45h-45z M30,125v25h25v-25z M37,132h11v11h-11z
+                          M75,20h10v10h-10z M95,20h10v10h-10z M85,35h10v10h-10z
+                          M75,50h10v15h-10z M95,50h10v15h-10z
+                          M20,75h10v10h-10z M35,85h10v10h-10z M50,75h15v10h-15z
+                          M75,75h30v15h-30z M75,95h15v20h-15z M95,100h15v15h-15z
+                          M120,75h15v15h-15z M145,75h15v10h-15z M135,95h25v15h-25z
+                          M20,95h15v10h-15z M45,95h20v10h-20z M35,105h10v10h-10z
+                          M75,120h15v15h-15z M95,120h15v15h-15z M85,140h25v20h-25z
+                          M120,120h20v10h-20z M145,120h15v15h-15z M120,135h15v25h-15z
+                          M140,140h20v20h-20z"/>
+</vector>

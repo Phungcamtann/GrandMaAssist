@@ -32,6 +32,7 @@ public final class ShiftAgreementEditActivity extends AppCompatActivity {
     public static final String EXTRA_INITIAL_AREA_NAME = "initial_area_name";
     public static final String EXTRA_INITIAL_AREA_CODE = "initial_area_code";
     public static final String EXTRA_INITIAL_PAY = "initial_pay";
+    public static final String EXTRA_INITIAL_SCHEDULE = "initial_schedule";
 
     private ShiftAgreementViewModel vm;
     private String applicationId = "";
@@ -75,6 +76,7 @@ public final class ShiftAgreementEditActivity extends AppCompatActivity {
         String initAreaName = getIntent().getStringExtra(EXTRA_INITIAL_AREA_NAME);
         String initAreaCode = getIntent().getStringExtra(EXTRA_INITIAL_AREA_CODE);
         long initPay = getIntent().getLongExtra(EXTRA_INITIAL_PAY, 0L);
+        String initSchedule = getIntent().getStringExtra(EXTRA_INITIAL_SCHEDULE);
 
         etTask = findViewById(R.id.etShiftTask);
         tvWorkAddress = findViewById(R.id.tvShiftWorkAddress);
@@ -110,6 +112,32 @@ public final class ShiftAgreementEditActivity extends AppCompatActivity {
         if (initPay > 0 && vm.laborAmount == 0) {
             vm.updateLaborAmount(initPay);
             etPay.setText(String.valueOf(initPay));
+        }
+        if (initSchedule != null && !initSchedule.isEmpty() && !vm.dateSet) {
+            java.util.regex.Matcher dm = java.util.regex.Pattern.compile("(\\d{1,2})/(\\d{1,2})/(\\d{4})").matcher(initSchedule);
+            if (dm.find()) {
+                int d = Integer.parseInt(dm.group(1));
+                int m = Integer.parseInt(dm.group(2)) - 1;
+                int y = Integer.parseInt(dm.group(3));
+                vm.startCalendar.set(Calendar.YEAR, y);
+                vm.startCalendar.set(Calendar.MONTH, m);
+                vm.startCalendar.set(Calendar.DAY_OF_MONTH, d);
+                vm.endCalendar.set(Calendar.YEAR, y);
+                vm.endCalendar.set(Calendar.MONTH, m);
+                vm.endCalendar.set(Calendar.DAY_OF_MONTH, d);
+                vm.dateSet = true;
+            }
+            java.util.regex.Matcher tm = java.util.regex.Pattern.compile("(\\d{1,2}):(\\d{2})\\s*-\\s*(\\d{1,2}):(\\d{2})").matcher(initSchedule);
+            if (tm.find()) {
+                int sh = Integer.parseInt(tm.group(1));
+                int sm = Integer.parseInt(tm.group(2));
+                int eh = Integer.parseInt(tm.group(3));
+                int em = Integer.parseInt(tm.group(4));
+                vm.startCalendar.set(Calendar.HOUR_OF_DAY, sh);
+                vm.startCalendar.set(Calendar.MINUTE, sm);
+                vm.endCalendar.set(Calendar.HOUR_OF_DAY, eh);
+                vm.endCalendar.set(Calendar.MINUTE, em);
+            }
         }
 
         btnDate.setOnClickListener(v -> showDatePicker());

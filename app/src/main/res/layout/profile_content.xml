@@ -1,76 +1,403 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/profileContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp" android:visibility="gone">
-<com.google.android.material.textview.MaterialTextView android:id="@+id/profileMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_loading"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileReload" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_reload" />
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnOfflineDrafts" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_offline_entry" android:visibility="gone"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileBackHome" style="@style/Widget.GrandMa.BackLink" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/n_back" android:visibility="gone"/>
-<LinearLayout android:id="@+id/rolePicker" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="true" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/p_role_title"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_role_intro"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnRoleSeeker" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_seeker_card" android:drawableTop="@drawable/ic_role_work" android:drawablePadding="12dp" android:background="@drawable/role_card" android:textColor="@color/role_text" android:minHeight="168dp" android:gravity="start|center_vertical"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnRoleEmployer" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_employer_card" android:drawableTop="@drawable/ic_role_hire" android:drawablePadding="12dp" android:background="@drawable/role_card" android:textColor="@color/role_text" android:minHeight="168dp" android:gravity="start|center_vertical"/>
-<com.google.android.material.textview.MaterialTextView android:id="@+id/roleSelection" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_selected"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnRoleContinue" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_continue" />
-</LinearLayout>
-<LinearLayout android:id="@+id/profileEditor" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="true" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/p_title"/>
-<com.google.android.material.textview.MaterialTextView android:id="@+id/profileRole" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_title"/>
-<LinearLayout style="@style/Widget.GrandMa.ProfileSection">
-<TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/p_section_info"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:labelFor="@id/profileDisplayName" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/p_name"/>
-<androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileDisplayName" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapWords" android:maxLength="100"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_area"/>
-<Spinner android:id="@+id/profileArea" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:saveEnabled="false" android:spinnerMode="dialog" android:prompt="@string/p_area"/>
-<com.google.android.material.textview.MaterialTextView android:id="@+id/profileAreaMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_areas_empty"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnAreasReload" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_areas_retry" />
-</LinearLayout>
-<LinearLayout style="@style/Widget.GrandMa.ProfileSection">
-<TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/p_section_work"/>
-<LinearLayout android:id="@+id/seekerFields" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:labelFor="@id/profileSkills" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/p_skills"/>
-<androidx.appcompat.widget.AppCompatEditText android:hint="@string/p_skills_hint" android:id="@+id/profileSkills" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:maxLength="1000"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:labelFor="@id/profileExperience" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/p_experience"/>
-<androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileExperience" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:maxLength="1000"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_shifts"/>
-<CheckBox android:id="@+id/profile_morning" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:saveEnabled="false" android:textSize="20sp" android:textColor="@color/text_charcoal" android:text="@string/p_morning"/>
-<CheckBox android:id="@+id/profile_afternoon" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:saveEnabled="false" android:textSize="20sp" android:textColor="@color/text_charcoal" android:text="@string/p_afternoon"/>
-<CheckBox android:id="@+id/profile_evening" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:saveEnabled="false" android:textSize="20sp" android:textColor="@color/text_charcoal" android:text="@string/p_evening"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profileContent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:visibility="gone">
 
-</LinearLayout>
-<LinearLayout android:id="@+id/employerFields" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_employer_type"/>
-<RadioGroup android:id="@+id/profileEmployerType" android:layout_width="match_parent" android:layout_height="wrap_content" android:saveEnabled="false">
-<RadioButton android:id="@+id/profile_individual" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:saveEnabled="false" android:textColor="@color/text_charcoal" android:text="@string/p_individual"/>
-<RadioButton android:id="@+id/profile_organization" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:saveEnabled="false" android:textColor="@color/text_charcoal" android:text="@string/p_organization"/>
-</RadioGroup>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:id="@+id/profileOrganizationLabel" android:labelFor="@id/profileOrganization" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/p_org_name"/>
-<androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileOrganization" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapWords" android:maxLength="150"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:labelFor="@id/profileIntroduction" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:text="@string/p_introduction"/>
-<androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileIntroduction" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:maxLength="1000"/>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/profileMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:saveEnabled="false"
+        android:accessibilityHeading="false"
+        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+        android:text="@string/p_loading"/>
 
-</LinearLayout>
-</LinearLayout>
-<LinearLayout style="@style/Widget.GrandMa.ProfileSection">
-<TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/p_contact_title"/>
-<com.google.android.material.textview.MaterialTextView android:id="@+id/profileContact" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_no_phone"/>
-<com.google.android.material.textview.MaterialTextView android:id="@+id/profileContactState" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_phone_pending"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfilePhone" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/c03_add_phone" />
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileSync" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_sync" />
-<com.google.android.material.textview.MaterialTextView android:visibility="gone" android:id="@+id/profileCompleteness" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_incomplete"/>
-</LinearLayout>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileSave" style="@style/Widget.GrandMa.Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_save" />
-</LinearLayout>
-<LinearLayout android:id="@+id/profileVerificationSection" style="@style/Widget.GrandMa.ProfileSection" android:visibility="gone">
-<TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/p_verification_title"/>
-<TextView android:id="@+id/profileVerificationStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Label" android:accessibilityLiveRegion="polite" android:saveEnabled="false"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileVerification" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_verify"/>
-</LinearLayout>
-<LinearLayout android:id="@+id/adminProfile" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="true" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/p_admin"/>
-<com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_admin_note"/>
-</LinearLayout>
-<LinearLayout style="@style/Widget.GrandMa.ProfileSection">
-<TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/p_account"/>
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileAccount" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/p_account" />
-<androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileSignOut" style="@style/Widget.GrandMa.Button.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/auth_sign_out" />
-</LinearLayout>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnProfileReload"
+        style="@style/Widget.GrandMa.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/p_reload" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnOfflineDrafts"
+        style="@style/Widget.GrandMa.VerificationSecondary"
+        android:text="@string/jd_offline_entry"
+        android:visibility="gone"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnProfileBackHome"
+        style="@style/Widget.GrandMa.BackLink"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/n_back"
+        android:visibility="gone"/>
+
+    <!-- Role Picker (when not selected) -->
+    <LinearLayout
+        android:id="@+id/rolePicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:saveEnabled="false"
+            android:accessibilityHeading="true"
+            android:textAppearance="@style/TextAppearance.GrandMa.Title"
+            android:text="@string/p_role_title"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:saveEnabled="false"
+            android:accessibilityHeading="false"
+            android:textAppearance="@style/TextAppearance.GrandMa.Body"
+            android:text="@string/p_role_intro"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRoleSeeker"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/p_seeker_card"
+            android:drawableTop="@drawable/ic_role_work"
+            android:drawablePadding="12dp"
+            android:background="@drawable/role_card"
+            android:textColor="@color/role_text"
+            android:minHeight="168dp"
+            android:gravity="start|center_vertical"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRoleEmployer"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/p_employer_card"
+            android:drawableTop="@drawable/ic_role_hire"
+            android:drawablePadding="12dp"
+            android:background="@drawable/role_card"
+            android:textColor="@color/role_text"
+            android:minHeight="168dp"
+            android:gravity="start|center_vertical"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/roleSelection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:saveEnabled="false"
+            android:accessibilityHeading="false"
+            android:textAppearance="@style/TextAppearance.GrandMa.Body"
+            android:text="@string/p_selected"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRoleContinue"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/p_continue" />
+    </LinearLayout>
+
+    <!-- Main Profile Editor -->
+    <LinearLayout
+        android:id="@+id/profileEditor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/profileRole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:saveEnabled="false"
+            android:accessibilityHeading="true"
+            android:textAppearance="@style/TextAppearance.GrandMa.Title"
+            android:textColor="#1C6758"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:text="Hồ sơ cá nhân"/>
+
+        <!-- Single Unified Profile Information Card -->
+        <LinearLayout
+            style="@style/Widget.GrandMa.ProfileSection"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                style="@style/Widget.GrandMa.ProfileSectionHeading"
+                android:text="Thông tin hồ sơ"/>
+
+            <!-- Name -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:labelFor="@id/profileDisplayName"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:text="@string/p_name"/>
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/profileDisplayName"
+                style="@style/Widget.GrandMa.ProfileInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:maxLength="100"/>
+
+            <!-- Phone & Verification inline -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:text="Số điện thoại"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/profileContact"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                    android:textColor="#1A1C19"
+                    android:textSize="16sp"
+                    android:text="@string/p_no_phone"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/profileContactState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#2E7D32"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:text="Đã xác minh"/>
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnProfilePhone"
+                style="@style/Widget.GrandMa.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="48dp"
+                android:includeFontPadding="false"
+                android:text="@string/c03_add_phone" />
+
+            <!-- Area -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:text="@string/p_area"/>
+
+            <Spinner
+                android:id="@+id/profileArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="56dp"
+                android:saveEnabled="false"
+                android:spinnerMode="dialog"
+                android:prompt="@string/p_area"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/profileAreaMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:saveEnabled="false"
+                android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                android:text="@string/p_areas_empty"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAreasReload"
+                style="@style/Widget.GrandMa.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/p_areas_retry" />
+
+            <!-- Skills (Seeker) -->
+            <LinearLayout
+                android:id="@+id/seekerFields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:labelFor="@id/profileSkills"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:text="@string/p_skills"/>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:hint="@string/p_skills_hint"
+                    android:id="@+id/profileSkills"
+                    style="@style/Widget.GrandMa.ProfileInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="1000"/>
+            </LinearLayout>
+
+            <!-- Employer Fields (if role is EMPLOYER) -->
+            <LinearLayout
+                android:id="@+id/employerFields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <RadioGroup
+                    android:id="@+id/profileEmployerType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:saveEnabled="false">
+                    <RadioButton android:id="@+id/profile_individual" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/p_individual"/>
+                    <RadioButton android:id="@+id/profile_organization" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/p_organization"/>
+                </RadioGroup>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:id="@+id/profileOrganizationLabel"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:text="@string/p_org_name"/>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/profileOrganization"
+                    style="@style/Widget.GrandMa.ProfileInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:maxLength="150"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:labelFor="@id/profileIntroduction"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:text="@string/p_introduction"/>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/profileIntroduction"
+                    style="@style/Widget.GrandMa.ProfileInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="1000"/>
+            </LinearLayout>
+
+            <!-- Verification Status section inside the unified card -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:text="Xét duyệt hồ sơ"/>
+
+            <TextView
+                android:id="@+id/profileVerificationStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#2E7D32"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:saveEnabled="false"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnProfileVerification"
+                style="@style/Widget.GrandMa.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:minHeight="48dp"
+                android:includeFontPadding="false"
+                android:text="@string/p_verify"/>
+
+            <!-- Save Profile Button -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnProfileSave"
+                style="@style/Widget.GrandMa.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:minHeight="52dp"
+                android:includeFontPadding="false"
+                android:text="Lưu hồ sơ" />
+        </LinearLayout>
+
+        <!-- Direct Navigation Buttons Below Profile Card -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnProfileWallet"
+            style="@style/Widget.GrandMa.HomeButton"
+            android:layout_marginTop="16dp"
+            android:text="Ví tiền của tôi"
+            android:drawableStart="@drawable/ic_wallet"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnProfileAccount"
+            style="@style/Widget.GrandMa.HomeButton"
+            android:layout_marginTop="10dp"
+            android:text="Thông tin tài khoản"
+            android:drawableStart="@drawable/ic_nav_account"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnProfileHelp"
+            style="@style/Widget.GrandMa.HomeButton"
+            android:layout_marginTop="10dp"
+            android:text="Trợ giúp &amp; Hướng dẫn"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnProfileSettings"
+            style="@style/Widget.GrandMa.HomeButton"
+            android:layout_marginTop="10dp"
+            android:text="Cài đặt"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnProfileSignOut"
+            style="@style/Widget.GrandMa.HomeButton"
+            android:layout_marginTop="10dp"
+            android:text="@string/auth_sign_out"
+            android:textColor="@color/text_error"/>
+
+        <!-- Hidden legacy views for safe reference compatibility -->
+        <LinearLayout android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileExperience" android:layout_width="0dp" android:layout_height="0dp"/>
+            <CheckBox android:id="@+id/profile_morning" android:layout_width="0dp" android:layout_height="0dp"/>
+            <CheckBox android:id="@+id/profile_afternoon" android:layout_width="0dp" android:layout_height="0dp"/>
+            <CheckBox android:id="@+id/profile_evening" android:layout_width="0dp" android:layout_height="0dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnProfileSync" android:layout_width="0dp" android:layout_height="0dp"/>
+            <TextView android:id="@+id/profileCompleteness" android:layout_width="0dp" android:layout_height="0dp"/>
+            <LinearLayout android:id="@+id/profileVerificationSection" android:layout_width="0dp" android:layout_height="0dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/adminProfile" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+        <com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="true" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:text="@string/p_admin"/>
+        <com.google.android.material.textview.MaterialTextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false" android:accessibilityHeading="false" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:text="@string/p_admin_note"/>
+    </LinearLayout>
 </LinearLayout>

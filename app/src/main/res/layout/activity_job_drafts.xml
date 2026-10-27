@@ -64,35 +64,147 @@
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_area" android:labelFor="@id/jdArea"/>
                     <Spinner android:id="@+id/jdArea" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_area"/>
                     <TextView android:id="@+id/jdAreaError" style="@style/Widget.GrandMa.DraftError"/>
+
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Địa chỉ làm việc" android:labelFor="@id/jdWorkAddress"/>
                     <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdWorkAddress" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPostalAddress|textMultiLine" android:hint="Số nhà, đường, phường/xã và tỉnh/thành"/>
                     <TextView style="@style/Widget.GrandMa.VerificationMessage" android:text="Địa chỉ sẽ hiển thị trên tin đã duyệt."/>
 
-                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_days"/>
-                    <CheckBox android:id="@+id/jdMonday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Hai"/>
-                    <CheckBox android:id="@+id/jdTuesday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Ba"/>
-                    <CheckBox android:id="@+id/jdWednesday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Tư"/>
-                    <CheckBox android:id="@+id/jdThursday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Năm"/>
-                    <CheckBox android:id="@+id/jdFriday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Sáu"/>
-                    <CheckBox android:id="@+id/jdSaturday" style="@style/Widget.GrandMa.DraftCheck" android:text="Thứ Bảy"/>
-                    <CheckBox android:id="@+id/jdSunday" style="@style/Widget.GrandMa.DraftCheck" android:text="Chủ Nhật"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Hình thức làm việc"/>
+                    <Spinner android:id="@+id/jdWorkType" style="@style/Widget.GrandMa.DraftSpinner"/>
+
+                    <!-- Container cho Việc 1 lần -->
+                    <LinearLayout
+                        android:id="@+id/jdOneTimeContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Ngày làm việc"/>
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnPickJobDate"
+                            style="@style/Widget.GrandMa.VerificationSecondary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:includeFontPadding="false"
+                            android:gravity="center"
+                            android:textSize="16sp"
+                            android:text="Chọn ngày làm việc"/>
+                    </LinearLayout>
+
+                    <!-- Container cho Lặp lại ngắn hạn -->
+                    <LinearLayout
+                        android:id="@+id/jdRecurringContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Ngày bắt đầu công việc"/>
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnPickStartDate"
+                            style="@style/Widget.GrandMa.VerificationSecondary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:includeFontPadding="false"
+                            android:gravity="center"
+                            android:textSize="16sp"
+                            android:text="Chọn ngày bắt đầu"/>
+
+                        <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Lịch các ngày trong tuần"/>
+                        <!-- 2 hàng ngang cho các thứ trong tuần -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <CheckBox android:id="@+id/jdMonday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 2"/>
+                            <CheckBox android:id="@+id/jdTuesday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 3"/>
+                            <CheckBox android:id="@+id/jdWednesday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 4"/>
+                            <CheckBox android:id="@+id/jdThursday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 5"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <CheckBox android:id="@+id/jdFriday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 6"/>
+                            <CheckBox android:id="@+id/jdSaturday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Thứ 7"/>
+                            <CheckBox android:id="@+id/jdSunday" style="@style/Widget.GrandMa.DraftCheck" android:layout_width="0dp" android:layout_weight="1" android:text="Chủ nhật"/>
+                            <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
                     <TextView android:id="@+id/jdDaysError" style="@style/Widget.GrandMa.DraftError"/>
+
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_shift" android:labelFor="@id/jdShift"/>
                     <Spinner android:id="@+id/jdShift" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_shift"/>
                     <TextView android:id="@+id/jdShiftError" style="@style/Widget.GrandMa.DraftError"/>
-                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_schedule_text" android:labelFor="@id/jdScheduleText"/>
+
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Giờ làm việc trong ca"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnPickStartTime"
+                            style="@style/Widget.GrandMa.VerificationSecondary"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:includeFontPadding="false"
+                            android:gravity="center"
+                            android:textSize="15sp"
+                            android:layout_marginEnd="6dp"
+                            android:text="Bắt đầu: 08:00"/>
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnPickEndTime"
+                            style="@style/Widget.GrandMa.VerificationSecondary"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:includeFontPadding="false"
+                            android:gravity="center"
+                            android:textSize="15sp"
+                            android:layout_marginStart="6dp"
+                            android:text="Kết thúc: 11:30"/>
+                    </LinearLayout>
+
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Lịch cụ thể (tự động cập nhật)" android:labelFor="@id/jdScheduleText"/>
                     <androidx.appcompat.widget.AppCompatEditText android:id="@+id/jdScheduleText" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="500" android:inputType="textCapSentences|textMultiLine" android:hint="@string/jd_schedule_hint"/>
                 </LinearLayout>
+
+                <!-- Section Yêu cầu thể lực gom thành 1 Combobox -->
                 <LinearLayout style="@style/Widget.GrandMa.ProfileSection">
                     <TextView style="@style/Widget.GrandMa.ProfileSectionHeading" android:text="@string/jd_demands"/>
-                    <RadioGroup android:id="@+id/jdDemandMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
-                        <RadioButton android:id="@+id/jdNoDemands" style="@style/Widget.GrandMa.DraftRadio" android:text="@string/jd_no_demands"/>
-                        <RadioButton android:id="@+id/jdSomeDemands" style="@style/Widget.GrandMa.DraftRadio" android:text="@string/jd_some_demands"/>
+                    <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="Mức độ thể lực yêu cầu"/>
+                    <Spinner android:id="@+id/jdDemandSpinner" style="@style/Widget.GrandMa.DraftSpinner"/>
+
+                    <!-- Hidden legacy views for reference compatibility -->
+                    <RadioGroup android:id="@+id/jdDemandMode" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <RadioButton android:id="@+id/jdNoDemands" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <RadioButton android:id="@+id/jdSomeDemands" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </RadioGroup>
-                    <LinearLayout android:id="@+id/jdDemandChoices" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-                        <CheckBox android:id="@+id/jdLifting" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_lifting"/>
-                        <CheckBox android:id="@+id/jdStanding" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_standing"/>
-                        <CheckBox android:id="@+id/jdMoving" style="@style/Widget.GrandMa.DraftCheck" android:text="@string/jd_moving"/>
+                    <LinearLayout android:id="@+id/jdDemandChoices" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <CheckBox android:id="@+id/jdLifting" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <CheckBox android:id="@+id/jdStanding" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <CheckBox android:id="@+id/jdMoving" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                     <TextView android:id="@+id/jdDemandsError" style="@style/Widget.GrandMa.DraftError"/>
                 </LinearLayout>
@@ -214,7 +326,7 @@
                     <Spinner android:id="@+id/jdUnit" style="@style/Widget.GrandMa.DraftSpinner" android:prompt="@string/jd_unit"/>
                     <TextView android:id="@+id/jdUnitError" style="@style/Widget.GrandMa.DraftError"/>
                     <TextView style="@style/Widget.GrandMa.DraftLabel" android:text="@string/jd_expiry" android:labelFor="@id/jdExpiry"/>
-                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdExpiry" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/jd_pick_expiry"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/jdExpiry" style="@style/Widget.GrandMa.VerificationSecondary" android:layout_height="wrap_content" android:minHeight="52dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:includeFontPadding="false" android:gravity="center" android:textSize="15sp" android:text="@string/jd_pick_expiry"/>
                     <TextView android:id="@+id/jdExpiryError" style="@style/Widget.GrandMa.DraftError"/>
                 </LinearLayout>
             </LinearLayout>

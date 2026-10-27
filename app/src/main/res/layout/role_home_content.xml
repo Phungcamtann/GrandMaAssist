@@ -2,7 +2,11 @@
     android:id="@+id/roleHomeContent" android:layout_width="match_parent" android:layout_height="wrap_content"
     android:orientation="vertical" android:padding="@dimen/screen_padding" android:visibility="gone" android:saveEnabled="false">
     <TextView android:id="@+id/homeTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true" android:saveEnabled="false"/>
+        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+        android:textStyle="bold"
+        android:textSize="26sp"
+        android:textColor="#1C6758"
+        android:accessibilityHeading="true" android:saveEnabled="false"/>
     <TextView android:id="@+id/homeIntro" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
     <LinearLayout android:id="@+id/homeMember" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">

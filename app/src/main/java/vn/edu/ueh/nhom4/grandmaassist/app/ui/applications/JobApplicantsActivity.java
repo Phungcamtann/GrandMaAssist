@@ -375,6 +375,7 @@ public final class JobApplicantsActivity extends AppCompatActivity {
             intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_AREA_NAME, app.jobSnapshot.areaName);
             intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_AREA_CODE, app.jobSnapshot.areaCode);
             intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_PAY, app.jobSnapshot.payAmount);
+            intent.putExtra(ShiftAgreementEditActivity.EXTRA_INITIAL_SCHEDULE, app.jobSnapshot.scheduleText);
         }
         startActivity(intent);
     }

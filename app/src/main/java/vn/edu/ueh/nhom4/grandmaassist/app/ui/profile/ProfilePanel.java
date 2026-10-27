@@ -131,6 +131,12 @@ public final class ProfilePanel {
         click(R.id.btnAreasReload, vm::loadAreas);
         click(R.id.btnProfileSync, () -> discardThen(() -> { vm.dirty = false; vm.syncPhone(); }));
         click(R.id.btnProfileAccount,()->{if(vm.snapshot==null)vm.showSecurity();else vm.showAccount();scrollTop();});
+        click(R.id.btnProfileWallet, () -> {
+            String role = vm.snapshot != null ? vm.snapshot.role : "SEEKER";
+            vn.edu.ueh.nhom4.grandmaassist.app.ui.wallet.WalletActivity.start(activity, role, 0L);
+        });
+        click(R.id.btnProfileHelp, () -> android.widget.Toast.makeText(activity, "Trung tâm trợ giúp GrandMa Assist", android.widget.Toast.LENGTH_SHORT).show());
+        click(R.id.btnProfileSettings, () -> android.widget.Toast.makeText(activity, "Cài đặt ứng dụng", android.widget.Toast.LENGTH_SHORT).show());
         click(R.id.btnProfileVerification,()->{
             if(vm.verificationLoading)return;
             if("UNKNOWN".equals(vm.verificationStatus))vm.refreshVerification();else openVerification();
@@ -327,26 +333,38 @@ public final class ProfilePanel {
             show(R.id.profileOrganization, organization);
             view(R.id.profileOrganization).setEnabled(editable && organization);
             renderAreas();
-            set(R.id.profileContact, vm.currentPhone.isEmpty() ? activity.getString(R.string.p_no_phone)
-                    : activity.getString(R.string.p_phone_value, vm.currentPhone));
-            boolean synced = vm.snapshot.phone.equals(vm.currentPhone) && !vm.readRequired;
-            text(R.id.profileContactState, synced ? 0 : R.string.p_phone_pending);
-            show(R.id.profileContactState, !synced);
-            text(R.id.btnProfilePhone, vm.currentPhone.isEmpty() ? R.string.c03_add_phone : R.string.c03_change_phone);
-            view(R.id.btnProfilePhone).setEnabled(!vm.busy && !state.checkingSession);
-            show(R.id.btnProfileSync, !synced);
-            view(R.id.btnProfileSync).setEnabled(!vm.busy && !vm.readRequired);
+            boolean hasPhone = !vm.currentPhone.isEmpty();
+            set(R.id.profileContact, hasPhone ? vm.currentPhone : "Chưa có số điện thoại");
+            TextView tvPhoneState = (TextView) view(R.id.profileContactState);
+            if (hasPhone) {
+                tvPhoneState.setText("✓ Đã xác minh");
+                tvPhoneState.setTextColor(android.graphics.Color.parseColor("#2E7D32"));
+                show(R.id.profileContactState, true);
+                show(R.id.btnProfilePhone, false);
+            } else {
+                tvPhoneState.setText("Chưa xác minh");
+                tvPhoneState.setTextColor(android.graphics.Color.parseColor("#E65100"));
+                show(R.id.profileContactState, true);
+                show(R.id.btnProfilePhone, true);
+                text(R.id.btnProfilePhone, R.string.c03_add_phone);
+                view(R.id.btnProfilePhone).setEnabled(!vm.busy && !state.checkingSession);
+            }
+            show(R.id.btnProfileSync, false);
             // Completeness/authorization explanations belong in help and validation, not
             // as permanent paragraphs between the form and its primary action.
             show(R.id.profileCompleteness, false);
             renderVerification(state);
         }
-        for (int id : new int[]{R.id.btnProfileReload, R.id.btnProfileAccount,
-                R.id.btnProfileSignOut, R.id.btnReturnProfile,R.id.btnProfileBackHome}) view(id).setEnabled(!vm.busy);
+        for (int id : new int[]{R.id.btnProfileReload, R.id.btnProfileAccount, R.id.btnProfileWallet,
+                R.id.btnProfileHelp, R.id.btnProfileSettings,
+                R.id.btnProfileSignOut, R.id.btnReturnProfile,R.id.btnProfileBackHome}) {
+            View v = view(id);
+            if (v != null) v.setEnabled(!vm.busy);
+        }
         if (vm.busy) for (int id : new int[]{R.id.btnSignOut, R.id.btnAccountPhone, R.id.btnAccountGoogle}) view(id).setEnabled(false);
         back.setEnabled(account && !methods && (vm.busy || vm.dirty || vm.destination!=ProfileViewModel.Destination.HOME));
         RoleNavigationBar.Action selected=vm.destination==ProfileViewModel.Destination.HOME?RoleNavigationBar.Action.HOME:
-                vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)?RoleNavigationBar.Action.PROFILE:RoleNavigationBar.Action.ACCOUNT;
+                vm.snapshot!=null && !"ADMIN".equals(vm.snapshot.role)?RoleNavigationBar.Action.PROFILE:RoleNavigationBar.Action.ACCOUNT;
         homePanel.render(state,known && !methods,home,hub,selected);
         if (!account) {
             for (int id : new int[]{R.id.profileDisplayName, R.id.profileSkills, R.id.profileExperience,

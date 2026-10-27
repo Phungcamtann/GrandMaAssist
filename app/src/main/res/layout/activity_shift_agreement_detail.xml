@@ -406,6 +406,76 @@
                     android:text="Hủy đề xuất thỏa thuận"/>
             </LinearLayout>
 
+            <!-- Employer Funding Section -->
+            <LinearLayout
+                android:id="@+id/shiftDetailEmployerFunding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEmployerFund"
+                    style="@style/Widget.GrandMa.VerificationPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="54dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:includeFontPadding="false"
+                    android:textSize="17sp"
+                    android:text="Cấp tiền ca làm"/>
+
+                <TextView
+                    android:id="@+id/tvEmployerWalletInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textColor="#1C6758"
+                    android:textSize="14sp"
+                    android:text="Số dư ví hiện tại: 0 đ"/>
+            </LinearLayout>
+
+            <!-- Status Banner when READY -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSessionReadyNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:strokeWidth="1dp"
+                app:strokeColor="#A5D6A7"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_check_circle_green"
+                        android:contentDescription="Đã bảo chứng"/>
+
+                    <TextView
+                        android:id="@+id/tvSessionReadyNotice"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:textColor="#1B5E20"
+                        android:textSize="15sp"
+                        android:text="Đã tạm giữ cọc an toàn. Ca làm việc đã sẵn sàng."/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
