@@ -27,4 +27,33 @@
     <string name="app_status_rejected">Bị từ chối</string>
     <string name="app_status_withdrawn">Đã rút đơn</string>
     <string name="app_consent_required">Vui lòng đồng ý chia sẻ số điện thoại để người thuê có thể liên hệ.</string>
+
+    <!-- C13: Employer Review & Contact -->
+    <string name="applicant_list_title">Danh sách ứng viên</string>
+    <string name="applicant_tab_all">Tất cả (%1$d)</string>
+    <string name="applicant_tab_pending">Chờ duyệt (%1$d)</string>
+    <string name="applicant_tab_accepted">Đã nhận (%1$d)</string>
+    <string name="applicant_tab_rejected">Đã từ chối (%1$d)</string>
+    <string name="applicant_empty">Chưa có ứng viên nào nộp đơn vào tin tuyển dụng này.</string>
+    <string name="applicant_skills_label">Kỹ năng:</string>
+    <string name="applicant_experience_label">Kinh nghiệm:</string>
+    <string name="applicant_note_label">Lời nhắn:</string>
+    <string name="applicant_phone_label">Số điện thoại:</string>
+    <string name="applicant_phone_hidden">Ứng viên chưa chia sẻ số điện thoại</string>
+    <string name="applicant_btn_call">Gọi điện</string>
+    <string name="applicant_btn_accept">Chấp nhận</string>
+    <string name="applicant_btn_reject">Từ chối</string>
+    <string name="applicant_accept_dialog_title">Chấp nhận ứng viên?</string>
+    <string name="applicant_accept_dialog_msg">Sau khi chấp nhận, thông tin liên hệ của bạn sẽ được chia sẻ cho ứng viên và ứng viên sẽ được thông báo đã trúng tuyển.</string>
+    <string name="applicant_accept_confirm">Chấp nhận</string>
+    <string name="applicant_reject_dialog_title">Từ chối ứng viên?</string>
+    <string name="applicant_reject_dialog_msg">Bạn có chắc muốn từ chối ứng viên này không? Sau khi từ chối sẽ không thể thay đổi lại.</string>
+    <string name="applicant_reject_confirm">Từ chối</string>
+    <string name="applicant_accept_success">Đã chấp nhận ứng viên thành công.</string>
+    <string name="applicant_reject_success">Đã từ chối ứng viên.</string>
+    <string name="applicant_action_cancel">Hủy</string>
+    <string name="applicant_employer_contact">Thông tin liên hệ người thuê</string>
+    <string name="applicant_employer_name">Người thuê:</string>
+    <string name="applicant_view_candidates">Xem danh sách ứng viên (%1$d)</string>
+    <string name="applicant_call_error">Không tìm thấy ứng dụng gọi điện thoại trên máy.</string>
 </resources>

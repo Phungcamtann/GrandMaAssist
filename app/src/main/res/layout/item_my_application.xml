@@ -74,6 +74,66 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
+        <!-- Employer Contact Section (Visible when ACCEPTED) -->
+        <LinearLayout
+            android:id="@+id/appItemEmployerContactSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_section_rounded"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/applicant_employer_contact"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/appItemEmployerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                        android:textColor="#1A1C19" />
+
+                    <TextView
+                        android:id="@+id/appItemEmployerPhone"
+                        style="@style/Widget.GrandMa.PublicCardBody"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#424940" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/appItemBtnCallEmployer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="44dp"
+                    android:minWidth="80dp"
+                    android:text="@string/applicant_btn_call"
+                    android:textColor="@color/white"
+                    android:background="@drawable/button_primary"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <View
             android:id="@+id/appItemDivider"
             android:layout_width="match_parent"

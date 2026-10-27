@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/jobApplicantsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface_ivory">
+
+    <include layout="@layout/role_topbar"/>
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:id="@+id/applicantsToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/applicantsBack"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:background="@drawable/public_back_button"
+            android:textSize="18sp"
+            android:text="@string/n_back"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/applicantsReload"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:textSize="16sp"
+            android:text="@string/pb_reload_short"
+            android:contentDescription="@string/pb_reload"/>
+    </LinearLayout>
+
+    <!-- Header Titles -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/applicantsTitle"
+            style="@style/Widget.GrandMa.VerificationHeading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.GrandMa.Title"
+            android:textSize="26sp"
+            android:text="@string/applicant_list_title"/>
+
+        <TextView
+            android:id="@+id/applicantsJobSubtitle"
+            style="@style/Widget.GrandMa.PublicCardBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/brand_green"
+            android:textAppearance="@style/TextAppearance.GrandMa.Label"
+            android:maxLines="2"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- Filter Tabs (HorizontalScrollView for 4 tabs) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:fillViewport="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantsTabAll"
+                style="@style/Widget.GrandMa.VerificationPrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="100dp"
+                android:layout_marginEnd="6dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="14sp"
+                android:text="Tất cả"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantsTabPending"
+                style="@style/Widget.GrandMa.VerificationSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="110dp"
+                android:layout_marginEnd="6dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="14sp"
+                android:text="Chờ duyệt"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantsTabAccepted"
+                style="@style/Widget.GrandMa.VerificationSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="110dp"
+                android:layout_marginEnd="6dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="14sp"
+                android:text="Đã nhận"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantsTabRejected"
+                style="@style/Widget.GrandMa.VerificationSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:minWidth="110dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="14sp"
+                android:text="Đã từ chối"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <ProgressBar
+        android:id="@+id/applicantsProgress"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/applicantsMessage"
+        style="@style/Widget.GrandMa.VerificationMessage"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:visibility="gone"/>
+
+    <ScrollView
+        android:id="@+id/applicantsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/applicantsContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Empty Layout -->
+            <LinearLayout
+                android:id="@+id/applicantsEmptyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_nav_queue"
+                    app:tint="@color/brand_green"
+                    android:alpha="0.4"
+                    android:importantForAccessibility="no"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                    android:text="@string/applicant_list_title"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                    android:text="@string/applicant_empty"/>
+            </LinearLayout>
+
+            <!-- List Body -->
+            <LinearLayout
+                android:id="@+id/applicantsListBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/role_navigation"/>
+</LinearLayout>

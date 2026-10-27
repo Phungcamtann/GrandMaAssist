@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:screenReaderFocusable="true"
+    android:saveEnabled="false"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/public_card_stroke"
+    app:rippleColor="@color/button_ripple">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header: Name + Status Badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/applicantItemName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.GrandMa.PublicCardTitle"
+                android:textColor="#1A1C19"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/applicantItemBadge"
+                style="@style/Widget.GrandMa.PublicBadge"
+                android:layout_marginStart="8dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <!-- Applied Date -->
+        <TextView
+            android:id="@+id/applicantItemDate"
+            style="@style/Widget.GrandMa.PublicCardBody"
+            android:layout_marginTop="4dp"
+            android:textColor="#747775"
+            android:textSize="13sp" />
+
+        <!-- Phone & Quick Dial Section -->
+        <LinearLayout
+            android:id="@+id/applicantPhoneSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:background="@drawable/bg_section_rounded">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/applicant_phone_label"
+                    android:textColor="#424940"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/applicantItemPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#1A1C19"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantItemBtnCall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:minWidth="80dp"
+                android:text="@string/applicant_btn_call"
+                android:textColor="@color/white"
+                android:background="@drawable/button_primary"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Skills Section -->
+        <LinearLayout
+            android:id="@+id/applicantSkillsSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/applicant_skills_label"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758" />
+
+            <TextView
+                android:id="@+id/applicantItemSkills"
+                style="@style/Widget.GrandMa.PublicCardBody"
+                android:layout_marginTop="2dp"
+                android:textColor="#1A1C19" />
+        </LinearLayout>
+
+        <!-- Experience Section -->
+        <LinearLayout
+            android:id="@+id/applicantExpSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/applicant_experience_label"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#1C6758" />
+
+            <TextView
+                android:id="@+id/applicantItemExperience"
+                style="@style/Widget.GrandMa.PublicCardBody"
+                android:layout_marginTop="2dp"
+                android:textColor="#1A1C19" />
+        </LinearLayout>
+
+        <!-- Note / Message Section -->
+        <LinearLayout
+            android:id="@+id/applicantNoteSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/applicant_note_label"
+                android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                android:textColor="#424940" />
+
+            <TextView
+                android:id="@+id/applicantItemMessage"
+                style="@style/Widget.GrandMa.PublicCardBody"
+                android:layout_marginTop="2dp"
+                android:textColor="#424940"
+                android:textStyle="italic" />
+        </LinearLayout>
+
+        <!-- Action Divider & Buttons (Only visible for PENDING) -->
+        <View
+            android:id="@+id/applicantItemDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/public_card_border" />
+
+        <LinearLayout
+            android:id="@+id/applicantItemActionSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantItemBtnReject"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/applicant_btn_reject"
+                android:textColor="#C62828"
+                android:background="@drawable/button_secondary" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/applicantItemBtnAccept"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/applicant_btn_accept"
+                android:textColor="@color/white"
+                android:background="@drawable/button_primary" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

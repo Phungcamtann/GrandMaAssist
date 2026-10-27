@@ -16,6 +16,7 @@ import java.text.*;
 import java.util.*;
 import vn.edu.ueh.nhom4.grandmaassist.app.R;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.*;
+import vn.edu.ueh.nhom4.grandmaassist.app.ui.applications.JobApplicantsActivity;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation.RoleNavigationBar;
 import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.JobPostViewModel;
 
@@ -59,6 +60,10 @@ public final class JobPostActivity extends AppCompatActivity {
         click(R.id.jpHide, () -> showReasonInput("HIDE", "Lý do ẩn tin"));
         click(R.id.jpConfirmAction, () -> { if ("HIDE".equals(vm.reasonAction)) vm.hidePost(); else vm.decide(false); });
         click(R.id.jpCancelReject,()->{vm.reasonVisible=false;vm.reason="";vm.message="";vm.emit();});
+        click(R.id.jpViewApplicants, () -> {
+            if (vm.selected == null || vm.busy) return;
+            openApplicants(vm.selected.content.id, vm.selected.content.title);
+        });
         click(R.id.jpClose, () -> {
             if (vm.selected == null || vm.busy) return;
             new AlertDialog.Builder(this)
@@ -130,6 +135,9 @@ public final class JobPostActivity extends AppCompatActivity {
 
                     text(c,p.areaName+"\n"+money(p.content),false);
                     button(c,"Xem tin",()->vm.open(p.content.id));
+                    if (!vm.admin && ("OPEN".equals(p.status) || "CLOSED".equals(p.status))) {
+                        button(c, "Xem danh sách ứng viên", () -> openApplicants(p.content.id, p.content.title));
+                    }
                 }
             }else{
                 JobPost p=vm.selected;LocalJobDraft d=p.content;LinearLayout c=card(body);
@@ -170,6 +178,7 @@ public final class JobPostActivity extends AppCompatActivity {
         show(R.id.jpReject, pending && !vm.reasonVisible);
         show(R.id.jpHide, canHide && !vm.reasonVisible);
         show(R.id.jpReasonSection, vm.reasonVisible);
+        show(R.id.jpViewApplicants, isOwner && (isOpen || isClosed) && !vm.reasonVisible);
         show(R.id.jpEdit, isOwner && (isRejected || isOpen) && !vm.reasonVisible);
         show(R.id.jpClose, isOwner && isOpen && !vm.reasonVisible);
         show(R.id.jpMore, vm.ready && vm.selected == null && vm.more);
@@ -180,7 +189,7 @@ public final class JobPostActivity extends AppCompatActivity {
             set(R.id.jpEdit, "Sửa và gửi lại");
         }
 
-        set(R.id.jpReason,vm.reason);for(int id:new int[]{R.id.jpReload,R.id.jpMore,R.id.jpApprove,R.id.jpReject,R.id.jpHide,R.id.jpConfirmAction,R.id.jpCancelReject,R.id.jpReason,R.id.jpEdit,R.id.jpClose,R.id.jpDrafts,R.id.jpCreate,R.id.jpProfiles,R.id.jpBack})findViewById(id).setEnabled(!vm.busy);
+        set(R.id.jpReason,vm.reason);for(int id:new int[]{R.id.jpReload,R.id.jpMore,R.id.jpApprove,R.id.jpReject,R.id.jpHide,R.id.jpConfirmAction,R.id.jpCancelReject,R.id.jpReason,R.id.jpViewApplicants,R.id.jpEdit,R.id.jpClose,R.id.jpDrafts,R.id.jpCreate,R.id.jpProfiles,R.id.jpBack})findViewById(id).setEnabled(!vm.busy);
         enabled(findViewById(R.id.jpBody),!vm.busy);rendering=false;
         if(lastPage!=vm.pageEvent){lastPage=vm.pageEvent;findViewById(R.id.jpScroll).post(()->findViewById(R.id.jpScroll).scrollTo(0,0));}
     }
@@ -232,6 +241,12 @@ public final class JobPostActivity extends AppCompatActivity {
         lp.leftMargin = dp(8);
         badge.setLayoutParams(lp);
         return badge;
+    }
+    private void openApplicants(String jobId, String jobTitle) {
+        Intent intent = new Intent(this, JobApplicantsActivity.class);
+        intent.putExtra(JobApplicantsActivity.EXTRA_JOB_ID, jobId);
+        intent.putExtra(JobApplicantsActivity.EXTRA_JOB_TITLE, jobTitle);
+        startActivity(intent);
     }
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private void click(int id,Runnable r){findViewById(id).setOnClickListener(v->r.run());}

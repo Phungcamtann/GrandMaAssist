@@ -3,6 +3,7 @@ package vn.edu.ueh.nhom4.grandmaassist.app.ui.applications;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -225,6 +226,28 @@ public final class MyApplicationsActivity extends AppCompatActivity {
             message.setVisibility(View.GONE);
         }
 
+        View empSection = card.findViewById(R.id.appItemEmployerContactSection);
+        TextView empName = card.findViewById(R.id.appItemEmployerName);
+        TextView empPhone = card.findViewById(R.id.appItemEmployerPhone);
+        AppCompatButton btnCallEmp = card.findViewById(R.id.appItemBtnCallEmployer);
+
+        if (app.isAccepted() && app.employerContactSnapshot != null) {
+            empSection.setVisibility(View.VISIBLE);
+            String empDisplayName = app.employerContactSnapshot.displayName;
+            empName.setText(empDisplayName != null && !empDisplayName.trim().isEmpty() ? empDisplayName : "Người tuyển dụng");
+            final String rawPhone = app.employerContactSnapshot.phoneE164;
+            if (rawPhone != null && !rawPhone.trim().isEmpty()) {
+                empPhone.setText(rawPhone);
+                btnCallEmp.setVisibility(View.VISIBLE);
+                btnCallEmp.setOnClickListener(v -> dialPhone(rawPhone));
+            } else {
+                empPhone.setText("Chưa cập nhật số điện thoại");
+                btnCallEmp.setVisibility(View.GONE);
+            }
+        } else {
+            empSection.setVisibility(View.GONE);
+        }
+
         if (app.isPending()) {
             divider.setVisibility(View.VISIBLE);
             actionSection.setVisibility(View.VISIBLE);
@@ -286,6 +309,17 @@ public final class MyApplicationsActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.app_withdraw_cancel, null)
                 .show();
+    }
+
+    private void dialPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) return;
+        try {
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phone.trim()));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.applicant_call_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private int dp(int n) {

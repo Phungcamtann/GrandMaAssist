@@ -223,6 +223,109 @@ public final class ApplicationRepository {
         }));
     }
 
+    public Task<List<Application>> getApplicationsForJob(String uid, String jobId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+        Query q = db.collection("applications")
+                .whereEqualTo("employerId", uid)
+                .whereEqualTo("jobId", jobId)
+                .limit(50);
+
+        return bounded(q.get(Source.SERVER).continueWith(t -> {
+            if (!t.isSuccessful()) throw t.getException();
+            if (!same(uid)) throw new Failure("SESSION");
+            QuerySnapshot s = t.getResult();
+            List<Application> list = new ArrayList<>();
+            if (s != null) {
+                for (DocumentSnapshot doc : s) {
+                    Application a = Application.fromSnapshot(doc);
+                    if (a != null) list.add(a);
+                }
+            }
+            list.sort((a, b) -> {
+                if (a.createdAt == null && b.createdAt == null) return 0;
+                if (a.createdAt == null) return 1;
+                if (b.createdAt == null) return -1;
+                return b.createdAt.compareTo(a.createdAt);
+            });
+            return list;
+        }));
+    }
+
+    public Task<Void> accept(String uid, String applicationId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+            DocumentReference appRef = db.collection("applications").document(applicationId);
+            DocumentSnapshot app = tx.get(appRef);
+            if (!app.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(app.getString("employerId"))) throw new Failure("FORBIDDEN");
+            if (!Application.STATUS_PENDING.equals(app.getString("status"))) {
+                throw new Failure("APPLICATION_NOT_PENDING");
+            }
+
+            String jobId = app.getString("jobId");
+            if (jobId != null) {
+                DocumentReference jobRef = db.collection("jobs").document(jobId);
+                DocumentSnapshot job = tx.get(jobRef);
+                if (!job.exists()) throw new Failure("JOB_NOT_FOUND");
+                String jobStatus = job.getString("status");
+                if (!"OPEN".equals(jobStatus) && !"CLOSED".equals(jobStatus)) {
+                    throw new Failure("JOB_INACTIVE");
+                }
+            }
+
+            DocumentReference userRef = db.collection("users").document(uid);
+            DocumentSnapshot user = tx.get(userRef);
+            String displayName = user.exists() ? user.getString("displayName") : "";
+            String phoneE164 = user.exists() ? user.getString("phoneE164") : "";
+            if (phoneE164 == null) phoneE164 = "";
+            if (displayName == null || displayName.trim().isEmpty()) displayName = "Người tuyển dụng";
+
+            Map<String, Object> contactMap = new HashMap<>();
+            contactMap.put("displayName", displayName);
+            contactMap.put("phoneE164", phoneE164);
+            contactMap.put("acceptedAt", FieldValue.serverTimestamp());
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", Application.STATUS_ACCEPTED);
+            updates.put("employerContactSnapshot", contactMap);
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+            tx.update(appRef, updates);
+            return null;
+        }));
+    }
+
+    public Task<Void> reject(String uid, String applicationId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+            DocumentReference appRef = db.collection("applications").document(applicationId);
+            DocumentSnapshot app = tx.get(appRef);
+            if (!app.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(app.getString("employerId"))) throw new Failure("FORBIDDEN");
+            if (!Application.STATUS_PENDING.equals(app.getString("status"))) {
+                throw new Failure("APPLICATION_NOT_PENDING");
+            }
+
+            String jobId = app.getString("jobId");
+            if (jobId != null) {
+                DocumentReference jobRef = db.collection("jobs").document(jobId);
+                DocumentSnapshot job = tx.get(jobRef);
+                if (!job.exists()) throw new Failure("JOB_NOT_FOUND");
+                String jobStatus = job.getString("status");
+                if (!"OPEN".equals(jobStatus) && !"CLOSED".equals(jobStatus)) {
+                    throw new Failure("JOB_INACTIVE");
+                }
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", Application.STATUS_REJECTED);
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+            tx.update(appRef, updates);
+            return null;
+        }));
+    }
+
     public Task<Application> getApplicationForJob(String uid, String jobId) {
         if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
         String applicationId = jobId + "_" + uid;
@@ -275,6 +378,12 @@ public final class ApplicationRepository {
                         return "Không thể ứng tuyển vào công việc do chính mình đăng.";
                     case "CANNOT_WITHDRAW":
                         return "Đơn ứng tuyển không còn ở trạng thái chờ để rút.";
+                    case "APPLICATION_NOT_PENDING":
+                        return "Đơn ứng tuyển không còn ở trạng thái chờ duyệt (ứng viên đã rút đơn hoặc đã được phản hồi).";
+                    case "JOB_INACTIVE":
+                        return "Tin tuyển dụng này hiện không ở trạng thái hợp lệ để tiếp nhận ứng viên.";
+                    case "NOT_FOUND":
+                        return "Không tìm thấy thông tin đơn ứng tuyển.";
                     case "FORBIDDEN":
                         return "Tài khoản không đủ quyền thực hiện thao tác này.";
                     case "MESSAGE_TOO_LONG":

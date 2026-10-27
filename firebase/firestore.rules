@@ -577,7 +577,7 @@ service cloud.firestore {
     match /applications/{applicationId} {
       allow get: if (request.auth != null && !exists(applicationPath(applicationId)))
         || (request.auth != null && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin()));
-      allow list: if request.auth != null && request.query.limit <= 20
+      allow list: if request.auth != null && request.query.limit <= 50
         && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin());
       allow create: if request.auth != null && resource == null
         && applicationShape(request.resource.data, applicationId)

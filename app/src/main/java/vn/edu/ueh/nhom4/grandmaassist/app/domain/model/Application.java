@@ -19,12 +19,14 @@ public final class Application {
     public final boolean sharePhoneConsent;
     public final ApplicantSnapshot applicantSnapshot;
     public final JobSnapshot jobSnapshot;
+    public final EmployerContactSnapshot employerContactSnapshot;
     public final Timestamp createdAt;
     public final Timestamp updatedAt;
 
     public Application(String id, String jobId, String seekerId, String employerId, String message,
                        String status, boolean sharePhoneConsent, ApplicantSnapshot applicantSnapshot,
-                       JobSnapshot jobSnapshot, Timestamp createdAt, Timestamp updatedAt) {
+                       JobSnapshot jobSnapshot, EmployerContactSnapshot employerContactSnapshot,
+                       Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.jobId = jobId;
         this.seekerId = seekerId;
@@ -34,8 +36,16 @@ public final class Application {
         this.sharePhoneConsent = sharePhoneConsent;
         this.applicantSnapshot = applicantSnapshot;
         this.jobSnapshot = jobSnapshot;
+        this.employerContactSnapshot = employerContactSnapshot;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public Application(String id, String jobId, String seekerId, String employerId, String message,
+                       String status, boolean sharePhoneConsent, ApplicantSnapshot applicantSnapshot,
+                       JobSnapshot jobSnapshot, Timestamp createdAt, Timestamp updatedAt) {
+        this(id, jobId, seekerId, employerId, message, status, sharePhoneConsent,
+             applicantSnapshot, jobSnapshot, null, createdAt, updatedAt);
     }
 
     @SuppressWarnings("unchecked")
@@ -53,11 +63,12 @@ public final class Application {
         Boolean consent = (Boolean) data.get("sharePhoneConsent");
         ApplicantSnapshot applicant = ApplicantSnapshot.fromMap((Map<String, Object>) data.get("applicantSnapshot"));
         JobSnapshot job = JobSnapshot.fromMap((Map<String, Object>) data.get("jobSnapshot"));
+        EmployerContactSnapshot employer = EmployerContactSnapshot.fromMap((Map<String, Object>) data.get("employerContactSnapshot"));
         Timestamp created = (Timestamp) data.get("createdAt");
         Timestamp updated = (Timestamp) data.get("updatedAt");
 
         return new Application(id, jobId, seekerId, employerId, message, status,
-                Boolean.TRUE.equals(consent), applicant, job, created, updated);
+                Boolean.TRUE.equals(consent), applicant, job, employer, created, updated);
     }
 
     public boolean isPending() { return STATUS_PENDING.equals(status); }
