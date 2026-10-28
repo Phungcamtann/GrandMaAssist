@@ -84,17 +84,22 @@
     <!-- Direct actions below card -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/accountHubWallet"
-        style="@style/Widget.GrandMa.HomeButton"
-        android:layout_marginTop="16dp"
-        android:text="Ví tiền của tôi"
-        android:drawableStart="@drawable/ic_wallet"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/accountHubSignOut"
-        style="@style/Widget.GrandMa.HomeButton"
-        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="54dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/button_sign_out"
+        android:gravity="center"
         android:text="@string/auth_sign_out"
-        android:textColor="@color/text_error"/>
+        android:textColor="#E53935"
+        android:textSize="17sp"
+        android:textStyle="bold"/>
 
     <!-- Dummy stub views kept for ID reference compatibility without rendering -->
     <View android:id="@+id/accountHubProfile" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>

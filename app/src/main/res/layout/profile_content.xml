@@ -367,22 +367,29 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnProfileHelp"
-            style="@style/Widget.GrandMa.HomeButton"
-            android:layout_marginTop="10dp"
-            android:text="Trợ giúp &amp; Hướng dẫn"/>
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnProfileSettings"
             style="@style/Widget.GrandMa.HomeButton"
             android:layout_marginTop="10dp"
-            android:text="Cài đặt"/>
+            android:text="Cài đặt hỗ trợ tiếp cận"
+            android:drawableStart="@drawable/ic_settings"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnProfileSignOut"
-            style="@style/Widget.GrandMa.HomeButton"
-            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="54dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_sign_out"
+            android:gravity="center"
             android:text="@string/auth_sign_out"
-            android:textColor="@color/text_error"/>
+            android:textColor="#E53935"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
 
         <!-- Hidden legacy views for safe reference compatibility -->
         <LinearLayout android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">

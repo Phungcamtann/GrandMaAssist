@@ -166,8 +166,8 @@ public final class PublicJobsActivity extends AppCompatActivity {
                 btnApply.setEnabled(!vm.busy && !vm.applyCheckBusy);
                 if (vm.hasApplied) {
                     btnApply.setText(R.string.app_already_applied);
-                    btnApply.setBackgroundResource(R.drawable.button_secondary);
-                    btnApply.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+                    btnApply.setBackgroundResource(R.drawable.button_primary);
+                    btnApply.setTextColor(Color.WHITE);
                 } else {
                     btnApply.setText(R.string.app_apply_now);
                     btnApply.setBackgroundResource(R.drawable.button_primary);
@@ -334,14 +334,14 @@ public final class PublicJobsActivity extends AppCompatActivity {
 
     private TextView labelHeading(LinearLayout parent, String text) {
         TextView tv = label(parent, text, true);
-        tv.setTextSize(15);
+        tv.setTextSize(17);
         tv.setTextColor(Color.parseColor("#1C6758"));
         return tv;
     }
 
     private TextView labelBody(LinearLayout parent, String text) {
         TextView tv = label(parent, text, false);
-        tv.setTextSize(15);
+        tv.setTextSize(17);
         tv.setTextColor(Color.parseColor("#1A1C19"));
         return tv;
     }

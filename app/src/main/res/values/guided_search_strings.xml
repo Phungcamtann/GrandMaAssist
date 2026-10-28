@@ -53,12 +53,12 @@
     <string name="gs_seeker_home_title">Cô/chú mong muốn công việc như thế nào ?</string>
     <string name="gs_seeker_home_intro">Cứ thong thả, từng bước một.</string>
     <string name="gs_seeker_help_me">Giúp tôi tìm việc</string>
-    <string name="gs_seeker_pending">Việc cần xử lý</string>
+    <string name="gs_seeker_pending">Việc làm sắp tới</string>
     <string name="gs_seeker_pending_sub">1 việc chờ cô/chú xem</string>
     <string name="gs_seeker_my_jobs">Việc của tôi</string>
     <string name="gs_seeker_my_jobs_sub">Lịch làm và tiền công</string>
     <string name="gs_seeker_other_jobs">Xem các việc khác</string>
     <string name="gs_seeker_other_jobs_sub">Tìm việc phù hợp</string>
-    <string name="gs_seeker_support">Trợ giúp</string>
+    <string name="gs_seeker_support">Liên hệ tổng đài</string>
     <string name="gs_seeker_support_sub">Có người hướng dẫn</string>
 </resources>

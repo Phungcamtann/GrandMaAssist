@@ -6,11 +6,11 @@
     <string name="phone_welcome">Xin chào!</string>
     <string name="phone_intro">Mời cô/chú nhập số điện thoại.</string>
     <string name="phone_number_label">Số điện thoại</string>
-    <string name="phone_number_hint">0xxxxxxxxx hoặc +84xxxxxxxxx</string>
-    <string name="phone_sms_hint">Cô/chú sẽ nhận mã qua SMS.</string>
+    <string name="phone_number_hint">Điền số điện thoại</string>
+    <string name="phone_sms_hint">Mã sẽ được gửi vào tin nhắn</string>
     <string name="phone_send">Gửi mã xác nhận</string>
     <string name="phone_review_title">Kiểm tra số điện thoại</string>
-    <string name="phone_consent">Google sẽ xử lý số điện thoại để xác thực và chống lạm dụng. Có thể phát sinh cước SMS.</string>
+    <string name="phone_consent">Có thể phát sinh cước phí để gửi tin nhắn. Nếu ứng dụng chuyển sang trình duyệt kiểm tra thì cô/chú cứ yên tâm chờ chút là thành công nhé</string>
     <string name="phone_confirm_send">Xác nhận gửi SMS</string>
     <string name="phone_edit">Quay lại sửa số điện thoại</string>
     <string name="phone_edit_short">Sửa số điện thoại</string>

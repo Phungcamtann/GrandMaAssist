@@ -1,6 +1,9 @@
 package vn.edu.ueh.nhom4.grandmaassist.app.ui.navigation;
 
 import android.content.Intent;
+import android.graphics.Typeface;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository;
+import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +52,7 @@ public final class RoleHomePanel {
             }
         });
         click(R.id.homeAudioGuide, () -> Toast.makeText(activity, "Đang phát hướng dẫn bằng giọng nói...", Toast.LENGTH_SHORT).show());
+        click(R.id.homeHelpFuture, () -> CallCenterDialog.show(activity));
         click(R.id.accountHubBack,()->navigate.accept(RoleNavigationBar.Action.HOME));
         click(R.id.accountHubProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
         click(R.id.accountHubWallet, () -> {
@@ -97,7 +101,7 @@ public final class RoleHomePanel {
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.white));
             ((androidx.appcompat.widget.AppCompatButton)activity.findViewById(R.id.homeMainFuture)).setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
 
-            text(R.id.homeAttentionFuture, activity.getString(R.string.gs_seeker_pending));
+            text(R.id.homeAttentionFuture, "Việc làm sắp tới");
             text(R.id.homeWorkFuture, activity.getString(R.string.gs_seeker_my_jobs));
             text(R.id.homeOtherFuture, "Xem các việc khác");
             text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support));
@@ -108,6 +112,16 @@ public final class RoleHomePanel {
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeOtherFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
+            show(R.id.homeOtherFuture, true);
+            int[] seekerBigButtons = new int[]{R.id.homeMainFuture, R.id.homeAttentionFuture, R.id.homeWorkFuture, R.id.homeOtherFuture};
+            for (int bid : seekerBigButtons) {
+                View b = activity.findViewById(bid);
+                if (b instanceof TextView) {
+                    ((TextView) b).setTextSize(20f);
+                    ((TextView) b).setTypeface(null, Typeface.BOLD);
+                    b.setMinimumHeight(Math.round(80 * activity.getResources().getDisplayMetrics().density));
+                }
+            }
         } else {
             show(R.id.homeAudioGuide, false);
             text(R.id.homeTitle,activity.getString(admin?R.string.n_admin_title:R.string.n_employer_title));
@@ -128,7 +142,8 @@ public final class RoleHomePanel {
             show(R.id.homeIntro, !employerVerified);
             text(R.id.homeMainFuture,activity.getString(R.string.jd_create));
             text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));
-            text(R.id.homeOtherFuture,"Ca làm việc");
+            text(R.id.homeAttentionFuture, "Việc làm sắp tới");
+            show(R.id.homeOtherFuture, false);
             activity.findViewById(R.id.homeMainFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             activity.findViewById(R.id.homeMainFuture).setBackgroundResource(R.drawable.button_primary);
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.button_primary_text));
@@ -136,8 +151,6 @@ public final class RoleHomePanel {
             ((TextView)activity.findViewById(R.id.homeAttentionFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeWorkFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
-            activity.findViewById(R.id.homeOtherFuture).setEnabled(active && !vm.busy && !auth.isBusy());
-            ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
         }
 
         future(R.id.homePostsFuture,R.string.n_admin_posts);future(R.id.homeReportsFuture,R.string.n_admin_reports);
@@ -193,6 +206,36 @@ public final class RoleHomePanel {
         }
         View ver = activity.findViewById(R.id.accountHubVerification);
         if (ver != null) ver.setEnabled(!vm.busy && !auth.isBusy() && active);
+        View helpBtn = activity.findViewById(R.id.homeHelpFuture);
+        if (helpBtn != null) {
+            helpBtn.setEnabled(!vm.busy && !auth.isBusy());
+            if (helpBtn instanceof TextView) {
+                ((TextView) helpBtn).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
+            }
+        }
+
+        if (auth.account != null && auth.account.uid != null && !auth.account.uid.isEmpty() && (seeker || employer)) {
+            new WorkSessionRepository()
+                    .getSessionsForUser(auth.account.uid, role)
+                    .addOnSuccessListener(sessions -> {
+                        if (activity.isFinishing() || activity.isDestroyed()) return;
+                        int count = 0;
+                        if (sessions != null) {
+                            for (WorkSession s : sessions) {
+                                if (!s.isCompleted() && !s.isCancelled() && !WorkSession.STATUS_DISPUTED.equals(s.status)) {
+                                    boolean bothConfirmed = s.isReady() || s.isInProgress() || s.isCompletionPending()
+                                            || (s.employerAcceptedVersion != null && s.seekerAcceptedVersion != null
+                                                && s.employerAcceptedVersion.equals(s.agreementVersion) && s.seekerAcceptedVersion.equals(s.agreementVersion));
+                                    if (bothConfirmed) {
+                                        count++;
+                                    }
+                                }
+                            }
+                        }
+                        String badge = count > 0 ? " (" + count + ")" : "";
+                        text(R.id.homeAttentionFuture, "Việc làm sắp tới" + badge);
+                    });
+        }
     }
     private String capped(long count){return count>=50?"50+":String.valueOf(count);}
 }

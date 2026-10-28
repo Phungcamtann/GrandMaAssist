@@ -230,7 +230,17 @@ public final class ProfilePanel {
     private void click(int id, Runnable action) { view(id).setOnClickListener(v -> action.run()); }
     private void signOut() {
         if (vm.busy) return;
-        discardThen(() -> { vm.dirty = false; auth.signOut(); });
+        discardThen(() -> {
+            new AlertDialog.Builder(activity)
+                    .setTitle("Xác nhận đăng xuất")
+                    .setMessage("Cô/chú có chắc chắn muốn đăng xuất khỏi ứng dụng không?")
+                    .setNegativeButton("Ở lại", null)
+                    .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                        vm.dirty = false;
+                        auth.signOut();
+                    })
+                    .show();
+        });
     }
     private void discardThen(Runnable action) {
         if (vm.busy) return;

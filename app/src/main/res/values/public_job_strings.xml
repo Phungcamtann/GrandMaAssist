@@ -1,8 +1,8 @@
 <resources>
     <string name="pb_title">Việc đang tuyển</string>
     <string name="pb_detail">Chi tiết công việc</string>
-    <string name="pb_guest">Xem việc không cần đăng nhập</string>
-    <string name="pb_open">Xem việc</string>
+    <string name="pb_guest">Xem trước công việc</string>
+    <string name="pb_open">Xem trước công việc</string>
     <string name="pb_area">Khu vực</string>
     <string name="pb_category">Loại việc</string>
     <string name="pb_all_areas">Tất cả khu vực</string>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_section_rounded"
+    android:padding="22dp">
+
+    <!-- Title Centered & Bold -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Liên hệ tổng đài"
+        android:textColor="#1C6758"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <!-- Description -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Cô/chú có thắc mắc về ứng dụng hoặc cần hỗ trợ trực tiếp có thể liên hệ qua các số liên hệ theo bộ phận dưới đây. Cô/chú có thể ấn trực tiếp vào biểu tượng để gọi"
+        android:textColor="#5C6360"
+        android:textSize="15sp"
+        android:lineSpacingExtra="3dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="14dp"
+        android:background="#E0E4E1" />
+
+    <!-- Section 1: Thông tin ứng dụng -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1. Cần hỗ trợ về thông tin ứng dụng"
+        android:textColor="#1A1C19"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Contact 1 -->
+    <LinearLayout
+        android:id="@+id/btnCallLong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="LH1: Phạm Thiên Long: 0936719323"
+            android:textColor="#2C3332"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_phone_support"
+            android:background="@drawable/public_job_badge"
+            android:contentDescription="Gọi cho Phạm Thiên Long" />
+    </LinearLayout>
+
+    <!-- Contact 2 -->
+    <LinearLayout
+        android:id="@+id/btnCallTai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="LH2: Nguyễn Duy Thành Tài: 0935272284"
+            android:textColor="#2C3332"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_phone_support"
+            android:background="@drawable/public_job_badge"
+            android:contentDescription="Gọi cho Nguyễn Duy Thành Tài" />
+    </LinearLayout>
+
+    <!-- Section 2: Chính sách -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="2. Có thắc mắc về các chính sách và thông tin khác"
+        android:textColor="#1A1C19"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Contact 3 -->
+    <LinearLayout
+        android:id="@+id/btnCallSam"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="LH: Dương Hoàng Sâm: 0775446799"
+            android:textColor="#2C3332"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_phone_support"
+            android:background="@drawable/public_job_badge"
+            android:contentDescription="Gọi cho Dương Hoàng Sâm" />
+    </LinearLayout>
+
+    <!-- Section 3: Lỗi kỹ thuật -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="3. Cần hỗ trợ về các vấn đề lỗi kỹ thuật"
+        android:textColor="#1A1C19"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Contact 4 -->
+    <LinearLayout
+        android:id="@+id/btnCallTan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="LH: Phùng Cẩm Tân: 0878805819"
+            android:textColor="#2C3332"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_phone_support"
+            android:background="@drawable/public_job_badge"
+            android:contentDescription="Gọi cho Phùng Cẩm Tân" />
+    </LinearLayout>
+
+    <!-- Cheer text -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:gravity="center"
+        android:text="Đội ngũ GrandMaAssist luôn sẵn sàng hỗ trợ nhé!"
+        android:textColor="#1C6758"
+        android:textSize="15sp"
+        android:textStyle="italic" />
+
+    <!-- Close button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnCloseCallCenter"
+        style="@style/Widget.GrandMa.PublicToolbarButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:minHeight="48dp"
+        android:layout_marginTop="16dp"
+        android:text="Đóng"
+        android:textSize="16sp" />
+</LinearLayout>

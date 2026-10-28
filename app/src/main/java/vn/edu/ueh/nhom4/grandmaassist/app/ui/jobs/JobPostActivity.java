@@ -25,6 +25,7 @@ public final class JobPostActivity extends AppCompatActivity {
     public static final String POST_ID="post_id";
     private JobPostViewModel vm;private RoleNavigationBar nav;
     private Object bodyKey;private long lastPage;private boolean rendering;
+    private int currentFilterTab = 0;
     private final androidx.activity.result.ActivityResultLauncher<Intent> editor=registerForActivityResult(
         new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),r->{
             if(vm==null||vm.ended)return;
@@ -51,6 +52,9 @@ public final class JobPostActivity extends AppCompatActivity {
         });
         click(R.id.jpBack,this::back);
         click(R.id.jpCreate, () -> editor.launch(new Intent(this, JobDraftActivity.class).putExtra(JobDraftActivity.CREATE_NEW, true)));
+        click(R.id.jpTabActive, () -> setFilterTab(0));
+        click(R.id.jpTabCompleted, () -> setFilterTab(1));
+        click(R.id.jpTabDrafts, () -> setFilterTab(2));
         click(R.id.jpDrafts,()->guard(()->leave("DRAFTS")));
         click(R.id.jpProfiles,()->guard(()->leave("PROFILES")));
         click(R.id.jpReload,()->guard(()->{if(!vm.ready)vm.authorize(getIntent().getStringExtra(POST_ID)==null?"":getIntent().getStringExtra(POST_ID));else if(vm.selected!=null)vm.open(vm.selected.content.id);else vm.load(false);}));
@@ -118,38 +122,33 @@ public final class JobPostActivity extends AppCompatActivity {
         show(R.id.jpProgress,vm.busy);set(R.id.jpMessage,vm.message);show(R.id.jpMessage,!vm.message.isEmpty());
         show(R.id.jpEmployerActions, vm.ready && !vm.admin && vm.selected == null);
         show(R.id.jpProfiles, vm.ready && vm.admin && vm.selected == null);
-        Object key=vm.selected==null?vm.items:vm.selected;
+        Object key = vm.selected == null ? (vm.items.hashCode() + "_" + currentFilterTab) : vm.selected;
         if(bodyKey!=key){bodyKey=key;LinearLayout body=findViewById(R.id.jpBody);body.removeAllViews();
             if(vm.selected==null){
-                for(JobPost p:vm.items){
-                    LinearLayout c=card(body);
-                    if("CLOSED".equals(p.status))c.setAlpha(0.88f);
-
-                    LinearLayout header=new LinearLayout(this);
-                    header.setOrientation(LinearLayout.HORIZONTAL);
-                    header.setGravity(Gravity.CENTER_VERTICAL);
-                    LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(-1,-2);
-                    hp.topMargin=dp(4);
-
-                    TextView title=new TextView(this);
-                    title.setTextAppearance(R.style.TextAppearance_GrandMa_Label);
-                    title.setText(p.content.title);
-                    title.setSaveEnabled(false);
-                    ViewCompat.setAccessibilityHeading(title,true);
-                    if("CLOSED".equals(p.status))title.setTextColor(Color.parseColor("#616161"));
-                    header.addView(title,new LinearLayout.LayoutParams(0,-2,1f));
-
-                    header.addView(statusBadge(p.status));
-                    c.addView(header,hp);
-
-                    text(c,p.areaName+"\n"+money(p.content),false);
-                    button(c,"Xem tin",()->vm.open(p.content.id));
-                    WorkSession itemSession = vm.jobSessions.get(p.content.id);
-                    if (!vm.admin && ("OPEN".equals(p.status) || "CLOSED".equals(p.status))) {
-                        if (itemSession != null) {
-                            button(c, "Xem thỏa thuận ca", () -> ShiftAgreementDetailActivity.start(this, itemSession.id));
+                if (vm.admin) {
+                    for (JobPost p : vm.items) renderPostCard(body, p);
+                } else {
+                    updateFilterTabStyles();
+                    if (currentFilterTab == 2) {
+                        renderDrafts(body);
+                    } else {
+                        java.util.List<JobPost> filtered = new java.util.ArrayList<>();
+                        for (JobPost p : vm.items) {
+                            boolean isFinished = "CLOSED".equals(p.status) || "REJECTED".equals(p.status);
+                            if (currentFilterTab == 1 && isFinished) {
+                                filtered.add(p);
+                            } else if (currentFilterTab == 0 && !isFinished) {
+                                filtered.add(p);
+                            }
+                        }
+                        if (filtered.isEmpty()) {
+                            TextView empty = new TextView(this);
+                            empty.setText(currentFilterTab == 0 ? "Chưa có tin tuyển dụng nào đang đăng." : "Chưa có tin tuyển dụng nào đã xong.");
+                            empty.setTextAppearance(R.style.TextAppearance_GrandMa_Body);
+                            empty.setPadding(0, dp(16), 0, 0);
+                            body.addView(empty);
                         } else {
-                            button(c, "Xem danh sách ứng viên", () -> openApplicants(p.content.id, p.content.title));
+                            for (JobPost p : filtered) renderPostCard(body, p);
                         }
                     }
                 }
@@ -362,4 +361,98 @@ public final class JobPostActivity extends AppCompatActivity {
     private void click(int id,Runnable r){findViewById(id).setOnClickListener(v->r.run());}
     private void show(int id,boolean b){findViewById(id).setVisibility(b?View.VISIBLE:View.GONE);}
     private void set(int id,String s){TextView t=findViewById(id);if(!t.getText().toString().equals(s))t.setText(s);}
+    private void setFilterTab(int tab) {
+        if (currentFilterTab != tab) {
+            currentFilterTab = tab;
+            bodyKey = null;
+            render();
+        }
+    }
+
+    private void updateFilterTabStyles() {
+        androidx.appcompat.widget.AppCompatButton tabActive = findViewById(R.id.jpTabActive);
+        androidx.appcompat.widget.AppCompatButton tabCompleted = findViewById(R.id.jpTabCompleted);
+        androidx.appcompat.widget.AppCompatButton tabDrafts = findViewById(R.id.jpTabDrafts);
+        if (tabActive == null || tabCompleted == null || tabDrafts == null) return;
+
+        tabActive.setBackgroundResource(currentFilterTab == 0 ? R.drawable.button_primary : R.drawable.button_secondary);
+        tabActive.setTextColor(currentFilterTab == 0 ? Color.WHITE : Color.parseColor("#444444"));
+
+        tabCompleted.setBackgroundResource(currentFilterTab == 1 ? R.drawable.button_primary : R.drawable.button_secondary);
+        tabCompleted.setTextColor(currentFilterTab == 1 ? Color.WHITE : Color.parseColor("#444444"));
+
+        tabDrafts.setBackgroundResource(currentFilterTab == 2 ? R.drawable.button_primary : R.drawable.button_secondary);
+        tabDrafts.setTextColor(currentFilterTab == 2 ? Color.WHITE : Color.parseColor("#444444"));
+    }
+
+    private void renderPostCard(LinearLayout body, JobPost p) {
+        LinearLayout c = card(body);
+        if ("CLOSED".equals(p.status)) c.setAlpha(0.88f);
+
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-1, -2);
+        hp.topMargin = dp(4);
+
+        TextView title = new TextView(this);
+        title.setTextAppearance(R.style.TextAppearance_GrandMa_Label);
+        title.setText(p.content.title);
+        title.setSaveEnabled(false);
+        ViewCompat.setAccessibilityHeading(title, true);
+        if ("CLOSED".equals(p.status)) title.setTextColor(Color.parseColor("#616161"));
+        header.addView(title, new LinearLayout.LayoutParams(0, -2, 1f));
+
+        header.addView(statusBadge(p.status));
+        c.addView(header, hp);
+
+        text(c, p.areaName + "\n" + money(p.content), false);
+        button(c, "Xem tin", () -> vm.open(p.content.id));
+        WorkSession itemSession = vm.jobSessions.get(p.content.id);
+        if (!vm.admin && ("OPEN".equals(p.status) || "CLOSED".equals(p.status))) {
+            if (itemSession != null) {
+                button(c, "Xem thỏa thuận ca", () -> ShiftAgreementDetailActivity.start(this, itemSession.id));
+            } else {
+                button(c, "Xem danh sách ứng viên", () -> openApplicants(p.content.id, p.content.title));
+            }
+        }
+    }
+
+    private void renderDrafts(LinearLayout body) {
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
+                ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+        java.util.List<LocalJobDraft> drafts = vn.edu.ueh.nhom4.grandmaassist.app.data.local.JobDraftStore.get(this).list(uid);
+        if (drafts.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("Không có bản nháp nào trên thiết bị.");
+            empty.setTextAppearance(R.style.TextAppearance_GrandMa_Body);
+            empty.setPadding(0, dp(16), 0, 0);
+            body.addView(empty);
+        } else {
+            for (LocalJobDraft d : drafts) {
+                LinearLayout c = card(body);
+                TextView title = new TextView(this);
+                title.setTextAppearance(R.style.TextAppearance_GrandMa_Label);
+                String draftTitle = (d.title != null && !d.title.trim().isEmpty()) ? d.title : "Bản nháp chưa đặt tên";
+                title.setText(draftTitle);
+                c.addView(title);
+
+                TextView sub = new TextView(this);
+                String area = (d.areaCode != null && !d.areaCode.isEmpty()) ? d.areaCode : "Chưa chọn khu vực";
+                sub.setText(area + " • Cập nhật: " + date(d.updatedAt));
+                sub.setTextColor(Color.parseColor("#5C6360"));
+                sub.setPadding(0, dp(4), 0, dp(8));
+                c.addView(sub);
+
+                button(c, "Tiếp tục chỉnh sửa", () -> {
+                    editor.launch(new Intent(this, JobDraftActivity.class).putExtra(JobDraftActivity.CREATE_NEW, false));
+                });
+            }
+        }
+    }
+
+    private String date(long time) {
+        if (time <= 0) return "Vừa xong";
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT, new java.util.Locale("vi", "VN")).format(new java.util.Date(time));
+    }
 }

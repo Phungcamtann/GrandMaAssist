@@ -35,7 +35,7 @@ public final class WalletTransactionAdapter extends RecyclerView.Adapter<WalletT
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WalletTransaction tx = items.get(position);
-        holder.tvTitle.setText(tx.description != null && !tx.description.isEmpty() ? tx.description : tx.getTypeLabel());
+        holder.tvTitle.setText(getCleanTitle(tx));
 
         if (tx.createdAt != null) {
             holder.tvTime.setText(df.format(tx.createdAt.toDate()));
@@ -60,6 +60,19 @@ public final class WalletTransactionAdapter extends RecyclerView.Adapter<WalletT
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    private String getCleanTitle(WalletTransaction tx) {
+        String desc = tx.description;
+        if (desc == null || desc.trim().isEmpty()) {
+            return tx.getTypeLabel();
+        }
+        int hashIdx = desc.indexOf('#');
+        if (hashIdx >= 0) {
+            String clean = desc.substring(0, hashIdx).trim();
+            if (!clean.isEmpty()) return clean;
+        }
+        return desc;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

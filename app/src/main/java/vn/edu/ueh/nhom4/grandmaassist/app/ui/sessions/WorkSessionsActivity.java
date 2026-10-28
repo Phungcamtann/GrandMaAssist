@@ -100,10 +100,10 @@ public final class WorkSessionsActivity extends AppCompatActivity {
 
         boolean isEmployer = "EMPLOYER".equals(role);
         if (isEmployer) {
-            tvTitle.setText("Ca làm việc");
+            tvTitle.setText("Việc làm sắp tới");
             tvSubtitle.setText("Danh sách các ca làm việc đã kết nối của bạn.");
         } else {
-            tvTitle.setText("Việc cần xử lý");
+            tvTitle.setText("Việc làm sắp tới");
             tvSubtitle.setText("Danh sách ca làm việc và thỏa thuận cần theo dõi.");
         }
 
@@ -218,7 +218,12 @@ public final class WorkSessionsActivity extends AppCompatActivity {
             if (s.isCompleted() || s.isCancelled() || WorkSession.STATUS_DISPUTED.equals(s.status)) {
                 historyList.add(s);
             } else {
-                activeList.add(s);
+                boolean bothConfirmed = s.isReady() || s.isInProgress() || s.isCompletionPending()
+                        || (s.employerAcceptedVersion != null && s.seekerAcceptedVersion != null
+                            && s.employerAcceptedVersion.equals(s.agreementVersion) && s.seekerAcceptedVersion.equals(s.agreementVersion));
+                if (bothConfirmed) {
+                    activeList.add(s);
+                }
             }
         }
 

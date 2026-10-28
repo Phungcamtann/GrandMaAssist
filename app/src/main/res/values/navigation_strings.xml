@@ -13,7 +13,7 @@
     <string name="n_my_jobs">Việc của tôi</string>
     <string name="n_other_jobs">Việc khác</string>
     <string name="n_my_posts">Tin của tôi</string>
-    <string name="n_sessions">Ca làm</string>
+    <string name="n_sessions">Việc làm sắp tới</string>
     <string name="n_seeker_title">Cô/chú mong muốn công việc như thế nào?</string>
     <string name="n_seeker_intro">Cứ thong thả, từng bước một.</string>
     <string name="n_employer_title">Cô/chú muốn tìm người hỗ trợ?</string>
@@ -21,8 +21,8 @@
     <string name="n_admin_title">Tổng quan hàng đợi</string>
     <string name="n_find_jobs">Giúp tôi tìm việc</string>
     <string name="n_create_post">Đăng tin tuyển</string>
-    <string name="n_attention">Việc cần xử lý</string>
-    <string name="n_help">Trợ giúp</string>
+    <string name="n_attention">Việc làm sắp tới</string>
+    <string name="n_help">Liên hệ tổng đài</string>
     <string name="n_settings">Cài đặt</string>
     <string name="n_profile_open">Xem hồ sơ</string>
     <string name="n_verification_open">Hồ sơ xác minh</string>

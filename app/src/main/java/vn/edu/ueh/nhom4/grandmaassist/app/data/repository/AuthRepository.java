@@ -51,7 +51,7 @@ public final class AuthRepository {
     public enum Retry { NONE, CHECK_SESSION, CLEAR_CREDENTIALS }
 
     public static final class Account {
-        private final String uid;
+        public final String uid;
         public final String name;
         public final String email;
         public final String googleEmail;

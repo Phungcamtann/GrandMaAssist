@@ -70,6 +70,7 @@ public final class GuidedSearchActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.gsBtnSkip).setOnClickListener(v -> vm.nextStep());
+        findViewById(R.id.gsBtnCancel).setOnClickListener(v -> finish());
         findViewById(R.id.gsBtnNext).setOnClickListener(v -> vm.nextStep());
 
         View ttsView = findViewById(R.id.gsTtsController);
@@ -149,6 +150,8 @@ public final class GuidedSearchActivity extends AppCompatActivity {
 
         btnBack.setVisibility(step > 1 ? View.VISIBLE : View.GONE);
         btnSkip.setVisibility(step <= 4 ? View.VISIBLE : View.GONE);
+        TextView btnCancel = findViewById(R.id.gsBtnCancel);
+        if (btnCancel != null) btnCancel.setVisibility(step == 1 ? View.VISIBLE : View.GONE);
 
         if (step <= 4) btnNext.setText(R.string.gs_action_continue);
         else if (step == 5) btnNext.setText(R.string.gs_action_see_jobs);
@@ -323,12 +326,12 @@ public final class GuidedSearchActivity extends AppCompatActivity {
 
         TextView tvTitle = new TextView(this);
         tvTitle.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        tvTitle.setText(title); tvTitle.setTextSize(18); tvTitle.setTypeface(null, Typeface.BOLD);
+        tvTitle.setText(title); tvTitle.setTextSize(20); tvTitle.setTypeface(null, Typeface.BOLD);
         tvTitle.setTextColor(Color.parseColor("#1A1C19"));
         top.addView(tvTitle);
 
         TextView tvEdit = new TextView(this);
-        tvEdit.setText(R.string.gs_edit); tvEdit.setTextSize(16); tvEdit.setTextColor(Color.parseColor("#1C6758"));
+        tvEdit.setText(R.string.gs_edit); tvEdit.setTextSize(17); tvEdit.setTextColor(Color.parseColor("#1C6758"));
         tvEdit.setPadding(12, 8, 12, 8);
         tvEdit.setOnClickListener(v -> vm.jumpToStep(targetStep));
         top.addView(tvEdit);
@@ -336,7 +339,7 @@ public final class GuidedSearchActivity extends AppCompatActivity {
         row.addView(top);
 
         TextView tvVal = new TextView(this);
-        tvVal.setText(val); tvVal.setTextSize(16); tvVal.setTextColor(Color.parseColor("#5C6360"));
+        tvVal.setText(val); tvVal.setTextSize(18); tvVal.setTextColor(Color.parseColor("#5C6360"));
         tvVal.setPadding(0, 8, 0, 0);
         row.addView(tvVal);
 
@@ -441,18 +444,18 @@ public final class GuidedSearchActivity extends AppCompatActivity {
 
         // Tags Layout
         LinearLayout tagsLayout = new LinearLayout(this);
-        tagsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        tagsLayout.setOrientation(LinearLayout.VERTICAL);
         tagsLayout.setPadding(0, 8, 0, 8);
 
         for (String tag : res.explanationTags) {
             TextView tagView = new TextView(this);
-            tagView.setText(tag); tagView.setTextSize(14); tagView.setTextColor(Color.parseColor("#1C6758"));
+            tagView.setText("• " + tag); tagView.setTextSize(15); tagView.setTextColor(Color.parseColor("#1C6758"));
             GradientDrawable tagBg = new GradientDrawable();
             tagBg.setCornerRadius(12f); tagBg.setColor(Color.parseColor("#EAF1E8"));
             tagView.setBackground(tagBg);
             tagView.setPadding(16, 8, 16, 8);
-            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            tlp.setMargins(0, 0, 8, 8); tagView.setLayoutParams(tlp);
+            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            tlp.setMargins(0, 0, 0, 8); tagView.setLayoutParams(tlp);
             tagsLayout.addView(tagView);
         }
         card.addView(tagsLayout);
