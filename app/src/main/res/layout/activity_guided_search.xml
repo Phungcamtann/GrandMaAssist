@@ -97,8 +97,14 @@
                     android:text="@string/gs_sub_category"
                     android:textColor="#5C6360"
                     android:textSize="16sp" />
-            </LinearLayout>
-
+                <include
+                    android:id="@+id/gsTtsController"
+                    layout="@layout/layout_tts_controller"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" />
+            </LinearLayout>
+
             <!-- Dynamic step contents container -->
             <LinearLayout
                 android:id="@+id/gsStepContainer"

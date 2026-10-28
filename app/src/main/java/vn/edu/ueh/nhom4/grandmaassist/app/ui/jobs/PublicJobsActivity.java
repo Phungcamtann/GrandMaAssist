@@ -271,6 +271,17 @@ public final class PublicJobsActivity extends AppCompatActivity {
         tvPay.setTextSize(18);
         tvPay.setTextColor(Color.parseColor("#2E7D32"));
 
+        View ttsView = getLayoutInflater().inflate(R.layout.layout_tts_controller, c, false);
+        LinearLayout.LayoutParams ttsLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ttsLp.topMargin = dp(10);
+        ttsLp.bottomMargin = dp(4);
+        c.addView(ttsView, ttsLp);
+
+        vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper ttsHelper =
+                new vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper(this, ttsView, "job_detail_" + j.id);
+        ttsHelper.setCustomIdleLabel("Nghe đọc việc làm");
+        ttsHelper.setTextSupplier(() -> buildJobSpeechSummary(j));
+
         addDetailDivider(c);
 
         labelHeading(c, "Địa chỉ làm việc");
@@ -469,5 +480,28 @@ public final class PublicJobsActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private String buildJobSpeechSummary(PublicJob j) {
+        if (j == null) return "";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Thông tin việc làm: ").append(j.title).append(". ");
+        sb.append("Người đăng: ").append(j.employerName).append(". ");
+        sb.append("Tiền công: ").append(money(j)).append(". ");
+        if (j.workAddress != null && !j.workAddress.trim().isEmpty()) {
+            sb.append("Địa chỉ làm việc: ").append(j.workAddress.trim()).append(", khu vực ").append(j.areaName).append(". ");
+        } else {
+            sb.append("Khu vực: ").append(j.areaName).append(". ");
+        }
+        String schedule = labels(LocalJobDraft.DAYS, getResources().getStringArray(R.array.jd_days), j.days) + ", " +
+                label(LocalJobDraft.SHIFTS, getResources().getStringArray(R.array.jd_shifts), j.shift) + ", " + j.schedule;
+        sb.append("Thời gian làm việc: ").append(schedule).append(". ");
+        if (j.description != null && !j.description.trim().isEmpty()) {
+            sb.append("Mô tả công việc: ").append(j.description).append(". ");
+        }
+        if (j.requirements != null && !j.requirements.trim().isEmpty()) {
+            sb.append("Yêu cầu: ").append(j.requirements).append(". ");
+        }
+        return sb.toString();
     }
 }

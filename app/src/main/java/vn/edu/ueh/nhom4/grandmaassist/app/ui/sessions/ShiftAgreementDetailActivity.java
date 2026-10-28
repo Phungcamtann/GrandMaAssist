@@ -58,6 +58,7 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     private View layoutSeekerActions;
     private View layoutEmployerActions;
     private ProgressBar pb;
+    private vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper ttsHelper;
     private TextView tvMessage;
     private View layoutEmployerFunding;
     private AppCompatButton btnEmployerFund;
@@ -171,6 +172,13 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         cardSessionCancelledNotice = findViewById(R.id.cardSessionCancelledNotice);
         tvSessionCancelledMessage = findViewById(R.id.tvSessionCancelledMessage);
         btnOpenWalletAfterCancel = findViewById(R.id.btnOpenWalletAfterCancel);
+
+        View ttsView = findViewById(R.id.shiftDetailTtsController);
+        if (ttsView != null) {
+            ttsHelper = new vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper(this, ttsView, "shift_agreement");
+            ttsHelper.setCustomIdleLabel("Nghe thỏa thuận ca làm");
+            ttsHelper.setTextSupplier(this::buildAgreementSpeechSummary);
+        }
 
         btnRequestCancelWhenReady.setOnClickListener(v -> showRequestCancelDialog());
         btnWithdrawCancelRequest.setOnClickListener(v -> confirmWithdrawCancelRequest());
@@ -768,6 +776,36 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Quay lại", null)
                 .show();
+    }
+
+    private String buildAgreementSpeechSummary() {
+        if (vm == null || vm.currentSession == null || vm.currentSession.agreement == null) return "";
+        WorkSession session = vm.currentSession;
+        AgreementSnapshot ag = session.agreement;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Chi tiết thỏa thuận ca làm việc. ");
+        if (tvBadge != null && tvBadge.getText() != null) {
+            sb.append("Trạng thái: ").append(tvBadge.getText()).append(". ");
+        }
+        if (ag.tasks != null && !ag.tasks.trim().isEmpty()) {
+            sb.append("Công việc cần làm: ").append(ag.tasks.trim()).append(". ");
+        }
+        if (tvSchedule != null && tvSchedule.getText() != null && tvSchedule.getText().length() > 0) {
+            sb.append("Thời gian làm việc: ").append(tvSchedule.getText().toString().replace("\n", ", ")).append(". ");
+        }
+        if (tvAddress != null && tvAddress.getText() != null && tvAddress.getText().length() > 0) {
+            sb.append("Địa điểm làm việc: ").append(tvAddress.getText().toString().replace("\n", ", ")).append(". ");
+        }
+        boolean isSeeker = currentUid.equals(session.seekerId);
+        if (isSeeker) {
+            sb.append("Tiền công bác thực nhận trọn vẹn là: ").append(formatMoney(ag.laborAmount)).append(". ");
+        } else {
+            sb.append("Tiền công người làm: ").append(formatMoney(ag.laborAmount))
+              .append(". Phí dịch vụ: ").append(formatMoney(ag.serviceFee))
+              .append(". Tổng thanh toán: ").append(formatMoney(ag.totalDue)).append(". ");
+        }
+        return sb.toString();
     }
 
     private void confirmRejectCancelRequest() {

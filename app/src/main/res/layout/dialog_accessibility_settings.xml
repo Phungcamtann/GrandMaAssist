@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_section_rounded"
+    android:padding="24dp">
+
+    <!-- Title & Icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_tts_play"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="Cài đặt hỗ trợ tiếp cận"
+            android:textColor="#1C6758"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Tùy chỉnh giọng đọc và hỗ trợ hiển thị dành cho người cao tuổi."
+        android:textColor="#5C6360"
+        android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="#E0E4E1" />
+
+    <!-- Option 1: Bật/Tắt Giọng đọc -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giọng đọc hướng dẫn"
+                android:textColor="#1A1C19"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Hiển thị nút nghe đọc trên các màn hình."
+                android:textColor="#747775"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchVoiceEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true" />
+    </LinearLayout>
+
+    <!-- Option 2: Tự động đọc khi mở bước mới -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tự động đọc khi chuyển bước"
+                android:textColor="#1A1C19"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Tự phát âm thanh khi vào câu hỏi mới (mặc định tắt)."
+                android:textColor="#747775"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchAutoReadEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="#E0E4E1" />
+
+    <!-- Option 3: Tốc độ đọc -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tốc độ giọng đọc:"
+        android:textColor="#1A1C19"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/rgSpeechRate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <RadioButton
+            android:id="@+id/rbRateSlow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Chậm rãi (0.75x) — Thong thả, dễ nghe"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/rbRateRecommended"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:checked="true"
+            android:text="Vừa phải (0.85x) — Khuyên dùng cho người lớn tuổi"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/rbRateNormal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Tiêu chuẩn (1.0x) — Tốc độ chuẩn"
+            android:textSize="16sp" />
+    </RadioGroup>
+
+    <!-- Option 4: Nút nghe thử giọng mẫu -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnTestVoice"
+        style="@style/Widget.GrandMa.PublicToolbarButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:minHeight="48dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_tts_pill"
+        android:textColor="#1C6758"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:text="🔊  Nghe thử giọng đọc mẫu" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCloseAccessibility"
+            style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Đóng"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSaveAccessibility"
+            style="@style/Widget.GrandMa.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
+            android:layout_marginStart="12dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="@drawable/button_primary"
+            android:textColor="#FFFFFF"
+            android:text="Lưu cài đặt"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

@@ -136,7 +136,7 @@ public final class ProfilePanel {
             vn.edu.ueh.nhom4.grandmaassist.app.ui.wallet.WalletActivity.start(activity, role, 0L);
         });
         click(R.id.btnProfileHelp, () -> android.widget.Toast.makeText(activity, "Trung tâm trợ giúp GrandMa Assist", android.widget.Toast.LENGTH_SHORT).show());
-        click(R.id.btnProfileSettings, () -> android.widget.Toast.makeText(activity, "Cài đặt ứng dụng", android.widget.Toast.LENGTH_SHORT).show());
+        click(R.id.btnProfileSettings, () -> vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.AccessibilitySettingsDialog.show(activity, null));
         click(R.id.btnProfileVerification,()->{
             if(vm.verificationLoading)return;
             if("UNKNOWN".equals(vm.verificationStatus))vm.refreshVerification();else openVerification();

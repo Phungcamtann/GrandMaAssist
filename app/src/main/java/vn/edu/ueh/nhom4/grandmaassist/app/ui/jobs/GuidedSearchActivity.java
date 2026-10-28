@@ -27,6 +27,7 @@ public final class GuidedSearchActivity extends AppCompatActivity {
     private GuidedSearchViewModel vm;
     private RoleNavigationBar nav;
     private int renderedStep = -1;
+    private vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper ttsHelper;
 
     private static final String[] DAYS_KEYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
     private static final int[] DAYS_STRINGS = {R.string.gs_d_mon, R.string.gs_d_tue, R.string.gs_d_wed, R.string.gs_d_thu, R.string.gs_d_fri, R.string.gs_d_sat, R.string.gs_d_sun};
@@ -71,6 +72,13 @@ public final class GuidedSearchActivity extends AppCompatActivity {
         findViewById(R.id.gsBtnSkip).setOnClickListener(v -> vm.nextStep());
         findViewById(R.id.gsBtnNext).setOnClickListener(v -> vm.nextStep());
 
+        View ttsView = findViewById(R.id.gsTtsController);
+        if (ttsView != null) {
+            ttsHelper = new vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.TtsControllerHelper(this, ttsView, "guided_search");
+            ttsHelper.setCustomIdleLabel("Nghe hướng dẫn");
+            ttsHelper.setTextSupplier(this::getSpeechTextForCurrentStep);
+        }
+
         vm.changes.observe(this, n -> render());
     }
 
@@ -87,6 +95,10 @@ public final class GuidedSearchActivity extends AppCompatActivity {
         if (renderedStep != step) {
             renderedStep = step;
             findViewById(R.id.gsScroll).post(() -> findViewById(R.id.gsScroll).scrollTo(0, 0));
+            if (ttsHelper != null) {
+                ttsHelper.reset();
+                ttsHelper.autoPlayIfEnabled();
+            }
         }
 
         // Header and Segment Bar
@@ -459,5 +471,21 @@ public final class GuidedSearchActivity extends AppCompatActivity {
             intent.putExtra("detail", detailId);
         }
         startActivity(intent);
+    }
+
+    private String getSpeechTextForCurrentStep() {
+        int step = vm != null ? vm.currentStep : 1;
+        switch (step) {
+            case 1:
+                return "Bước 1: Bác muốn làm công việc gì? Bác có thể chạm để chọn một hoặc nhiều công việc bên dưới như Nấu ăn gia đình, Dọn dẹp nhà cửa, hoặc Trông coi sân vườn. Sau đó bấm Tiếp tục.";
+            case 2:
+                return "Bước 2: Bác muốn làm việc ở khu vực nào? Bác có thể chọn các quận huyện gần nhà mình nhất để thuận tiện đi lại.";
+            case 3:
+                return "Bước 3: Bác thuận tiện làm việc vào những ngày nào trong tuần và buổi nào? Bác có thể chọn làm buổi sáng, buổi chiều hoặc buổi tối vào các ngày phù hợp với bác.";
+            case 4:
+                return "Bước 4: Bác cần tránh những yêu cầu nào để đảm bảo sức khỏe? Ví dụ tránh việc mang vác nặng, đứng lâu quá hai tiếng, hoặc di chuyển liên tục.";
+            default:
+                return "Kết quả tìm việc: Hệ thống đã chọn lọc các công việc phù hợp với tiêu chí của bác.";
+        }
     }
 }
