@@ -127,6 +127,20 @@ public final class WalletActivity extends AppCompatActivity {
 
         vm.init(currentUid);
 
+        // Auto-sync any unsettled earnings or refunds
+        vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository sessionRepo = new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository();
+        sessionRepo.getSessionsForUser(currentUid, currentRole).addOnSuccessListener(sessions -> {
+            if (sessions != null) {
+                for (vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession s : sessions) {
+                    if ("SEEKER".equals(currentRole) && s.isCompleted()) {
+                        sessionRepo.syncSettlementToWallet(currentUid, s);
+                    } else if ("EMPLOYER".equals(currentRole) && s.isCancelled() && s.totalFunded > 0) {
+                        sessionRepo.syncRefundToEmployerWallet(currentUid, s);
+                    }
+                }
+            }
+        });
+
         long prefill = getIntent().getLongExtra(EXTRA_INITIAL_TOPUP_AMOUNT, 0L);
         if (prefill > 0) {
             showTopUpDialog(prefill);

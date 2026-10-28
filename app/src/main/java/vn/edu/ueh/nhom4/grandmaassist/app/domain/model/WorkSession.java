@@ -19,6 +19,7 @@ public final class WorkSession {
     public static final String PAYMENT_HELD = "HELD";
     public static final String PAYMENT_SETTLING = "SETTLING";
     public static final String PAYMENT_SETTLED = "SETTLED";
+    public static final String PAYMENT_REFUNDED = "REFUNDED";
 
     public final String id;
     public final String applicationId;
@@ -41,6 +42,13 @@ public final class WorkSession {
     public final Timestamp completedAt;
     public final Timestamp settledAt;
 
+    // UC23 Cancellation & Refund fields
+    public final String cancellationRequestedBy;
+    public final String cancellationReason;
+    public final Timestamp cancellationRequestedAt;
+    public final Timestamp cancelledAt;
+    public final String cancelInitiatorRole;
+
     public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
                        AgreementSnapshot agreement, long agreementVersion,
                        Long employerAcceptedVersion, Long seekerAcceptedVersion,
@@ -48,7 +56,8 @@ public final class WorkSession {
                        Timestamp createdAt, Timestamp updatedAt) {
         this(id, applicationId, jobId, seekerId, employerId, agreement, agreementVersion,
                 employerAcceptedVersion, seekerAcceptedVersion, status, paymentStatus,
-                heldAmount, totalFunded, createdAt, updatedAt, null, null, null, null, null);
+                heldAmount, totalFunded, createdAt, updatedAt, null, null, null, null, null,
+                null, null, null, null, null);
     }
 
     public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
@@ -58,6 +67,22 @@ public final class WorkSession {
                        Timestamp createdAt, Timestamp updatedAt,
                        Timestamp seekerCheckedInAt, Timestamp employerCheckedInAt,
                        Timestamp startedAt, Timestamp completedAt, Timestamp settledAt) {
+        this(id, applicationId, jobId, seekerId, employerId, agreement, agreementVersion,
+                employerAcceptedVersion, seekerAcceptedVersion, status, paymentStatus,
+                heldAmount, totalFunded, createdAt, updatedAt, seekerCheckedInAt, employerCheckedInAt,
+                startedAt, completedAt, settledAt, null, null, null, null, null);
+    }
+
+    public WorkSession(String id, String applicationId, String jobId, String seekerId, String employerId,
+                       AgreementSnapshot agreement, long agreementVersion,
+                       Long employerAcceptedVersion, Long seekerAcceptedVersion,
+                       String status, String paymentStatus, long heldAmount, long totalFunded,
+                       Timestamp createdAt, Timestamp updatedAt,
+                       Timestamp seekerCheckedInAt, Timestamp employerCheckedInAt,
+                       Timestamp startedAt, Timestamp completedAt, Timestamp settledAt,
+                       String cancellationRequestedBy, String cancellationReason,
+                       Timestamp cancellationRequestedAt, Timestamp cancelledAt,
+                       String cancelInitiatorRole) {
         this.id = id;
         this.applicationId = applicationId;
         this.jobId = jobId;
@@ -78,6 +103,11 @@ public final class WorkSession {
         this.startedAt = startedAt;
         this.completedAt = completedAt;
         this.settledAt = settledAt;
+        this.cancellationRequestedBy = cancellationRequestedBy;
+        this.cancellationReason = cancellationReason;
+        this.cancellationRequestedAt = cancellationRequestedAt;
+        this.cancelledAt = cancelledAt;
+        this.cancelInitiatorRole = cancelInitiatorRole;
     }
 
     @SuppressWarnings("unchecked")
@@ -107,6 +137,12 @@ public final class WorkSession {
         Timestamp completedAt = (Timestamp) data.get("completedAt");
         Timestamp settledAt = (Timestamp) data.get("settledAt");
 
+        String cancelReqBy = (String) data.get("cancellationRequestedBy");
+        String cancelReason = (String) data.get("cancellationReason");
+        Timestamp cancelReqAt = (Timestamp) data.get("cancellationRequestedAt");
+        Timestamp cancelledAt = (Timestamp) data.get("cancelledAt");
+        String cancelRole = (String) data.get("cancelInitiatorRole");
+
         return new WorkSession(
                 id,
                 applicationId,
@@ -127,7 +163,12 @@ public final class WorkSession {
                 employerCheckedInAt,
                 startedAt,
                 completedAt,
-                settledAt
+                settledAt,
+                cancelReqBy,
+                cancelReason,
+                cancelReqAt,
+                cancelledAt,
+                cancelRole
         );
     }
 
@@ -141,6 +182,14 @@ public final class WorkSession {
     public boolean isCancelled() { return STATUS_CANCELLED.equals(status); }
     public boolean isSeekerCheckedIn() { return seekerCheckedInAt != null; }
     public boolean isEmployerCheckedIn() { return employerCheckedInAt != null; }
+
+    public boolean isCancellationRequested() {
+        return cancellationRequestedBy != null && !isCancelled();
+    }
+
+    public boolean isRefunded() {
+        return PAYMENT_REFUNDED.equals(paymentStatus);
+    }
 
     public boolean isAgreementConfirmed() {
         return employerAcceptedVersion != null && seekerAcceptedVersion != null

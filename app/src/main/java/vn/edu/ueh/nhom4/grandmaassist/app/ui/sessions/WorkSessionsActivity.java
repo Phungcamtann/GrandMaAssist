@@ -186,11 +186,17 @@ public final class WorkSessionsActivity extends AppCompatActivity {
                 allSessions.clear();
                 allSessions.addAll(t.getResult());
 
-                // Auto-sync completed sessions to seeker's wallet
+                // Auto-sync completed sessions to seeker's wallet / refunds to employer
                 if ("SEEKER".equals(role)) {
                     for (WorkSession s : allSessions) {
                         if (s.isCompleted()) {
                             repository.syncSettlementToWallet(currentUid, s);
+                        }
+                    }
+                } else if ("EMPLOYER".equals(role)) {
+                    for (WorkSession s : allSessions) {
+                        if (s.isCancelled() && s.totalFunded > 0) {
+                            repository.syncRefundToEmployerWallet(currentUid, s);
                         }
                     }
                 }
@@ -290,7 +296,7 @@ public final class WorkSessionsActivity extends AppCompatActivity {
             AgreementSnapshot ag = session.agreement;
             tvTasks.setText(ag != null && ag.tasks != null && !ag.tasks.isEmpty() ? ag.tasks : "Ca làm việc");
 
-            renderBadge(tvBadge, session.status);
+            renderBadge(tvBadge, session);
 
             // Schedule
             String scheduleStr = "";
@@ -326,7 +332,15 @@ public final class WorkSessionsActivity extends AppCompatActivity {
             btnView.setOnClickListener(clickListener);
         }
 
-        private void renderBadge(TextView badge, String status) {
+        private void renderBadge(TextView badge, WorkSession session) {
+            if (session == null) return;
+            if (session.isCancellationRequested()) {
+                badge.setText("Chờ hủy ca");
+                badge.setBackgroundColor(Color.parseColor("#FFF3E0"));
+                badge.setTextColor(Color.parseColor("#E65100"));
+                return;
+            }
+            String status = session.status;
             if (WorkSession.STATUS_PROPOSED.equals(status)) {
                 badge.setText(R.string.session_status_proposed);
                 badge.setBackgroundColor(Color.parseColor("#FFF3E0"));
@@ -353,8 +367,8 @@ public final class WorkSessionsActivity extends AppCompatActivity {
                 badge.setTextColor(Color.parseColor("#1C6758"));
             } else if (WorkSession.STATUS_CANCELLED.equals(status)) {
                 badge.setText(R.string.session_status_cancelled);
-                badge.setBackgroundColor(Color.parseColor("#EEEEEE"));
-                badge.setTextColor(Color.parseColor("#616161"));
+                badge.setBackgroundColor(Color.parseColor("#FFEBEE"));
+                badge.setTextColor(Color.parseColor("#C62828"));
             } else {
                 badge.setText(WorkSession.statusLabel(status));
                 badge.setBackgroundColor(Color.parseColor("#EEEEEE"));

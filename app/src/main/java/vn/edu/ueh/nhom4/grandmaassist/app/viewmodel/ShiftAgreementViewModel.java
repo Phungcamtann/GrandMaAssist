@@ -454,4 +454,114 @@ public final class ShiftAgreementViewModel extends ViewModel {
             repository.syncSettlementToWallet(seekerId, currentSession);
         }
     }
+
+    public void requestCancelSession(String sessionId, String reason, String role, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang gửi yêu cầu hủy ca làm...";
+        emit();
+
+        repository.requestCancelSession(uid, sessionId, reason, role).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                message = "";
+                loadSession(sessionId);
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void confirmCancelSession(String sessionId, String role, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang xác nhận hủy ca làm và hoàn trả tiền...";
+        emit();
+
+        repository.confirmCancelSession(uid, sessionId, role).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                message = "";
+                loadSession(sessionId);
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void rejectCancelRequest(String sessionId, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang từ chối yêu cầu hủy ca...";
+        emit();
+
+        repository.rejectCancelRequest(uid, sessionId).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                message = "";
+                loadSession(sessionId);
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void withdrawCancelRequest(String sessionId, Runnable onSuccess, Consumer<String> onError) {
+        String uid = currentUid();
+        if (uid.isEmpty()) {
+            if (onError != null) onError.accept("Chưa đăng nhập.");
+            return;
+        }
+
+        busy = true;
+        message = "Đang rút lại yêu cầu hủy...";
+        emit();
+
+        repository.withdrawCancelRequest(uid, sessionId).addOnCompleteListener(t -> {
+            busy = false;
+            if (t.isSuccessful()) {
+                message = "";
+                loadSession(sessionId);
+                if (onSuccess != null) onSuccess.run();
+            } else {
+                String err = WorkSessionRepository.error(t.getException());
+                message = err;
+                emit();
+                if (onError != null) onError.accept(err);
+            }
+        });
+    }
+
+    public void syncRefundToEmployerWallet(String employerId) {
+        if (currentSession != null && currentSession.isCancelled()) {
+            repository.syncRefundToEmployerWallet(employerId, currentSession);
+        }
+    }
 }

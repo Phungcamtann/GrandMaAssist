@@ -81,6 +81,19 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
     private TextView tvSessionCompletedMessage;
     private AppCompatButton btnOpenWalletAfterComplete;
 
+    // Cancellation views (UC23)
+    private View cardCancellationPending;
+    private TextView tvCancellationPendingTitle;
+    private TextView tvCancellationPendingDetail;
+    private AppCompatButton btnWithdrawCancelRequest;
+    private View layoutRecipientCancelActions;
+    private AppCompatButton btnConfirmCancelSession;
+    private AppCompatButton btnRejectCancelRequest;
+    private AppCompatButton btnRequestCancelWhenReady;
+    private View cardSessionCancelledNotice;
+    private TextView tvSessionCancelledMessage;
+    private AppCompatButton btnOpenWalletAfterCancel;
+
     private final WalletRepository walletRepo = new WalletRepository();
     private long currentWalletBalance = 0L;
 
@@ -146,6 +159,29 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         cardSessionCompletedNotice = findViewById(R.id.cardSessionCompletedNotice);
         tvSessionCompletedMessage = findViewById(R.id.tvSessionCompletedMessage);
         btnOpenWalletAfterComplete = findViewById(R.id.btnOpenWalletAfterComplete);
+
+        cardCancellationPending = findViewById(R.id.cardCancellationPending);
+        tvCancellationPendingTitle = findViewById(R.id.tvCancellationPendingTitle);
+        tvCancellationPendingDetail = findViewById(R.id.tvCancellationPendingDetail);
+        btnWithdrawCancelRequest = findViewById(R.id.btnWithdrawCancelRequest);
+        layoutRecipientCancelActions = findViewById(R.id.layoutRecipientCancelActions);
+        btnConfirmCancelSession = findViewById(R.id.btnConfirmCancelSession);
+        btnRejectCancelRequest = findViewById(R.id.btnRejectCancelRequest);
+        btnRequestCancelWhenReady = findViewById(R.id.btnRequestCancelWhenReady);
+        cardSessionCancelledNotice = findViewById(R.id.cardSessionCancelledNotice);
+        tvSessionCancelledMessage = findViewById(R.id.tvSessionCancelledMessage);
+        btnOpenWalletAfterCancel = findViewById(R.id.btnOpenWalletAfterCancel);
+
+        btnRequestCancelWhenReady.setOnClickListener(v -> showRequestCancelDialog());
+        btnWithdrawCancelRequest.setOnClickListener(v -> confirmWithdrawCancelRequest());
+        btnConfirmCancelSession.setOnClickListener(v -> confirmAgreeCancelSession());
+        btnRejectCancelRequest.setOnClickListener(v -> confirmRejectCancelRequest());
+        btnOpenWalletAfterCancel.setOnClickListener(v -> {
+            if (vm.currentSession != null) {
+                boolean isSeeker = currentUid.equals(vm.currentSession.seekerId);
+                WalletActivity.start(this, isSeeker ? "SEEKER" : "EMPLOYER");
+            }
+        });
 
         findViewById(R.id.shiftDetailBack).setOnClickListener(v -> finish());
         findViewById(R.id.shiftDetailReload).setOnClickListener(v -> reload());
@@ -233,7 +269,7 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
         if (session == null || session.agreement == null) return;
 
         AgreementSnapshot ag = session.agreement;
-        renderBadge(tvBadge, session.status);
+        renderBadge(tvBadge, session);
         tvVersion.setText("Phiên bản: #" + session.agreementVersion);
         tvTasks.setText(ag.tasks != null && !ag.tasks.isEmpty() ? ag.tasks : "Ca làm việc");
 
@@ -292,79 +328,96 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             tvWorkerPay.setText(formatMoney(ag.laborAmount));
             tvServiceFee.setText("+" + formatMoney(ag.serviceFee));
             tvTotalDue.setText(formatMoney(ag.totalDue));
-        }
+        }        // State machine UI
+        // Reset all dynamic sections first
+        layoutSeekerActions.setVisibility(View.GONE);
+        layoutEmployerActions.setVisibility(View.GONE);
+        layoutEmployerFunding.setVisibility(View.GONE);
+        cardSessionReadyNotice.setVisibility(View.GONE);
+        layoutSeekerCheckIn.setVisibility(View.GONE);
+        layoutEmployerCheckIn.setVisibility(View.GONE);
+        cardSessionLiveStatus.setVisibility(View.GONE);
+        cardSessionCompletedNotice.setVisibility(View.GONE);
+        cardCancellationPending.setVisibility(View.GONE);
+        btnRequestCancelWhenReady.setVisibility(View.GONE);
+        cardSessionCancelledNotice.setVisibility(View.GONE);
 
-        // State machine UI
         if (session.isProposed()) {
             layoutSeekerActions.setVisibility(isSeeker ? View.VISIBLE : View.GONE);
             layoutEmployerActions.setVisibility(isEmployer ? View.VISIBLE : View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
-            cardSessionLiveStatus.setVisibility(View.GONE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
         } else if (session.isAwaitingFunds()) {
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(isEmployer ? View.VISIBLE : View.GONE);
             if (isEmployer) {
+                layoutEmployerFunding.setVisibility(View.VISIBLE);
                 btnEmployerFund.setText("Cấp tiền ca làm (" + formatMoney(ag.totalDue) + ")");
                 tvEmployerWalletInfo.setText("Số dư ví hiện tại: " + formatMoney(currentWalletBalance));
                 btnEmployerFund.setOnClickListener(v -> handleEmployerFund(ag.totalDue));
+            } else {
+                cardSessionReadyNotice.setVisibility(View.VISIBLE);
+                tvSessionReadyNotice.setText("✓ Cô/chú đã đồng ý nhận ca. Đang chờ Người thuê cấp tiền bảo đảm cho ca làm việc.");
             }
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
-            cardSessionLiveStatus.setVisibility(View.GONE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
+            // In AWAITING_FUNDS, both sides can cancel agreement without penalty
+            btnRequestCancelWhenReady.setVisibility(View.VISIBLE);
+            btnRequestCancelWhenReady.setText("Hủy thỏa thuận ca làm");
         } else if (session.isReady()) {
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
             cardSessionReadyNotice.setVisibility(View.VISIBLE);
-            cardSessionLiveStatus.setVisibility(View.GONE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
 
-            if (isSeeker) {
-                tvSessionReadyNotice.setText("✓ Người thuê đã nạp đủ " + formatMoney(ag.totalDue) + " tiền cọc bảo chứng trên hệ thống. Cô/chú an tâm chuẩn bị đến ca làm đúng giờ.");
-                layoutSeekerCheckIn.setVisibility(View.VISIBLE);
+            if (session.isCancellationRequested()) {
+                // There is a pending cancel request
+                cardCancellationPending.setVisibility(View.VISIBLE);
+                btnRequestCancelWhenReady.setVisibility(View.GONE);
+                layoutSeekerCheckIn.setVisibility(View.GONE);
                 layoutEmployerCheckIn.setVisibility(View.GONE);
-                if (session.isSeekerCheckedIn()) {
-                    btnSeekerCheckIn.setVisibility(View.GONE);
-                    tvSeekerCheckInNotice.setVisibility(View.VISIBLE);
-                    String timeStr = session.seekerCheckedInAt != null ? formatTime(session.seekerCheckedInAt) : "";
-                    tvSeekerCheckInNotice.setText("✓ Cô/chú đã điểm danh thành công lúc " + timeStr + ".\nĐang chờ Người thuê bấm xác nhận trên máy của họ để bắt đầu ca làm.");
+
+                boolean isRequester = currentUid.equals(session.cancellationRequestedBy);
+                String roleRequester = "EMPLOYER".equals(session.cancelInitiatorRole) ? "Người thuê" : "Cô/chú người làm";
+                String reason = session.cancellationReason != null && !session.cancellationReason.isEmpty() ? session.cancellationReason : "Bận việc đột xuất";
+
+                if (isRequester) {
+                    tvCancellationPendingTitle.setText("⚠️ Đang chờ đối tác đồng ý hủy ca");
+                    tvCancellationPendingDetail.setText("Bạn đã gửi yêu cầu hủy ca làm việc này.\nLý do: " + reason + "\nĐang chờ đối tác xác nhận.");
+                    btnWithdrawCancelRequest.setVisibility(View.VISIBLE);
+                    layoutRecipientCancelActions.setVisibility(View.GONE);
                 } else {
-                    btnSeekerCheckIn.setVisibility(View.VISIBLE);
-                    btnSeekerCheckIn.setEnabled(true);
-                    tvSeekerCheckInNotice.setVisibility(View.GONE);
+                    tvCancellationPendingTitle.setText("⚠️ Yêu cầu hủy ca từ " + roleRequester);
+                    tvCancellationPendingDetail.setText(roleRequester + " đã gửi yêu cầu hủy ca làm việc này.\nLý do: " + reason + "\nNếu bạn đồng ý, toàn bộ tiền cọc bảo đảm (" + formatMoney(session.totalFunded) + ") sẽ được hoàn trả về ví Người thuê.");
+                    btnWithdrawCancelRequest.setVisibility(View.GONE);
+                    layoutRecipientCancelActions.setVisibility(View.VISIBLE);
                 }
             } else {
-                tvSessionReadyNotice.setText("✓ Đã tạm giữ cọc " + formatMoney(ag.totalDue) + " an toàn trên hệ thống. Ca làm việc đã sẵn sàng.");
-                layoutSeekerCheckIn.setVisibility(View.GONE);
-                layoutEmployerCheckIn.setVisibility(View.VISIBLE);
-                if (session.isEmployerCheckedIn()) {
-                    btnEmployerCheckIn.setVisibility(View.GONE);
-                    tvEmployerCheckInNotice.setVisibility(View.VISIBLE);
-                    String timeStr = session.employerCheckedInAt != null ? formatTime(session.employerCheckedInAt) : "";
-                    tvEmployerCheckInNotice.setText("✓ Bạn đã xác nhận người làm đến lúc " + timeStr + ".\nĐang chờ cô/chú bấm điểm danh trên điện thoại của họ để bắt đầu ca làm.");
+                // Normal READY: show check-in and cancel button
+                btnRequestCancelWhenReady.setVisibility(View.VISIBLE);
+                btnRequestCancelWhenReady.setText("Yêu cầu hủy ca làm việc");
+
+                if (isSeeker) {
+                    tvSessionReadyNotice.setText("✓ Người thuê đã nạp đủ " + formatMoney(ag.totalDue) + " tiền cọc bảo chứng trên hệ thống. Cô/chú an tâm chuẩn bị đến ca làm đúng giờ.");
+                    layoutSeekerCheckIn.setVisibility(View.VISIBLE);
+                    if (session.isSeekerCheckedIn()) {
+                        btnSeekerCheckIn.setVisibility(View.GONE);
+                        tvSeekerCheckInNotice.setVisibility(View.VISIBLE);
+                        String timeStr = session.seekerCheckedInAt != null ? formatTime(session.seekerCheckedInAt) : "";
+                        tvSeekerCheckInNotice.setText("✓ Cô/chú đã điểm danh thành công lúc " + timeStr + ".\nĐang chờ Người thuê bấm xác nhận trên máy của họ để bắt đầu ca làm.");
+                    } else {
+                        btnSeekerCheckIn.setVisibility(View.VISIBLE);
+                        btnSeekerCheckIn.setEnabled(true);
+                        tvSeekerCheckInNotice.setVisibility(View.GONE);
+                    }
                 } else {
-                    btnEmployerCheckIn.setVisibility(View.VISIBLE);
-                    btnEmployerCheckIn.setEnabled(true);
-                    tvEmployerCheckInNotice.setVisibility(View.GONE);
+                    tvSessionReadyNotice.setText("✓ Đã tạm giữ cọc " + formatMoney(ag.totalDue) + " an toàn trên hệ thống. Ca làm việc đã sẵn sàng.");
+                    layoutEmployerCheckIn.setVisibility(View.VISIBLE);
+                    if (session.employerCheckedInAt != null) {
+                        btnEmployerCheckIn.setVisibility(View.GONE);
+                        tvEmployerCheckInNotice.setVisibility(View.VISIBLE);
+                        String timeStr = session.employerCheckedInAt != null ? formatTime(session.employerCheckedInAt) : "";
+                        tvEmployerCheckInNotice.setText("✓ Bạn đã xác nhận người làm đến lúc " + timeStr + ".\nĐang chờ cô/chú bấm điểm danh trên điện thoại của họ để bắt đầu ca làm.");
+                    } else {
+                        btnEmployerCheckIn.setVisibility(View.VISIBLE);
+                        btnEmployerCheckIn.setEnabled(true);
+                        tvEmployerCheckInNotice.setVisibility(View.GONE);
+                    }
                 }
             }
         } else if (session.isInProgress()) {
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
             cardSessionLiveStatus.setVisibility(View.VISIBLE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
-
             tvLiveStatusHeader.setText("🟢 Ca làm việc đang diễn ra");
             String startStr = session.startedAt != null ? formatDateTime(session.startedAt) : "Đã bắt đầu";
             tvLiveStatusDetail.setText("Ca làm đã được cả 2 bên xác nhận bắt đầu lúc " + startStr + ".");
@@ -379,15 +432,7 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                 btnEmployerConfirmComplete.setEnabled(true);
             }
         } else if (session.isCompletionPending()) {
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
             cardSessionLiveStatus.setVisibility(View.VISIBLE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
-
             tvLiveStatusHeader.setText("⏳ Đang chờ xác nhận hoàn tất ca");
             if (isSeeker) {
                 tvLiveStatusDetail.setText("Cô/chú đã báo hoàn thành công việc. Vui lòng chờ Người thuê kiểm tra và xác nhận để nhận tiền vào ví.");
@@ -400,35 +445,41 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                 btnEmployerConfirmComplete.setEnabled(true);
             }
         } else if (session.isCompleted()) {
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
-            cardSessionLiveStatus.setVisibility(View.GONE);
             cardSessionCompletedNotice.setVisibility(View.VISIBLE);
-
             if (isSeeker) {
                 tvSessionCompletedMessage.setText("Tiền công " + formatMoney(ag.laborAmount) + " đã được cộng vào Ví tiền của cô/chú. Cô/chú có thể mở ví để kiểm tra hoặc rút tiền về tài khoản ngân hàng.");
                 vm.syncSettlementToWallet(currentUid);
             } else {
                 tvSessionCompletedMessage.setText("Đã hoàn tất thanh toán tiền công " + formatMoney(ag.laborAmount) + " cho người làm và phí nền tảng " + formatMoney(ag.serviceFee) + " thành công.");
             }
-        } else {
-            // Cancelled or disputed
-            layoutSeekerActions.setVisibility(View.GONE);
-            layoutEmployerActions.setVisibility(View.GONE);
-            layoutEmployerFunding.setVisibility(View.GONE);
-            cardSessionReadyNotice.setVisibility(View.GONE);
-            layoutSeekerCheckIn.setVisibility(View.GONE);
-            layoutEmployerCheckIn.setVisibility(View.GONE);
-            cardSessionLiveStatus.setVisibility(View.GONE);
-            cardSessionCompletedNotice.setVisibility(View.GONE);
+        } else if (session.isCancelled()) {
+            cardSessionCancelledNotice.setVisibility(View.VISIBLE);
+            String reason = session.cancellationReason != null && !session.cancellationReason.isEmpty() ? session.cancellationReason : "Không có lý do cụ thể";
+            if (session.totalFunded > 0) {
+                if (isEmployer) {
+                    tvSessionCancelledMessage.setText("Ca làm việc đã được hủy thành công.\nLý do: " + reason + "\n\n✓ Toàn bộ tiền cọc bảo đảm (" + formatMoney(session.totalFunded) + ") đã được hoàn trả lại vào Ví tiền của bạn.");
+                    btnOpenWalletAfterCancel.setVisibility(View.VISIBLE);
+                    vm.syncRefundToEmployerWallet(currentUid);
+                } else {
+                    tvSessionCancelledMessage.setText("Ca làm việc đã được hủy theo thỏa thuận giữa hai bên.\nLý do: " + reason);
+                    btnOpenWalletAfterCancel.setVisibility(View.GONE);
+                }
+            } else {
+                tvSessionCancelledMessage.setText("Ca làm việc đã được hủy trước khi cấp tiền bảo chứng.\nLý do: " + reason);
+                btnOpenWalletAfterCancel.setVisibility(View.GONE);
+            }
         }
     }
 
-    private void renderBadge(TextView badge, String status) {
+    private void renderBadge(TextView badge, WorkSession session) {
+        if (session == null) return;
+        if (session.isCancellationRequested()) {
+            badge.setText("Chờ hủy ca");
+            badge.setBackgroundColor(Color.parseColor("#FFF3E0"));
+            badge.setTextColor(Color.parseColor("#E65100"));
+            return;
+        }
+        String status = session.status;
         if (WorkSession.STATUS_PROPOSED.equals(status)) {
             badge.setText(R.string.session_status_proposed);
             badge.setBackgroundColor(Color.parseColor("#FFF3E0"));
@@ -635,4 +686,104 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     .show();
         }
     }
+
+    private void showRequestCancelDialog() {
+        if (vm.currentSession == null) return;
+        boolean isSeeker = currentUid.equals(vm.currentSession.seekerId);
+        String status = vm.currentSession.status;
+
+        if (WorkSession.STATUS_PROPOSED.equals(status) || WorkSession.STATUS_AWAITING_FUNDS.equals(status)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Hủy thỏa thuận ca làm?")
+                    .setMessage("Bạn có chắc muốn hủy ca làm này không? Ca làm sẽ được hủy ngay vì chưa có tiền bảo đảm.")
+                    .setPositiveButton("Hủy ca làm", (d, w) -> {
+                        vm.requestCancelSession(vm.currentSession.id, "Hủy thỏa thuận trước khi cấp tiền", isSeeker ? "SEEKER" : "EMPLOYER", () -> {
+                            Toast.makeText(this, "Đã hủy ca làm việc.", Toast.LENGTH_SHORT).show();
+                        }, err -> {
+                            Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                        });
+                    })
+                    .setNegativeButton("Quay lại", null)
+                    .show();
+            return;
+        }
+
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint("Nhập lý do hủy (vd: bận việc đột xuất...)");
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = pad;
+        params.rightMargin = pad;
+        input.setLayoutParams(params);
+        container.addView(input);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Yêu cầu hủy ca làm việc")
+                .setMessage("Sau khi gửi, đối tác sẽ nhận được thông báo yêu cầu hủy. Nếu cả hai bên đồng ý, tiền cọc bảo đảm sẽ được hoàn trả về ví người thuê.\n\nNhập lý do hủy ca:")
+                .setView(container)
+                .setPositiveButton("Gửi yêu cầu", (d, w) -> {
+                    String reason = input.getText().toString().trim();
+                    if (reason.isEmpty()) reason = "Bận việc đột xuất";
+                    vm.requestCancelSession(vm.currentSession.id, reason, isSeeker ? "SEEKER" : "EMPLOYER", () -> {
+                        Toast.makeText(this, "Đã gửi yêu cầu hủy ca làm việc.", Toast.LENGTH_SHORT).show();
+                    }, err -> {
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Quay lại", null)
+                .show();
+    }
+
+    private void confirmWithdrawCancelRequest() {
+        if (vm.currentSession == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Rút lại yêu cầu hủy?")
+                .setMessage("Bạn có muốn rút lại yêu cầu hủy ca không? Ca làm việc sẽ tiếp tục trạng thái Sẵn sàng.")
+                .setPositiveButton("Rút lại yêu cầu", (d, w) -> {
+                    vm.withdrawCancelRequest(vm.currentSession.id, () -> {
+                        Toast.makeText(this, "Đã rút lại yêu cầu hủy ca.", Toast.LENGTH_SHORT).show();
+                    }, err -> {
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Giữ yêu cầu", null)
+                .show();
+    }
+
+    private void confirmAgreeCancelSession() {
+        if (vm.currentSession == null) return;
+        boolean isSeeker = currentUid.equals(vm.currentSession.seekerId);
+        new AlertDialog.Builder(this)
+                .setTitle("Đồng ý hủy ca làm việc?")
+                .setMessage("Sau khi đồng ý, ca làm việc sẽ bị hủy. Toàn bộ tiền cọc bảo đảm (" + formatMoney(vm.currentSession.totalFunded) + ") sẽ được hoàn trả 100% về ví của Người thuê.")
+                .setPositiveButton("Xác nhận hủy & Hoàn cọc", (d, w) -> {
+                    vm.confirmCancelSession(vm.currentSession.id, isSeeker ? "SEEKER" : "EMPLOYER", () -> {
+                        Toast.makeText(this, "Đã xác nhận hủy ca làm và hoàn cọc.", Toast.LENGTH_LONG).show();
+                    }, err -> {
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Quay lại", null)
+                .show();
+    }
+
+    private void confirmRejectCancelRequest() {
+        if (vm.currentSession == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Từ chối yêu cầu hủy ca?")
+                .setMessage("Bạn có chắc muốn từ chối yêu cầu hủy ca không? Ca làm việc sẽ tiếp tục trạng thái Sẵn sàng.")
+                .setPositiveButton("Từ chối hủy", (d, w) -> {
+                    vm.rejectCancelRequest(vm.currentSession.id, () -> {
+                        Toast.makeText(this, "Đã từ chối yêu cầu hủy ca.", Toast.LENGTH_SHORT).show();
+                    }, err -> {
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+                    });
+                })
+                .setNegativeButton("Quay lại", null)
+                .show();
+    }
+
 }

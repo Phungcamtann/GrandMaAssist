@@ -226,6 +226,10 @@ public final class WorkSessionRepository {
     }
 
     public Task<Void> seekerReject(String uid, String sessionId) {
+        return cancelUnfundedSession(uid, sessionId, "Người tìm việc từ chối thỏa thuận", "SEEKER");
+    }
+
+    public Task<Void> cancelUnfundedSession(String uid, String sessionId, String reason, String role) {
         if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
 
         return bounded(db.runTransaction(tx -> {
@@ -237,16 +241,260 @@ public final class WorkSessionRepository {
             if (!uid.equals(session.getString("seekerId")) && !uid.equals(session.getString("employerId"))) {
                 throw new Failure("FORBIDDEN");
             }
-            if (!WorkSession.STATUS_PROPOSED.equals(session.getString("status"))) {
+            String status = session.getString("status");
+            if (!WorkSession.STATUS_PROPOSED.equals(status) && !WorkSession.STATUS_AWAITING_FUNDS.equals(status)) {
                 throw new Failure("CANNOT_CANCEL");
             }
 
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", WorkSession.STATUS_CANCELLED);
+            updates.put("cancelledAt", FieldValue.serverTimestamp());
+            updates.put("cancellationReason", reason != null ? reason : "");
+            updates.put("cancelInitiatorRole", role != null ? role : "");
             updates.put("updatedAt", FieldValue.serverTimestamp());
 
             tx.update(sessionRef, updates);
             return null;
+        }));
+    }
+
+    public Task<Void> requestCancelSession(String uid, String sessionId, String reason, String role) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(session.getString("seekerId")) && !uid.equals(session.getString("employerId"))) {
+                throw new Failure("FORBIDDEN");
+            }
+
+            String status = session.getString("status");
+            if (WorkSession.STATUS_PROPOSED.equals(status) || WorkSession.STATUS_AWAITING_FUNDS.equals(status)) {
+                // Cancel directly
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("status", WorkSession.STATUS_CANCELLED);
+                updates.put("cancelledAt", FieldValue.serverTimestamp());
+                updates.put("cancellationReason", reason != null ? reason : "");
+                updates.put("cancelInitiatorRole", role != null ? role : "");
+                updates.put("updatedAt", FieldValue.serverTimestamp());
+                tx.update(sessionRef, updates);
+                return null;
+            }
+
+            if (!WorkSession.STATUS_READY.equals(status)) {
+                throw new Failure("CANNOT_CANCEL");
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("cancellationRequestedBy", uid);
+            updates.put("cancellationReason", reason != null ? reason : "");
+            updates.put("cancellationRequestedAt", FieldValue.serverTimestamp());
+            updates.put("cancelInitiatorRole", role != null ? role : "");
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            tx.update(sessionRef, updates);
+            return null;
+        }));
+    }
+
+    public Task<Void> confirmCancelSession(String uid, String sessionId, String role) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(session.getString("seekerId")) && !uid.equals(session.getString("employerId"))) {
+                throw new Failure("FORBIDDEN");
+            }
+
+            String status = session.getString("status");
+            if (!WorkSession.STATUS_READY.equals(status)) {
+                throw new Failure("CANNOT_CANCEL");
+            }
+
+            String employerId = session.getString("employerId");
+            Long totalFunded = session.getLong("totalFunded");
+            long refundAmount = totalFunded != null ? totalFunded : 0L;
+            String reason = session.getString("cancellationReason");
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", WorkSession.STATUS_CANCELLED);
+            updates.put("paymentStatus", WorkSession.PAYMENT_REFUNDED);
+            updates.put("heldAmount", 0L);
+            updates.put("cancelledAt", FieldValue.serverTimestamp());
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            tx.update(sessionRef, updates);
+
+            // Record paymentEvent
+            String eventId = "pe_refund_" + sessionId;
+            DocumentReference eventRef = sessionRef.collection("paymentEvents").document(eventId);
+            Map<String, Object> peData = new HashMap<>();
+            peData.put("id", eventId);
+            peData.put("sessionId", sessionId);
+            peData.put("operationId", "refund_" + sessionId);
+            peData.put("type", "REFUND_COMPLETED");
+            peData.put("refundDelta", refundAmount);
+            peData.put("actorId", uid);
+            peData.put("createdAt", FieldValue.serverTimestamp());
+            tx.set(eventRef, peData);
+
+            // If actor is Employer, credit employer wallet directly in the transaction
+            if (uid.equals(employerId) && refundAmount > 0) {
+                DocumentReference wRef = db.collection("wallets").document(employerId);
+                DocumentSnapshot wSnap = tx.get(wRef);
+                long curBalance = 0L;
+                if (wSnap.exists()) {
+                    Long b = wSnap.getLong("balance");
+                    if (b != null) curBalance = b;
+                }
+                long newBalance = curBalance + refundAmount;
+                Map<String, Object> wData = new HashMap<>();
+                wData.put("balance", newBalance);
+                wData.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(wRef, wData, SetOptions.merge());
+
+                String txId = "tx_refund_" + sessionId;
+                DocumentReference txRef = db.collection("wallets").document(employerId)
+                        .collection("transactions").document(txId);
+                String displayId = sessionId.startsWith("session_") ? sessionId.substring("session_".length()) : sessionId;
+                Map<String, Object> txData = new HashMap<>();
+                txData.put("id", txId);
+                txData.put("type", "REFUND");
+                txData.put("amount", refundAmount);
+                txData.put("balanceAfter", newBalance);
+                txData.put("description", "Hoàn tiền cọc ca làm đã hủy #" + displayId + (reason != null && !reason.isEmpty() ? " - " + reason : ""));
+                txData.put("refId", sessionId);
+                txData.put("createdAt", FieldValue.serverTimestamp());
+                tx.set(txRef, txData);
+            }
+
+            return null;
+        }).continueWithTask(t -> {
+            if (!t.isSuccessful()) return Tasks.forException(t.getException());
+            // If actor was Seeker, try to credit employer's wallet asynchronously as best-effort
+            sessionRef.get().addOnSuccessListener(doc -> {
+                if (doc != null && doc.exists()) {
+                    String empId = doc.getString("employerId");
+                    Long tf = doc.getLong("totalFunded");
+                    if (empId != null && tf != null && tf > 0 && !uid.equals(empId)) {
+                        tryCreditEmployerRefund(empId, sessionId, tf, doc.getString("cancellationReason"));
+                    }
+                }
+            });
+            return Tasks.forResult(null);
+        }));
+    }
+
+    private void tryCreditEmployerRefund(String employerId, String sessionId, long amount, String reason) {
+        String txId = "tx_refund_" + sessionId;
+        DocumentReference txRef = db.collection("wallets").document(employerId)
+                .collection("transactions").document(txId);
+        txRef.get().addOnSuccessListener(snap -> {
+            if (snap != null && snap.exists()) return;
+            DocumentReference wRef = db.collection("wallets").document(employerId);
+            wRef.get().addOnSuccessListener(wSnap -> {
+                long curBalance = 0L;
+                if (wSnap != null && wSnap.exists()) {
+                    Long b = wSnap.getLong("balance");
+                    if (b != null) curBalance = b;
+                }
+                long newBalance = curBalance + amount;
+                Map<String, Object> wData = new HashMap<>();
+                wData.put("balance", newBalance);
+                wData.put("updatedAt", FieldValue.serverTimestamp());
+                wRef.set(wData, SetOptions.merge()).addOnSuccessListener(v -> {
+                    String displayId = sessionId.startsWith("session_") ? sessionId.substring("session_".length()) : sessionId;
+                    Map<String, Object> txData = new HashMap<>();
+                    txData.put("id", txId);
+                    txData.put("type", "REFUND");
+                    txData.put("amount", amount);
+                    txData.put("balanceAfter", newBalance);
+                    txData.put("description", "Hoàn tiền cọc ca làm đã hủy #" + displayId + (reason != null && !reason.isEmpty() ? " - " + reason : ""));
+                    txData.put("refId", sessionId);
+                    txData.put("createdAt", FieldValue.serverTimestamp());
+                    txRef.set(txData);
+                });
+            });
+        });
+    }
+
+    public Task<Void> rejectCancelRequest(String uid, String sessionId) {
+        if (!same(uid)) return Tasks.forException(new Failure("SESSION"));
+
+        return bounded(db.runTransaction(tx -> {
+            if (!same(uid)) throw new Failure("SESSION");
+
+            DocumentReference sessionRef = db.collection("workSessions").document(sessionId);
+            DocumentSnapshot session = tx.get(sessionRef);
+            if (!session.exists()) throw new Failure("NOT_FOUND");
+            if (!uid.equals(session.getString("seekerId")) && !uid.equals(session.getString("employerId"))) {
+                throw new Failure("FORBIDDEN");
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("cancellationRequestedBy", FieldValue.delete());
+            updates.put("cancellationReason", FieldValue.delete());
+            updates.put("cancellationRequestedAt", FieldValue.delete());
+            updates.put("cancelInitiatorRole", FieldValue.delete());
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            tx.update(sessionRef, updates);
+            return null;
+        }));
+    }
+
+    public Task<Void> withdrawCancelRequest(String uid, String sessionId) {
+        return rejectCancelRequest(uid, sessionId);
+    }
+
+    public Task<Void> syncRefundToEmployerWallet(String employerId, WorkSession session) {
+        if (!same(employerId) || session == null || !session.isCancelled()) return Tasks.forResult(null);
+        if (session.totalFunded <= 0) return Tasks.forResult(null);
+
+        String txId = "tx_refund_" + session.id;
+        DocumentReference txRef = db.collection("wallets").document(employerId)
+                .collection("transactions").document(txId);
+
+        return bounded(txRef.get().continueWithTask(t -> {
+            if (t.isSuccessful() && t.getResult() != null && t.getResult().exists()) {
+                // Already credited
+                return Tasks.forResult(null);
+            }
+            long refundAmount = session.totalFunded;
+            return db.runTransaction(tx -> {
+                DocumentReference wRef = db.collection("wallets").document(employerId);
+                DocumentSnapshot wSnap = tx.get(wRef);
+                long curBalance = 0L;
+                if (wSnap.exists()) {
+                    Long b = wSnap.getLong("balance");
+                    if (b != null) curBalance = b;
+                }
+                long newBalance = curBalance + refundAmount;
+                Map<String, Object> wData = new HashMap<>();
+                wData.put("balance", newBalance);
+                wData.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(wRef, wData, SetOptions.merge());
+
+                String displayId = session.id.startsWith("session_") ? session.id.substring("session_".length()) : session.id;
+                Map<String, Object> txData = new HashMap<>();
+                txData.put("id", txId);
+                txData.put("type", "REFUND");
+                txData.put("amount", refundAmount);
+                txData.put("balanceAfter", newBalance);
+                String desc = "Hoàn tiền cọc ca làm đã hủy #" + displayId + (session.cancellationReason != null && !session.cancellationReason.isEmpty() ? " - " + session.cancellationReason : "");
+                txData.put("description", desc);
+                txData.put("refId", session.id);
+                txData.put("createdAt", FieldValue.serverTimestamp());
+                tx.set(txRef, txData);
+                return null;
+            });
         }));
     }
 

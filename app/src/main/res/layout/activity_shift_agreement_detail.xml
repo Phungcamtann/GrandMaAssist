@@ -532,6 +532,104 @@
                     android:visibility="gone"/>
             </LinearLayout>
 
+            <!-- Cancellation Pending Card (UC23) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCancellationPending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFF3E0"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="#FFB74D"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvCancellationPendingTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="18sp"
+                        android:textColor="#E65100"
+                        android:text="⚠️ Đang có yêu cầu hủy ca làm việc"/>
+
+                    <TextView
+                        android:id="@+id/tvCancellationPendingDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:textSize="15sp"
+                        android:textColor="#5D4037"
+                        android:text="Lý do: ..."/>
+
+                    <!-- Action for Requester: Withdraw -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnWithdrawCancelRequest"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:layout_marginTop="12dp"
+                        android:includeFontPadding="false"
+                        android:text="Rút lại yêu cầu hủy (Tiếp tục ca)"
+                        android:visibility="gone"/>
+
+                    <!-- Actions for Recipient: Confirm or Reject -->
+                    <LinearLayout
+                        android:id="@+id/layoutRecipientCancelActions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnConfirmCancelSession"
+                            style="@style/Widget.GrandMa.VerificationPrimary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:backgroundTint="#D32F2F"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:includeFontPadding="false"
+                            android:text="Đồng ý hủy ca &amp; Hoàn cọc"/>
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnRejectCancelRequest"
+                            style="@style/Widget.GrandMa.VerificationSecondary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:layout_marginTop="8dp"
+                            android:includeFontPadding="false"
+                            android:text="Từ chối hủy (Tiếp tục ca làm)"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Request Cancel Button when READY (UC23) -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnRequestCancelWhenReady"
+                style="@style/Widget.GrandMa.VerificationSecondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="50dp"
+                android:layout_marginTop="14dp"
+                android:textColor="#C62828"
+                android:textSize="16sp"
+                android:includeFontPadding="false"
+                android:text="Yêu cầu hủy ca làm việc"
+                android:visibility="gone"/>
+
             <!-- Card for IN_PROGRESS and COMPLETION_PENDING -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSessionLiveStatus"
@@ -646,6 +744,58 @@
                         android:layout_marginTop="12dp"
                         android:includeFontPadding="false"
                         android:text="Mở Ví tiền của tôi"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card for CANCELLED (UC23) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSessionCancelledNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFEBEE"
+                app:strokeWidth="1dp"
+                app:strokeColor="#EF9A9A"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Title"
+                        android:textSize="18sp"
+                        android:textColor="#C62828"
+                        android:text="✕ Ca làm việc này đã được hủy"/>
+
+                    <TextView
+                        android:id="@+id/tvSessionCancelledMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.GrandMa.Body"
+                        android:textSize="14sp"
+                        android:textColor="#B71C1C"
+                        android:text="Ca làm đã hủy thành công."/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnOpenWalletAfterCancel"
+                        style="@style/Widget.GrandMa.VerificationSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="50dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:layout_marginTop="12dp"
+                        android:includeFontPadding="false"
+                        android:text="Xem ví tiền của tôi"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
