@@ -101,19 +101,19 @@ public final class RoleHomePanel {
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.white));
             ((androidx.appcompat.widget.AppCompatButton)activity.findViewById(R.id.homeMainFuture)).setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
 
-            text(R.id.homeAttentionFuture, "Việc làm sắp tới");
+            text(R.id.homeAttentionTitle, "Việc làm sắp tới");
+            text(R.id.homeAttentionCount, "Chưa có việc sắp tới");
             text(R.id.homeWorkFuture, activity.getString(R.string.gs_seeker_my_jobs));
             text(R.id.homeOtherFuture, "Xem các việc khác");
             text(R.id.homeHelpFuture, activity.getString(R.string.gs_seeker_support));
 
             activity.findViewById(R.id.homeAttentionFuture).setEnabled(!vm.busy && !auth.isBusy());
-            ((TextView)activity.findViewById(R.id.homeAttentionFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeWorkFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeOtherFuture).setEnabled(!vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeOtherFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             show(R.id.homeOtherFuture, true);
-            int[] seekerBigButtons = new int[]{R.id.homeMainFuture, R.id.homeAttentionFuture, R.id.homeWorkFuture, R.id.homeOtherFuture};
+            int[] seekerBigButtons = new int[]{R.id.homeMainFuture, R.id.homeWorkFuture, R.id.homeOtherFuture};
             for (int bid : seekerBigButtons) {
                 View b = activity.findViewById(bid);
                 if (b instanceof TextView) {
@@ -128,7 +128,8 @@ public final class RoleHomePanel {
             text(R.id.homeIntro,admin?"":activity.getString(R.string.n_employer_intro));
             show(R.id.homeIntro,!admin);
             future(R.id.homeMainFuture,R.string.n_create_post);
-            future(R.id.homeAttentionFuture,R.string.n_attention);
+            text(R.id.homeAttentionTitle, activity.getString(R.string.n_attention));
+            text(R.id.homeAttentionCount, "Chưa có việc sắp tới");
             future(R.id.homeWorkFuture,R.string.n_my_posts);
             future(R.id.homeOtherFuture,R.string.n_sessions);
             future(R.id.homeHelpFuture,R.string.n_help);
@@ -142,13 +143,13 @@ public final class RoleHomePanel {
             show(R.id.homeIntro, !employerVerified);
             text(R.id.homeMainFuture,activity.getString(R.string.jd_create));
             text(R.id.homeWorkFuture,activity.getString(R.string.n_my_posts));
-            text(R.id.homeAttentionFuture, "Việc làm sắp tới");
+            text(R.id.homeAttentionTitle, "Việc làm sắp tới");
+            text(R.id.homeAttentionCount, "Chưa có việc sắp tới");
             show(R.id.homeOtherFuture, false);
             activity.findViewById(R.id.homeMainFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             activity.findViewById(R.id.homeMainFuture).setBackgroundResource(R.drawable.button_primary);
             ((TextView)activity.findViewById(R.id.homeMainFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.button_primary_text));
             activity.findViewById(R.id.homeAttentionFuture).setEnabled(active && !vm.busy && !auth.isBusy());
-            ((TextView)activity.findViewById(R.id.homeAttentionFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
             activity.findViewById(R.id.homeWorkFuture).setEnabled(active && !vm.busy && !auth.isBusy());
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
         }
@@ -232,8 +233,9 @@ public final class RoleHomePanel {
                                 }
                             }
                         }
-                        String badge = count > 0 ? " (" + count + ")" : "";
-                        text(R.id.homeAttentionFuture, "Việc làm sắp tới" + badge);
+                        String countText = count > 0 ? ("Có " + count + " việc sắp tới") : "Chưa có việc sắp tới";
+                        text(R.id.homeAttentionTitle, "Việc làm sắp tới");
+                        text(R.id.homeAttentionCount, countText);
                     });
         }
     }

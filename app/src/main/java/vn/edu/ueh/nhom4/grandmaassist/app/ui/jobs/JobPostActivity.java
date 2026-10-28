@@ -375,14 +375,15 @@ public final class JobPostActivity extends AppCompatActivity {
         androidx.appcompat.widget.AppCompatButton tabDrafts = findViewById(R.id.jpTabDrafts);
         if (tabActive == null || tabCompleted == null || tabDrafts == null) return;
 
-        tabActive.setBackgroundResource(currentFilterTab == 0 ? R.drawable.button_primary : R.drawable.button_secondary);
-        tabActive.setTextColor(currentFilterTab == 0 ? Color.WHITE : Color.parseColor("#444444"));
+        applyTabStyle(tabActive, currentFilterTab == 0);
+        applyTabStyle(tabCompleted, currentFilterTab == 1);
+        applyTabStyle(tabDrafts, currentFilterTab == 2);
+    }
 
-        tabCompleted.setBackgroundResource(currentFilterTab == 1 ? R.drawable.button_primary : R.drawable.button_secondary);
-        tabCompleted.setTextColor(currentFilterTab == 1 ? Color.WHITE : Color.parseColor("#444444"));
-
-        tabDrafts.setBackgroundResource(currentFilterTab == 2 ? R.drawable.button_primary : R.drawable.button_secondary);
-        tabDrafts.setTextColor(currentFilterTab == 2 ? Color.WHITE : Color.parseColor("#444444"));
+    private void applyTabStyle(androidx.appcompat.widget.AppCompatButton tab, boolean selected) {
+        tab.setBackgroundResource(selected ? R.drawable.button_primary : R.drawable.button_secondary);
+        tab.setTextColor(selected ? Color.WHITE : androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+        tab.setPadding(dp(4), dp(10), dp(4), dp(10));
     }
 
     private void renderPostCard(LinearLayout body, JobPost p) {

@@ -11,7 +11,57 @@
         android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
     <LinearLayout android:id="@+id/homeMember" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeMainFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_find_jobs" android:drawableStart="@drawable/ic_nav_search"/>
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeAttentionFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_attention" android:drawableStart="@drawable/ic_nav_queue"/>
+        <LinearLayout
+            android:id="@+id/homeAttentionFuture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/verification_section"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_nav_queue"
+                android:contentDescription="Việc làm sắp tới" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/homeAttentionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Việc làm sắp tới"
+                    android:textColor="#1A1C19"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/be_vietnam_pro_semibold" />
+
+                <TextView
+                    android:id="@+id/homeAttentionCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Chưa có việc sắp tới"
+                    android:textColor="#5C6360"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/be_vietnam_pro_regular" />
+            </LinearLayout>
+        </LinearLayout>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeWorkFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_my_jobs" android:drawableStart="@drawable/ic_role_work"/>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOtherFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_other_jobs" android:drawableStart="@drawable/ic_nav_search"/>
         <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOpenProfile" style="@style/Widget.GrandMa.HomeButton" android:text="@string/n_profile_open" android:drawableStart="@drawable/ic_nav_account" android:visibility="gone"/>

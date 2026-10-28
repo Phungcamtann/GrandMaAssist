@@ -48,12 +48,18 @@
     * Nội dung: `"Cô/chú có chắc chắn muốn đăng xuất khỏi ứng dụng không?"`
     * Nút: `"Ở lại"` (Hủy) & `"Đăng xuất"` (Đồng ý), loại bỏ hoàn toàn rủi ro người lớn tuổi chạm nhầm bị văng khỏi tài khoản.
 
-### 1.4. Chuẩn hóa "Việc làm sắp tới" & Bộ đếm công việc
-* Đổi tên `"Việc cần xử lý"` ở cả 2 vai trò thành **`"Việc làm sắp tới"`**.
-* Tích hợp **Bộ đếm tự động `(N)`** trên nút ở trang chủ:
-  * Đếm chính xác số lượng ca làm việc sắp diễn ra của người dùng (`RoleHomePanel.java`).
-  * **Quy chuẩn lọc ca:** Chỉ đếm và hiển thị các ca làm việc đã được **cả 2 bên xác nhận thỏa thuận ca** (trạng thái `READY`, `IN_PROGRESS`, `COMPLETION_PENDING`, hoặc cả 2 bên đã xác nhận phiên bản thỏa thuận) và chưa hoàn thành/chưa hủy.
-  * Đồng bộ tiêu đề màn hình danh sách ca làm việc (`WorkSessionsActivity.java`) sang `"Việc làm sắp tới"`.
+### 1.4. Chuẩn hóa "Việc làm sắp tới" & Thẻ hiển thị bộ đếm công việc (Home Screen Card)
+* **Thống nhất tên gọi:** Đổi tên `"Việc cần xử lý"` ở cả 2 vai trò thành **`"Việc làm sắp tới"`**.
+* **Thiết kế Thẻ trạng thái thông minh trực quan (`role_home_content.xml`):**
+  * Thay vì nút bấm phẳng đơn giản, giao diện trang chủ của cả Người tìm việc và Người thuê được nâng cấp thành một **Thẻ trạng thái bo tròn chuyên biệt** (`@drawable/verification_section`), gồm 2 thành phần chính:
+    * **Biểu tượng:** Icon sổ ghi chú checklist màu xanh lá thương hiệu (`@drawable/ic_nav_queue`, kích thước 32dp).
+    * **Nội dung 2 tầng chữ trực quan:**
+      * Dòng 1: **`Việc làm sắp tới`** (cỡ chữ `20sp`, in đậm, màu `#1A1C19`, font `be_vietnam_pro_semibold`).
+      * Dòng 2: **`Có N việc sắp tới`** (hoặc **`Chưa có việc sắp tới`** khi `N = 0`, cỡ chữ `15sp`, màu xám `#5C6360`).
+  * **Quy chuẩn lọc ca hiển thị & đếm:**
+    * Tự động truy vấn từ `WorkSessionRepository.getSessionsForUser(...)`.
+    * Chỉ đếm và hiển thị các ca làm việc đã được **cả 2 bên xác nhận thỏa thuận ca** (trạng thái `READY`, `IN_PROGRESS`, `COMPLETION_PENDING`, hoặc cả 2 bên đã xác nhận phiên bản thỏa thuận) và chưa hoàn thành/chưa hủy.
+  * Khi bấm vào thẻ: Chuyển trực tiếp sang danh sách ca làm việc (`WorkSessionsActivity.java`) với tiêu đề đồng nhất là `"Việc làm sắp tới"`.
 
 ### 1.5. Chi tiết công việc (`PublicJobsActivity.java`)
 * Tăng nhẹ cỡ chữ nội dung thẻ chi tiết công việc từ `15sp` $\rightarrow$ **`17sp`** (`labelHeading` & `labelBody`):
@@ -78,7 +84,7 @@
 
 ### 2.1. Tinh gọn Trang chủ Người thuê (`RoleHomePanel.java`)
 * Xóa bỏ nút trùng lặp `"Ca làm việc"` trên trang chủ người thuê.
-* Thống nhất chỉ dùng 1 nút duy nhất **`"Việc làm sắp tới (N)"`** dẫn đến màn hình theo dõi ca.
+* Thống nhất chỉ dùng 1 thẻ trạng thái duy nhất **`"Việc làm sắp tới"`** dẫn đến màn hình theo dõi ca.
 * Thanh điều hướng dưới đáy (Bottom Navigation Bar): Đồng nhất nhãn tab thành **`"Việc làm sắp tới"`** (`n_sessions`).
 
 ### 2.2. Phân nhóm thẻ Tin của tôi (`JobPostActivity.java` & `activity_job_posts.xml`)
@@ -86,6 +92,9 @@
   1. **Đang đăng:** Lọc và hiển thị các tin tuyển dụng đang mở tiếp nhận đơn (`OPEN`) hoặc đang chờ admin duyệt (`PENDING_REVIEW`).
   2. **Đã xong:** Lọc các tin đã đóng (`CLOSED`) hoặc bị từ chối (`REJECTED`).
   3. **Bản nháp:** Đọc danh sách các bản nháp cục bộ lưu trên máy từ `JobDraftStore`. Mỗi thẻ nháp hiển thị tên nháp, khu vực, thời gian cập nhật gần nhất và nút **`"Tiếp tục chỉnh sửa"`** giúp người thuê mở lại form soạn thảo dễ dàng.
+* **Xử lý triệt để lỗi mất chữ/cắt mép chữ (Text Clipping Fix):**
+  * Nguyên nhân gốc: Do style button mặc định áp padding dọc lớn kết hợp với chiều cao cố định và việc gọi `setBackgroundResource()` lúc runtime làm reset lại padding hệ thống, khiến chữ tiếng Việt có dấu bị cắt viền trên/dưới.
+  * Giải pháp xử lý: Cấu hình `layout_height="wrap_content"`, `minHeight="48dp"`, `paddingTop="10dp"`, `paddingBottom="10dp"`, `includeFontPadding="false"`, đồng thời tạo hàm `applyTabStyle()` tái áp đặt padding chuẩn ngay sau khi đổi background. Đảm bảo toàn bộ chữ "Đang đăng", "Đã xong", "Bản nháp" hiển thị trọn vẹn, căn giữa hoàn hảo.
 * Nếu nhóm không có tin nào, hiển thị thông báo trống lịch sự và rõ ràng.
 
 ---
@@ -100,14 +109,14 @@
   * Tiêu đề mục: Tăng từ `18sp` $\rightarrow$ **`20sp`** (in đậm).
   * Nội dung đã chọn: Tăng từ `16sp` $\rightarrow$ **`18sp`**.
   * Nút "Sửa": Tăng từ `16sp` $\rightarrow$ **`17sp`**.
-* **Sửa lỗi hiển thị chữ bị kéo dọc (Khắc phục Bug Hình 3):**
+* **Sửa lỗi hiển thị chữ bị kéo dọc:**
   * Thẻ công việc phù hợp (Bước 6) trước đây sử dụng `LinearLayout` chiều ngang khiến các nhãn giải thích tiêu chí (tags) khi vượt quá chiều rộng màn hình bị ép thành một cột hẹp chỉ vài pixel, làm chữ bị ngắt từng ký tự xếp dọc.
   * Đã chuyển sang bố cục **hàng dọc (`LinearLayout.VERTICAL`)** với biểu tượng dấu đầu dòng (`• tag`), bo góc nhẹ, nền xanh nhạt, chiều rộng phủ toàn thẻ (`MATCH_PARENT`). Đảm bảo mọi giải thích tiêu chí hiển thị trọn vẹn, không bao giờ bị cắt xén hay đè chữ.
 
 ### 3.2. Trang chủ Người tìm việc (`RoleHomePanel.java`)
 * Phóng to các nút lựa chọn chính của người tìm việc:
   * `"Giúp tôi tìm việc"`
-  * `"Việc làm sắp tới (N)"`
+  * `"Việc làm sắp tới"` (thẻ trạng thái bo tròn kèm biểu tượng và bộ đếm)
   * `"Việc của tôi"`
   * `"Xem các việc khác"`
   * Chiều cao tối thiểu: Tăng lên **`80dp`**.
@@ -134,22 +143,26 @@
 | 6 | `app/src/main/res/drawable/ic_settings.xml` | Icon vector bánh răng cài đặt hỗ trợ tiếp cận. |
 | 7 | `app/src/main/res/layout/dialog_call_center.xml` | Giao diện hộp thoại Liên hệ tổng đài với 4 liên hệ và nút gọi. |
 | 8 | `CallCenterDialog.java` | Lớp logic hiển thị hộp thoại tổng đài và kích hoạt `Intent.ACTION_DIAL`. |
-| 9 | `RoleHomePanel.java` | Kết nối CallCenterDialog; phóng to nút Seeker; ẩn nút ca làm Employer; thêm đếm `(N)`. |
-| 10 | `ProfilePanel.java` | Thêm `AlertDialog` xác nhận đăng xuất an toàn; dọn dẹp các nút phụ. |
-| 11 | `WorkSessionsActivity.java` | Đổi tiêu đề sang `"Việc làm sắp tới"`; chỉ hiển thị ca đã xác nhận 2 bên. |
-| 12 | `PublicJobsActivity.java` | Tăng font chi tiết lên `17sp`; nút `"Đã nộp đơn"` nền xanh chữ trắng. |
-| 13 | `WalletTransactionAdapter.java` | Lược bỏ ID kỹ thuật dài dòng, chỉ giữ tiêu đề giao dịch sạch. |
-| 14 | `JobPostActivity.java` | Phân nhóm 3 tabs ("Đang đăng", "Đã xong", "Bản nháp"); nạp nháp từ JobDraftStore. |
-| 15 | `GuidedSearchActivity.java` | Bổ sung nút Hủy tìm; tăng font tóm tắt; fix bug chữ kéo dọc ở tags kết quả. |
-| 16 | `activity_job_posts.xml` | Thêm thanh 3 tab lọc tin người thuê. |
-| 17 | `activity_guided_search.xml` | Thêm `gsBtnCancel` ở Bước 1. |
-| 18 | `profile_content.xml` | Ẩn Help cũ; nút Đăng xuất đỏ; icon Cài đặt tiếp cận. |
-| 19 | `role_account_content.xml` | Ẩn Ví tiền trùng lặp; nút Đăng xuất đỏ. |
-| 20 | `AuthRepository.java` | Cung cấp `public final String uid` trong `Account`. |
+| 9 | `role_home_content.xml` | Thiết kế thẻ bo tròn "Việc làm sắp tới" với icon sổ tay checklist và 2 tầng chữ. |
+| 10 | `RoleHomePanel.java` | Kết nối CallCenterDialog; cập nhật dữ liệu thẻ "Việc làm sắp tới"; ẩn nút ca làm Employer; phóng to nút Seeker. |
+| 11 | `ProfilePanel.java` | Thêm `AlertDialog` xác nhận đăng xuất an toàn; dọn dẹp các nút phụ. |
+| 12 | `WorkSessionsActivity.java` | Đổi tiêu đề sang `"Việc làm sắp tới"`; chỉ hiển thị ca đã xác nhận 2 bên. |
+| 13 | `PublicJobsActivity.java` | Tăng font chi tiết lên `17sp`; nút `"Đã nộp đơn"` nền xanh chữ trắng. |
+| 14 | `WalletTransactionAdapter.java` | Lược bỏ ID kỹ thuật dài dòng, chỉ giữ tiêu đề giao dịch sạch. |
+| 15 | `JobPostActivity.java` | Phân nhóm 3 tabs ("Đang đăng", "Đã xong", "Bản nháp"); nạp nháp từ JobDraftStore; sửa lỗi mất chữ tab. |
+| 16 | `GuidedSearchActivity.java` | Bổ sung nút Hủy tìm; tăng font tóm tắt; fix bug chữ kéo dọc ở tags kết quả. |
+| 17 | `activity_job_posts.xml` | Thêm thanh 3 tab lọc tin người thuê; căn chỉnh padding tránh cắt mép chữ. |
+| 18 | `activity_guided_search.xml` | Thêm `gsBtnCancel` ở Bước 1. |
+| 19 | `profile_content.xml` | Ẩn Help cũ; nút Đăng xuất đỏ; icon Cài đặt tiếp cận. |
+| 20 | `role_account_content.xml` | Ẩn Ví tiền trùng lặp; nút Đăng xuất đỏ. |
+| 21 | `AuthRepository.java` | Cung cấp `public final String uid` trong `Account`. |
 
 ---
 
 ## 5. Kết Quả Kiểm Tra (Verification)
-* **Biên dịch Gradle:** `.\gradlew.bat assembleDebug` thành công 100% không cảnh báo lỗi (`BUILD SUCCESSFUL in 36s`).
+* **Biên dịch Gradle:** `.\gradlew.bat assembleDebug` thành công 100% không lỗi (`BUILD SUCCESSFUL in 37s`).
 * **Triển khai thiết bị thực:** Cài đặt thành công qua ADB trên thiết bị thực `adb-7L8XDIFU75JBMJBI-X00rBg` (`Success`).
-* **Khởi chạy ứng dụng:** `MainActivity` mở ổn định trên thiết bị, không xảy ra crash hoặc ngoại lệ runtime.
+* **Kiểm tra trực quan (Screenshots):**
+  * Thẻ "Việc làm sắp tới" hiển thị chuẩn xác icon checklist, dòng tiêu đề in đậm `20sp` và dòng phụ `Chưa có việc sắp tới` / `Có N việc sắp tới`.
+  * Các tab lọc tin người thuê "Đang đăng", "Đã xong", "Bản nháp" hiển thị đầy đủ 100% chữ tiếng Việt, không bị co ép hay mất mép.
+  * Các nút điều hướng và chuyển màn hình hoạt động trơn tru, không có hiện tượng văng ứng dụng hay lỗi runtime.
