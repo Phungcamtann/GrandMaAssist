@@ -10,7 +10,7 @@ import java.util.*;
 /** Explicit public projection. Never serialize a Firestore document or a private JobPost wholesale. */
 public final class PublicJob {
     public final String id, title, employerName, categoryId, categoryName, areaCode, areaName;
-    public final String workAddress, description, requirements, shift, schedule, payUnit;
+    public final String workAddress, workplacePhotoUrl, description, requirements, shift, schedule, payUnit;
     public final List<String> skills, days, demands;
     public final long payAmount, expiresAt, version, updatedAt, cachedAt;
 
@@ -20,7 +20,9 @@ public final class PublicJob {
         employerName = string(j,"employerName",150,true);
         categoryId = string(j,"categoryId",80,true); categoryName = string(j,"categoryName",120,true);
         areaCode = string(j,"areaCode",80,true); areaName = string(j,"areaName",120,true);
-        workAddress = string(j,"workAddress",500,true); description = string(j,"description",3000,true);
+        workAddress = string(j,"workAddress",500,true);
+        workplacePhotoUrl = j.optString("workplacePhotoUrl", "");
+        description = string(j,"description",3000,true);
         requirements = string(j,"requirements",1000,false); shift = string(j,"shift",20,true);
         schedule = string(j,"schedule",500,true); payUnit = string(j,"payUnit",20,true);
         skills = list(j,"skills",8,60); days = list(j,"days",7,20); demands = list(j,"demands",3,30);
@@ -53,6 +55,7 @@ public final class PublicJob {
             Object value = doc.get(name); if (!(value instanceof Timestamp)) throw new JSONException("SCHEMA");
             j.put(name,((Timestamp)value).toDate().getTime());
         }
+        j.put("workplacePhotoUrl", doc.getString("workplacePhotoUrl") != null ? doc.getString("workplacePhotoUrl") : "");
         return new PublicJob(j,now);
     }
     public static PublicJob fromCache(String payload, long savedAt) throws JSONException {
@@ -61,7 +64,7 @@ public final class PublicJob {
     public String toJson() throws JSONException {
         return new JSONObject().put("schemaVersion",1).put("id",id).put("title",title).put("employerName",employerName)
                 .put("categoryId",categoryId).put("categoryName",categoryName).put("areaCode",areaCode).put("areaName",areaName)
-                .put("workAddress",workAddress).put("description",description).put("requirements",requirements)
+                .put("workAddress",workAddress).put("workplacePhotoUrl",workplacePhotoUrl).put("description",description).put("requirements",requirements)
                 .put("skills",new JSONArray(skills)).put("days",new JSONArray(days)).put("demands",new JSONArray(demands))
                 .put("shift",shift).put("schedule",schedule).put("payUnit",payUnit).put("payAmount",payAmount)
                 .put("expiresAt",expiresAt).put("version",version).put("updatedAt",updatedAt).toString();

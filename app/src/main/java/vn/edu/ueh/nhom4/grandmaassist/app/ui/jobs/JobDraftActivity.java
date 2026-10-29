@@ -38,6 +38,23 @@ public final class JobDraftActivity extends AppCompatActivity {
                 if(route!=null&&!"DRAFTS".equals(route)){setResult(RESULT_OK,r.getData());finish();return;}}
             vm.loadList();
         });
+    private final androidx.activity.result.ActivityResultLauncher<String> photoPicker = registerForActivityResult(
+        new androidx.activity.result.contract.ActivityResultContracts.GetContent(), uri -> {
+            if (uri == null || vm == null || vm.draft == null) return;
+            try {
+                String dataUrl = vn.edu.ueh.nhom4.grandmaassist.app.util.ImageHelper.uriToCompressedBase64(this, uri, 800, 200000);
+                if (dataUrl != null) {
+                    vm.draft.workplacePhotoUrl = dataUrl;
+                    vm.edited("workplacePhotoUrl");
+                    renderPhoto();
+                    Toast.makeText(this, "Đã chọn ảnh nơi làm việc", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Không thể xử lý ảnh đã chọn", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Lỗi đọc ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     private RoleNavigationBar navigation;
     private boolean rendering;
     private Object renderedList;
@@ -100,6 +117,16 @@ public final class JobDraftActivity extends AppCompatActivity {
         click(R.id.btnPickStartDate, this::pickJobDate);
         click(R.id.btnPickStartTime, this::pickStartTime);
         click(R.id.btnPickEndTime, this::pickEndTime);
+        click(R.id.btnPickWorkplacePhoto, () -> {
+            if (canEdit()) photoPicker.launch("image/*");
+        });
+        click(R.id.btnRemovePhoto, () -> {
+            if (canEdit() && vm.draft != null) {
+                vm.draft.workplacePhotoUrl = "";
+                vm.edited("workplacePhotoUrl");
+                renderPhoto();
+            }
+        });
 
         Spinner spWorkType = findViewById(R.id.jdWorkType);
         if (spWorkType != null) {
@@ -293,6 +320,25 @@ public final class JobDraftActivity extends AppCompatActivity {
         updateScheduleUI();
     }
 
+    private void renderPhoto() {
+        if (vm == null || vm.draft == null) return;
+        View card = findViewById(R.id.jdPhotoCard);
+        ImageView preview = findViewById(R.id.jdPhotoPreview);
+        AppCompatButton pickBtn = findViewById(R.id.btnPickWorkplacePhoto);
+        if (card == null || preview == null || pickBtn == null) return;
+        if (vm.draft.workplacePhotoUrl != null && !vm.draft.workplacePhotoUrl.trim().isEmpty()) {
+            android.graphics.Bitmap bmp = vn.edu.ueh.nhom4.grandmaassist.app.util.ImageHelper.decodeBase64(vm.draft.workplacePhotoUrl);
+            if (bmp != null) {
+                preview.setImageBitmap(bmp);
+                card.setVisibility(View.VISIBLE);
+                pickBtn.setText("📷 Thay đổi ảnh nơi làm việc");
+                return;
+            }
+        }
+        card.setVisibility(View.GONE);
+        pickBtn.setText("📷 Chọn ảnh nơi làm việc");
+    }
+
     private void updateScheduleUI() {
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         String dateStr = df.format(jobCalendar.getTime());
@@ -412,6 +458,7 @@ public final class JobDraftActivity extends AppCompatActivity {
                 initScheduleFromDraft();
             }
             updateScheduleUI();
+            renderPhoto();
             Spinner spWt = findViewById(R.id.jdWorkType);
             if (spWt != null && spWt.getSelectedItemPosition() != workType) {
                 spWt.setSelection(workType);

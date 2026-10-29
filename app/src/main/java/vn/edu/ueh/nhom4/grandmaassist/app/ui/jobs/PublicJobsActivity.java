@@ -205,10 +205,18 @@ public final class PublicJobsActivity extends AppCompatActivity {
         String cachedAt=vm.cached?getString(R.string.pb_offline,date(job.cachedAt)):"";
         cardText(card,R.id.pbCardCachedAt,cachedAt);
         ImageView image=card.findViewById(R.id.pbCardImage);int illustration=illustration(job.categoryId);
-        image.setImageResource(illustration==0?R.drawable.ic_role_work:illustration);
+        android.graphics.Bitmap customPhoto = vn.edu.ueh.nhom4.grandmaassist.app.util.ImageHelper.decodeBase64(job.workplacePhotoUrl);
+        if (customPhoto != null) {
+            image.setImageBitmap(customPhoto);
+            image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            image.setPadding(0, 0, 0, 0);
+            card.findViewById(R.id.pbCardIllustration).setVisibility(View.VISIBLE);
+        } else {
+            image.setImageResource(illustration==0?R.drawable.ic_role_work:illustration);
         image.setScaleType(illustration==0?ImageView.ScaleType.CENTER_INSIDE:ImageView.ScaleType.CENTER_CROP);
         int padding=illustration==0?dp(48):0;image.setPadding(padding,padding,padding,padding);
         card.findViewById(R.id.pbCardIllustration).setVisibility(illustration==0?View.GONE:View.VISIBLE);
+        }
         String fullDays=labels(LocalJobDraft.DAYS,getResources().getStringArray(R.array.jd_days),job.days);
         card.setContentDescription(badge+"\n"+job.title+"\n"+job.employerName+" · "+job.areaName+"\n"+job.categoryName+"\n"+
                 fullDays+"\n"+schedule+"\n"+money(job)+"\n"+deadline+(cachedAt.isEmpty()?"":"\n"+cachedAt));
@@ -236,20 +244,29 @@ public final class PublicJobsActivity extends AppCompatActivity {
             case "GARDEN_CARE":return R.drawable.job_illustration_garden;
             case "KITCHEN_HELP":return R.drawable.job_illustration_kitchen;
             case "LIBRARY_HELP":return R.drawable.job_illustration_library;
-            case "SHOP_HELP":return R.drawable.job_illustration_shop;
-            default:return 0;
+            case "SHOP_HELP":
+            case "PARKING_ASSIST":return R.drawable.job_illustration_shop;
+            case "CLEANING_HOME":
+            case "BABYSITTING":
+            case "OTHER_HELP":
+            default:return R.drawable.job_illustration_garden;
         }
     }
     private void detail(LinearLayout body, PublicJob j) {
         int illustration = illustration(j.categoryId);
-        if (illustration != 0) {
+        android.graphics.Bitmap customPhoto = vn.edu.ueh.nhom4.grandmaassist.app.util.ImageHelper.decodeBase64(j.workplacePhotoUrl);
+        if (customPhoto != null || illustration != 0) {
             com.google.android.material.card.MaterialCardView cardImg = new com.google.android.material.card.MaterialCardView(this);
             cardImg.setRadius(dp(16));
             cardImg.setCardElevation(dp(2));
             cardImg.setStrokeWidth(0);
 
             ImageView iv = new ImageView(this);
-            iv.setImageResource(illustration);
+            if (customPhoto != null) {
+                iv.setImageBitmap(customPhoto);
+            } else {
+                iv.setImageResource(illustration);
+            }
             iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
             cardImg.addView(iv, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(180)));
 
@@ -287,6 +304,9 @@ public final class PublicJobsActivity extends AppCompatActivity {
         labelHeading(c, "Địa chỉ làm việc");
         String addrText = (j.workAddress != null && !j.workAddress.trim().isEmpty() ? j.workAddress.trim() + "\n" : "") + "Khu vực: " + j.areaName;
         labelBody(c, addrText);
+        button(c, "Xem đường đi (Google Maps)", () -> {
+            vn.edu.ueh.nhom4.grandmaassist.app.util.MapNavigationHelper.openDirections(this, j.workAddress, j.areaName);
+        });
 
         addDetailDivider(c);
 
@@ -348,6 +368,16 @@ public final class PublicJobsActivity extends AppCompatActivity {
     private LinearLayout section(LinearLayout body){
         LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(dp(16),dp(16),dp(16),dp(16));
         c.setBackgroundResource(R.drawable.verification_section);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(24);body.addView(c,p);return c;
+    }
+    private void button(LinearLayout p, String title, Runnable action) {
+        androidx.appcompat.widget.AppCompatButton b = new androidx.appcompat.widget.AppCompatButton(
+                new androidx.appcompat.view.ContextThemeWrapper(this, R.style.Widget_GrandMa_Button_Secondary), null, 0);
+        b.setText(title);
+        b.setSaveEnabled(false);
+        b.setOnClickListener(v -> action.run());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.topMargin = dp(16);
+        p.addView(b, params);
     }
     private TextView label(LinearLayout parent,String value,boolean heading){
         TextView v=new TextView(this);v.setTextAppearance(heading?R.style.TextAppearance_GrandMa_Label:R.style.TextAppearance_GrandMa_Body);

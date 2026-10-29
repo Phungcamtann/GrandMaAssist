@@ -9,7 +9,7 @@ import java.util.*;
 public final class LocalJobDraft {
     public String id=UUID.randomUUID().toString(),ownerUid="";
     public long revision,createdAt,updatedAt,serverBaseVersion;
-    public String workAddress="";
+    public String workAddress="", workplacePhotoUrl="";
     public String title="",categoryId="",areaCode="",description="",requirements="",skillsInput="";
     public String shift="",schedule="",payInput="",payUnit="",demandMode="";
     public long expiresAt;
@@ -27,7 +27,7 @@ public final class LocalJobDraft {
     }
     public String toJson() throws JSONException {
         JSONObject j=new JSONObject();j.put("schemaVersion",1);
-        j.put("workAddress",workAddress);j.put("serverBaseVersion",serverBaseVersion);
+        j.put("workAddress",workAddress);j.put("workplacePhotoUrl",workplacePhotoUrl);j.put("serverBaseVersion",serverBaseVersion);
         j.put("title",title);j.put("categoryId",categoryId);j.put("areaCode",areaCode);j.put("description",description);
         j.put("requirements",requirements);j.put("skillsInput",skillsInput);j.put("shift",shift);j.put("schedule",schedule);
         j.put("payInput",payInput);j.put("payUnit",payUnit);j.put("demandMode",demandMode);j.put("expiresAt",expiresAt);
@@ -36,7 +36,7 @@ public final class LocalJobDraft {
     public static LocalJobDraft fromJson(String json,String uid,String id,long revision,long created,long updated) throws JSONException {
         JSONObject j=new JSONObject(json);if(j.getInt("schemaVersion")!=1)throw new JSONException("SCHEMA");
         LocalJobDraft d=new LocalJobDraft();d.ownerUid=uid;d.id=id;d.revision=revision;d.createdAt=created;d.updatedAt=updated;
-        d.workAddress=j.optString("workAddress","");d.serverBaseVersion=j.optLong("serverBaseVersion",0);
+        d.workAddress=j.optString("workAddress","");d.workplacePhotoUrl=j.optString("workplacePhotoUrl","");d.serverBaseVersion=j.optLong("serverBaseVersion",0);
         d.title=j.getString("title");d.categoryId=j.getString("categoryId");d.areaCode=j.getString("areaCode");
         d.description=j.getString("description");d.requirements=j.getString("requirements");d.skillsInput=j.getString("skillsInput");
         d.shift=j.getString("shift");d.schedule=j.getString("schedule");d.payInput=j.getString("payInput");
@@ -46,7 +46,7 @@ public final class LocalJobDraft {
         if(!d.bounded())throw new JSONException("BOUNDS");return d;
     }
     public boolean bounded(){
-        return workAddress.length()<=500 && serverBaseVersion>=0 && title.length()<=120 && description.length()<=3000 && requirements.length()<=1000 && skillsInput.length()<=500
+        return (workplacePhotoUrl==null||workplacePhotoUrl.length()<=300000) && workAddress.length()<=500 && serverBaseVersion>=0 && title.length()<=120 && description.length()<=3000 && requirements.length()<=1000 && skillsInput.length()<=500
                 && schedule.length()<=500 && payInput.length()<=24 && categoryId.length()<=80 && areaCode.length()<=80
                 && (shift.isEmpty()||SHIFTS.contains(shift)) && (payUnit.isEmpty()||UNITS.contains(payUnit))
                 && Arrays.asList("","NONE","SELECT").contains(demandMode) && DAYS.containsAll(days) && days.size()<=7

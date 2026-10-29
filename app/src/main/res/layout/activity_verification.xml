@@ -3,17 +3,29 @@
     android:id="@+id/verificationScreenRoot" android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/surface_ivory">
     <include layout="@layout/role_topbar"/>
+    <LinearLayout android:id="@+id/vToolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vBack" style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+            android:background="@drawable/public_back_button" android:gravity="start|center_vertical"
+            android:textSize="18sp" android:text="@string/n_back"/>
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReload" style="@style/Widget.GrandMa.PublicToolbarButton"
+            android:layout_width="wrap_content" android:layout_height="48dp" android:minHeight="48dp"
+            android:paddingStart="14dp" android:paddingEnd="14dp"
+            android:textSize="15sp" android:maxLines="1" android:singleLine="true"
+            android:text="@string/p_reload" android:contentDescription="@string/p_reload"/>
+    </LinearLayout>
     <ScrollView android:id="@+id/verificationScroll" android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:fillViewport="true" android:saveEnabled="false">
     <LinearLayout android:id="@+id/verificationRoot" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:padding="20dp" android:saveEnabled="false">
         
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/vBack" style="@style/Widget.GrandMa.BackLink" android:text="@string/n_back"/>
         <TextView android:id="@+id/vPageTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
             android:text="@string/v_title" android:textAppearance="@style/TextAppearance.GrandMa.Title" android:accessibilityHeading="true"/>
         <LinearLayout android:id="@+id/vFeedbackSection" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
             <TextView android:id="@+id/vMessage" style="@style/Widget.GrandMa.VerificationMessage" android:layout_marginTop="0dp"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReload" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/vOwner" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
             <LinearLayout style="@style/Widget.GrandMa.VerificationSection">
@@ -73,14 +85,113 @@
         </LinearLayout>
         <LinearLayout android:id="@+id/vAdmin" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
             <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_admin_section"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vReviewPosts" style="@style/Widget.GrandMa.VerificationSecondary" android:text="Duyệt tin tuyển"/>
-            <RadioGroup android:id="@+id/vQueueType" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:saveEnabled="false">
-                <RadioButton android:id="@+id/vQueueSeeker" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_seeker"/>
-                <RadioButton android:id="@+id/vQueueEmployer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:minHeight="56dp" android:textSize="20sp" android:fontFamily="@font/be_vietnam_pro_regular" android:saveEnabled="false" android:text="@string/v_queue_employer"/>
-            </RadioGroup>
-            <androidx.appcompat.widget.AppCompatEditText android:id="@+id/vSearch" style="@style/Widget.GrandMa.ProfileInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:inputType="textNoSuggestions" android:maxLength="128" android:hint="@string/v_search_hint"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/vFind" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/v_find"/>
-            <LinearLayout android:id="@+id/vQueue" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="vertical"/>
+            
+            <!-- Ô tìm kiếm và icon tìm kiếm cùng 1 hàng -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/vSearch"
+                    style="@style/Widget.GrandMa.ProfileInput"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="0dp"
+                    android:inputType="textNoSuggestions"
+                    android:maxLength="128"
+                    android:hint="@string/v_search_hint"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/vFind"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/button_secondary"
+                    android:src="@drawable/ic_search"
+                    android:tint="#1C6758"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/v_find" />
+            </LinearLayout>
+
+            <!-- Hàng bộ lọc: Chưa duyệt || Đã duyệt || Icon phễu -->
+            <LinearLayout
+                android:id="@+id/vFilterRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="6dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/vFilterPending"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="44dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:background="@drawable/button_primary"
+                    android:textColor="@color/white"
+                    android:text="Chưa duyệt" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/vFilterApproved"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:minHeight="44dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="@color/brand_green"
+                    android:text="Đã duyệt" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/vFilterRole"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/button_secondary"
+                    android:src="@drawable/ic_filter"
+                    android:tint="#1C6758"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Lọc vai trò" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/vRoleFilterLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="13sp"
+                android:textColor="#5C6360"
+                android:text="Đang lọc: Tất cả vai trò" />
+
+            <LinearLayout
+                android:id="@+id/vQueue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/vReview" style="@style/Widget.GrandMa.VerificationSection" android:visibility="gone">
             <TextView style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/v_review_section"/>

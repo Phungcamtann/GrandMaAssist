@@ -34,7 +34,8 @@ public final class VerificationViewModel extends AndroidViewModel {
     private byte[] candidateQrSource;
     public final List<byte[]> evidence=new ArrayList<>();
     public CardIdentity identity;
-    public String message="",evidenceType="RETIREMENT_CERTIFICATE",queueRole="SEEKER",lookup="",reason="";
+    public String message="",evidenceType="RETIREMENT_CERTIFICATE",queueRole="ALL",lookup="",reason="";
+    public boolean queuePending = true;
     public String reasonAction="",reasonMessage="";
     public boolean busy,loaded,consent,reviewed,externalPending,sessionEnded,sending,readRequired;
     public boolean openCurrentOnLoad;
@@ -80,6 +81,16 @@ public final class VerificationViewModel extends AndroidViewModel {
             emit();
         });
     }
+    public void setQueuePending(boolean pending) {
+        if (busy || queuePending == pending) return;
+        queuePending = pending;
+        loadQueue();
+    }
+    public void setQueueRole(String role) {
+        if (busy || queueRole.equals(role)) return;
+        queueRole = role;
+        loadQueue();
+    }
     public void loadQueue() {
         loadQueue("");
     }
@@ -87,7 +98,7 @@ public final class VerificationViewModel extends AndroidViewModel {
         if(busy || sessionEnded)return;
         long e=++epoch; busy=true; selected=null; reviewImages.clear(); reviewed=false;reason=lookup=reasonAction=reasonMessage="";
         queue=new ArrayList<>(); message=(resultMessage+" Đang tải danh sách…").trim(); emit();
-        repository.queue(uid,queueRole).addOnCompleteListener(t->{
+        repository.queue(uid,queueRole,queuePending).addOnCompleteListener(t->{
             if(!valid(e))return; busy=false;
             if(t.isSuccessful()) { queue=t.getResult(); message=(resultMessage+" "+(queue.isEmpty()?"Chưa có hồ sơ chờ duyệt.":"")).trim(); }
             else message=(resultMessage+" "+error(t.getException())).trim();

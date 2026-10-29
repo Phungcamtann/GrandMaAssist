@@ -43,6 +43,12 @@ public final class AccessibilitySettings implements Serializable {
         return new AccessibilitySettings(this.voiceEnabled, this.autoReadEnabled, this.speechRate, fontScaleOption);
     }
 
+    public float getFontScale() {
+        if ("LARGE".equals(fontScaleOption)) return 1.15f;
+        if ("EXTRA_LARGE".equals(fontScaleOption)) return 1.30f;
+        return 1.0f;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

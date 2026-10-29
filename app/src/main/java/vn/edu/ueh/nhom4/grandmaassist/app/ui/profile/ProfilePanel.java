@@ -136,7 +136,7 @@ public final class ProfilePanel {
             vn.edu.ueh.nhom4.grandmaassist.app.ui.wallet.WalletActivity.start(activity, role, 0L);
         });
         click(R.id.btnProfileHelp, () -> android.widget.Toast.makeText(activity, "Trung tâm trợ giúp GrandMa Assist", android.widget.Toast.LENGTH_SHORT).show());
-        click(R.id.btnProfileSettings, () -> vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.AccessibilitySettingsDialog.show(activity, null));
+        click(R.id.btnProfileSettings, () -> vn.edu.ueh.nhom4.grandmaassist.app.ui.accessibility.AccessibilitySettingsDialog.show(activity, newSettings -> activity.recreate()));
         click(R.id.btnProfileVerification,()->{
             if(vm.verificationLoading)return;
             if("UNKNOWN".equals(vm.verificationStatus))vm.refreshVerification();else openVerification();
@@ -168,6 +168,7 @@ public final class ProfilePanel {
                 else{vm.showProfile();vm.refreshVerification();}
                 scrollTop();break;
             case ACCOUNT:vm.showAccount();scrollTop();break;
+            case STATS:activity.startActivity(new android.content.Intent(activity, vn.edu.ueh.nhom4.grandmaassist.app.ui.admin.AdminStatsActivity.class));break;
             case PROCESS:new AlertDialog.Builder(activity).setTitle("Xử lý").setItems(new String[]{"Kiểm tra hồ sơ","Duyệt tin tuyển"},(d,w)->{if(w==0)openVerification();else openPosts();}).show();break;
             case WORK:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))openPosts();else if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role))openMyApplications();else openDrafts(false);break;
             case OTHER:if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role))discardThen(()->vn.edu.ueh.nhom4.grandmaassist.app.ui.sessions.WorkSessionsActivity.start(activity,"EMPLOYER"));else openPublicJobs();break;

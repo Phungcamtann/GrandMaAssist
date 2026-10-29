@@ -43,8 +43,12 @@ public final class ProfileRepository {
         }
     }
     public static final class AdminCounts {
-        public final long seeker, employer;
-        AdminCounts(long seeker,long employer){this.seeker=seeker;this.employer=employer;}
+        public final long seeker, employer, pendingJobs;
+        public AdminCounts(long seeker, long employer, long pendingJobs) {
+            this.seeker = seeker;
+            this.employer = employer;
+            this.pendingJobs = pendingJobs;
+        }
     }
     private static final class Proof {
         final String uid, phone;
@@ -124,10 +128,12 @@ public final class ProfileRepository {
                     .limit(50).count().get(AggregateSource.SERVER);
             Task<AggregateQuerySnapshot> employer=db.collection("identityRequests").whereEqualTo("status","SUBMITTED")
                     .limit(50).count().get(AggregateSource.SERVER);
-            return Tasks.whenAll(seeker,employer).continueWith(done->{
+            Task<AggregateQuerySnapshot> jobs=db.collection("jobs").whereEqualTo("status","PENDING_REVIEW")
+                    .limit(50).count().get(AggregateSource.SERVER);
+            return Tasks.whenAll(seeker,employer,jobs).continueWith(done->{
                 if(!done.isSuccessful())throw done.getException();
                 if(!same(uid))throw new Failure("SESSION");
-                return new AdminCounts(seeker.getResult().getCount(),employer.getResult().getCount());
+                return new AdminCounts(seeker.getResult().getCount(),employer.getResult().getCount(),jobs.getResult().getCount());
             });
         });
     }

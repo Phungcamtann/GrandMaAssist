@@ -275,6 +275,7 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
 
         WorkSession session = vm.currentSession;
         if (session == null || session.agreement == null) return;
+        vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.scheduleReminders(this, session);
 
         AgreementSnapshot ag = session.agreement;
         renderBadge(tvBadge, session);
@@ -319,6 +320,17 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
             sb.append("Khu vực: ").append(area);
         }
         tvAddress.setText(sb.length() > 0 ? sb.toString() : "Địa chỉ làm việc theo tin tuyển dụng");
+        View btnDirections = findViewById(R.id.shiftDetailBtnDirections);
+        if (btnDirections != null) {
+            final String navAddress = workAddr;
+            final String navArea = area;
+            if (!navAddress.isEmpty() || !navArea.isEmpty()) {
+                btnDirections.setVisibility(View.VISIBLE);
+                btnDirections.setOnClickListener(v -> vn.edu.ueh.nhom4.grandmaassist.app.util.MapNavigationHelper.openDirections(this, navAddress, navArea));
+            } else {
+                btnDirections.setVisibility(View.GONE);
+            }
+        }
 
         boolean isSeeker = currentUid.equals(session.seekerId);
         boolean isEmployer = currentUid.equals(session.employerId);

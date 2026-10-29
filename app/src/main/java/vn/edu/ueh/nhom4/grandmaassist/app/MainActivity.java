@@ -48,6 +48,13 @@ import vn.edu.ueh.nhom4.grandmaassist.app.viewmodel.ProfileViewModel;
 import vn.edu.ueh.nhom4.grandmaassist.app.ui.profile.ProfilePanel;
 
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        android.content.res.Configuration config = new android.content.res.Configuration(newBase.getResources().getConfiguration());
+        vn.edu.ueh.nhom4.grandmaassist.app.data.local.AccessibilityStore store = new vn.edu.ueh.nhom4.grandmaassist.app.data.local.AccessibilityStore(newBase);
+        config.fontScale = store.getSettings().getFontScale();
+        super.attachBaseContext(newBase.createConfigurationContext(config));
+    }
     private AuthViewModel model;
     private ProfilePanel profilePanel;
     private ProfileViewModel profileModel;

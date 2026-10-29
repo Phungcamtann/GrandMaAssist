@@ -1,12 +1,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/roleHomeContent" android:layout_width="match_parent" android:layout_height="wrap_content"
     android:orientation="vertical" android:padding="@dimen/screen_padding" android:visibility="gone" android:saveEnabled="false">
-    <TextView android:id="@+id/homeTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.GrandMa.Title"
-        android:textStyle="bold"
-        android:textSize="26sp"
-        android:textColor="#1C6758"
-        android:accessibilityHeading="true" android:saveEnabled="false"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/homeTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.GrandMa.Title"
+            android:textStyle="bold"
+            android:textSize="26sp"
+            android:textColor="#1C6758"
+            android:accessibilityHeading="true"
+            android:saveEnabled="false"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/homeAdminReload"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_reload"
+            android:tint="#1C6758"
+            android:contentDescription="Tải lại dữ liệu"
+            android:visibility="gone" />
+    </LinearLayout>
     <TextView android:id="@+id/homeIntro" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="12dp" android:textAppearance="@style/TextAppearance.GrandMa.Body" android:saveEnabled="false"/>
     <LinearLayout android:id="@+id/homeMember" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
@@ -69,16 +93,112 @@
         <TextView android:id="@+id/homeAudioGuide" style="@style/Widget.GrandMa.VerificationSecondary" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_gravity="center_horizontal" android:layout_marginTop="16dp" android:gravity="center" android:paddingStart="20dp" android:paddingEnd="20dp" android:text="@string/gs_listen_guide" android:visibility="gone"/>
     </LinearLayout>
     <LinearLayout android:id="@+id/homeAdmin" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homePostsFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_posts"/>
-        <LinearLayout style="@style/Widget.GrandMa.HomeCard">
-            <TextView android:id="@+id/homeQueueTitle" style="@style/Widget.GrandMa.VerificationHeading" android:text="@string/n_queue_title" android:saveEnabled="false"/>
-            <TextView android:id="@+id/homeQueueCounts" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
-                android:textAppearance="@style/TextAppearance.GrandMa.Body" android:accessibilityLiveRegion="polite" android:saveEnabled="false"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeReviewProfiles" style="@style/Widget.GrandMa.VerificationPrimary" android:text="@string/n_admin_review"/>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeRefreshCounts" style="@style/Widget.GrandMa.VerificationSecondary" android:text="@string/p_reload"/>
+        <!-- Khối 1: Tin cần duyệt -->
+        <LinearLayout
+            android:id="@+id/homeAdminPostsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/verification_section"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_role_work"
+                android:tint="#1C6758"
+                android:contentDescription="Tin cần duyệt" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/homeAdminPostsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tin cần duyệt"
+                    android:textColor="#1A1C19"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/be_vietnam_pro_semibold" />
+
+                <TextView
+                    android:id="@+id/homeAdminPostsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Đang kiểm tra tin chờ duyệt..."
+                    android:textColor="#5C6360"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/be_vietnam_pro_regular" />
+            </LinearLayout>
         </LinearLayout>
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeReportsFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_reports"/>
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeDisputesFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_disputes"/>
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/homeOverdueFuture" style="@style/Widget.GrandMa.HomeFuture" android:text="@string/n_admin_overdue"/>
+
+        <!-- Khối 2: Hồ sơ chờ duyệt -->
+        <LinearLayout
+            android:id="@+id/homeAdminProfilesCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/verification_section"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_bank_card"
+                android:tint="#1C6758"
+                android:contentDescription="Hồ sơ chờ duyệt" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/homeAdminProfilesTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hồ sơ chờ duyệt"
+                    android:textColor="#1A1C19"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/be_vietnam_pro_semibold" />
+
+                <TextView
+                    android:id="@+id/homeAdminProfilesCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Đang kiểm tra hồ sơ..."
+                    android:textColor="#5C6360"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/be_vietnam_pro_regular" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>

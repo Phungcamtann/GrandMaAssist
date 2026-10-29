@@ -180,6 +180,22 @@
                         style="@style/Widget.GrandMa.PublicCardBody"
                         android:layout_marginTop="4dp"
                         android:textColor="#1A1C19"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/shiftDetailBtnDirections"
+                        style="@style/Widget.GrandMa.Button.Secondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="44dp"
+                        android:layout_marginTop="10dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:drawableStart="@drawable/ic_search"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:text="Xem đường đi (Google Maps)"
+                        android:textSize="15sp"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

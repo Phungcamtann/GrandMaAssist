@@ -88,8 +88,9 @@ public final class VerificationActivity extends AppCompatActivity {
         File dir=new File(getCacheDir(),"verification-capture");
         File[] stale=dir.listFiles();
         if(stale!=null)for(File f:stale)if(!f.equals(vm.capture))f.delete();
-        click(R.id.vReviewPosts,()->{if(vm.home!=null&&"ADMIN".equals(vm.home.role))discardThen(()->{
-            setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,"POSTS"));finish();});});
+        click(R.id.vFilterPending, () -> vm.setQueuePending(true));
+        click(R.id.vFilterApproved, () -> vm.setQueuePending(false));
+        click(R.id.vFilterRole, this::showRoleFilterDialog);
         click(R.id.vBack,this::leave);
         click(R.id.vCancelUpload,vm::cancelSending);
         click(R.id.vReload,()->discardThen(()->{ vm.clearDraft(); vm.load(); }));
@@ -134,10 +135,7 @@ public final class VerificationActivity extends AppCompatActivity {
         ((RadioGroup)findViewById(R.id.vEvidenceType)).setOnCheckedChangeListener((g,id)->{
             if(!rendering)vm.evidenceType=id==R.id.vBhxh?"BHXH_SIMULATED":"RETIREMENT_CERTIFICATE";
         });
-        ((RadioGroup)findViewById(R.id.vQueueType)).setOnCheckedChangeListener((g,id)->{
-            if(!rendering && !vm.busy){String role=id==R.id.vQueueEmployer?"EMPLOYER":"SEEKER";
-                discardThen(()->{vm.queueRole=role;vm.loadQueue();});render();}
-        });
+
         ((RadioGroup)findViewById(R.id.vLookup)).setOnCheckedChangeListener((g,id)->{
             if(!rendering){vm.lookup=id==R.id.vMatch?"MATCH":id==R.id.vNotMatch?"NOT_MATCH":"INSUFFICIENT";vm.emit();}
         });
@@ -265,6 +263,7 @@ public final class VerificationActivity extends AppCompatActivity {
                 if(w==0)vm.loadQueue();else discardThen(()->{setResult(RESULT_OK,new Intent().putExtra(RoleNavigationBar.RETURN_DESTINATION,"POSTS"));finish();});
             }).show();return;
         }
+        if(action==RoleNavigationBar.Action.STATS){discardThen(()->startActivity(new Intent(this, vn.edu.ueh.nhom4.grandmaassist.app.ui.admin.AdminStatsActivity.class)));return;}
         if(action==RoleNavigationBar.Action.PROCESS){
             if(vm.selected!=null)discardThen(vm::loadQueue);else findViewById(R.id.verificationScroll).scrollTo(0,0);
             return;
@@ -378,12 +377,33 @@ public final class VerificationActivity extends AppCompatActivity {
         }
         if(admin){
             findViewById(R.id.vFind).setEnabled(!vm.busy);
-            enabled(findViewById(R.id.vQueueType),!vm.busy);
-            ((RadioGroup)findViewById(R.id.vQueueType)).check("SEEKER".equals(vm.queueRole)?R.id.vQueueSeeker:R.id.vQueueEmployer);
+            if (findViewById(R.id.vFilterPending) != null) {
+                findViewById(R.id.vFilterPending).setEnabled(!vm.busy);
+                findViewById(R.id.vFilterApproved).setEnabled(!vm.busy);
+                findViewById(R.id.vFilterRole).setEnabled(!vm.busy);
+                applyFilterTabStyle((androidx.appcompat.widget.AppCompatButton) findViewById(R.id.vFilterPending), vm.queuePending);
+                applyFilterTabStyle((androidx.appcompat.widget.AppCompatButton) findViewById(R.id.vFilterApproved), !vm.queuePending);
+                String roleLabel = "Đang lọc: " + ("SEEKER".equals(vm.queueRole) ? "Người tìm việc (Nghỉ hưu)" : ("EMPLOYER".equals(vm.queueRole) ? "Người thuê" : "Tất cả vai trò"));
+                set(R.id.vRoleFilterLabel, roleLabel);
+            }
             if(renderedQueueKey!=vm.queue){
                 renderedQueueKey=vm.queue;LinearLayout box=findViewById(R.id.vQueue);box.removeAllViews();
-                for(VerificationRepository.Record r:vm.queue)button(box,String.valueOf(r.identity().get("fullName"))+" · "+r.id.substring(0,8),()->discardThen(()->vm.select(r)));
-                if(vm.queue.size()==50)label(box,"Hiển thị tối đa 50 hồ sơ. Duyệt xong rồi tải lại để xem tiếp.");
+                if(vm.queue.isEmpty()) {
+                    TextView empty = new TextView(this);
+                    empty.setText(vm.queuePending ? "Không có hồ sơ nào đang chờ duyệt." : "Không có hồ sơ nào đã duyệt.");
+                    empty.setTextSize(15f);
+                    empty.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.text_charcoal));
+                    empty.setPadding(0, dp(16), 0, dp(16));
+                    box.addView(empty);
+                } else {
+                    for(VerificationRepository.Record r:vm.queue) {
+                        String roleText = "SEEKER".equals(r.text("role")) ? "Người tìm việc" : "Người thuê";
+                        String statusText = statusLabel(r.text("status"));
+                        String label = String.valueOf(r.identity().get("fullName")) + "\n" + roleText + " · " + statusText + " (" + r.id.substring(0, Math.min(8, r.id.length())) + ")";
+                        button(box, label, ()->discardThen(()->vm.select(r)));
+                    }
+                    if(vm.queue.size()==50)label(box,"Hiển thị tối đa 50 hồ sơ. Duyệt xong rồi tải lại để xem tiếp.");
+                }
             }
         }
         show(R.id.vReview,vm.selected!=null);
@@ -489,5 +509,31 @@ public final class VerificationActivity extends AppCompatActivity {
         AlertDialog dialog=new AlertDialog.Builder(this).setView(image).setPositiveButton("Đóng",null).create();
         dialog.setOnShowListener(d->{if(dialog.getWindow()!=null){dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
             dialog.getWindow().setLayout(-1,(int)(getResources().getDisplayMetrics().heightPixels*.85f));}});dialog.show();
+    }
+    private void showRoleFilterDialog() {
+        if (vm.busy) return;
+        String[] options = new String[]{"Tất cả vai trò", "Người tìm việc (Nghỉ hưu)", "Người thuê"};
+        int selected = "SEEKER".equals(vm.queueRole) ? 1 : ("EMPLOYER".equals(vm.queueRole) ? 2 : 0);
+        new AlertDialog.Builder(this)
+                .setTitle("Lọc theo vai trò hồ sơ")
+                .setSingleChoiceItems(options, selected, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == 1) vm.setQueueRole("SEEKER");
+                    else if (which == 2) vm.setQueueRole("EMPLOYER");
+                    else vm.setQueueRole("ALL");
+                })
+                .setNegativeButton("Đóng", null)
+                .show();
+    }
+    private void applyFilterTabStyle(androidx.appcompat.widget.AppCompatButton tab, boolean selected) {
+        if (tab == null) return;
+        if (selected) {
+            tab.setBackgroundResource(R.drawable.button_primary);
+            tab.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.white));
+        } else {
+            tab.setBackgroundResource(R.drawable.button_secondary);
+            tab.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.brand_green));
+        }
+        tab.setPadding(dp(4), dp(8), dp(4), dp(8));
     }
 }

@@ -30,8 +30,9 @@ public final class RoleHomePanel {
         activity.findViewById(R.id.roleHomeContent).setSaveFromParentEnabled(false);
         activity.findViewById(R.id.roleAccountContent).setSaveFromParentEnabled(false);
         click(R.id.homeOpenProfile,()->navigate.accept(RoleNavigationBar.Action.PROFILE));
-        click(R.id.homePostsFuture,reviewPosts);
-        click(R.id.homeReviewProfiles,verify);click(R.id.homeRefreshCounts,vm::loadCounts);
+        click(R.id.homeAdminPostsCard, reviewPosts);
+        click(R.id.homeAdminProfilesCard, verify);
+        click(R.id.homeAdminReload, vm::loadCounts);
         click(R.id.homeMainFuture,()->{
             if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role)) createDraft.run();
             else if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)) {
@@ -84,7 +85,7 @@ public final class RoleHomePanel {
         boolean keyboard=insets!=null && insets.isVisible(WindowInsetsCompat.Type.ime());
         navigation.render(role,selected,known && !keyboard && !auth.isBusy(),!vm.busy);
         if(!known){
-            for(int id:new int[]{R.id.accountHubName,R.id.accountHubRole,R.id.accountHubArea,R.id.homeQueueCounts})text(id,"");return;
+            for(int id:new int[]{R.id.accountHubName,R.id.accountHubRole,R.id.accountHubArea,R.id.homeAdminPostsCount,R.id.homeAdminProfilesCount})text(id,"");return;
         }
         boolean admin="ADMIN".equals(role),seeker="SEEKER".equals(role),employer="EMPLOYER".equals(role);
         boolean active="ACTIVE".equals(vm.snapshot.status);
@@ -154,24 +155,32 @@ public final class RoleHomePanel {
             ((TextView)activity.findViewById(R.id.homeWorkFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity, R.color.brand_green));
         }
 
-        future(R.id.homePostsFuture,R.string.n_admin_posts);future(R.id.homeReportsFuture,R.string.n_admin_reports);
-        future(R.id.homeDisputesFuture,R.string.n_admin_disputes);future(R.id.homeOverdueFuture,R.string.n_admin_overdue);
-        
-
+        show(R.id.homeAdminReload, admin);
         if(admin){
-            text(R.id.homePostsFuture,"Duyệt tin tuyển");activity.findViewById(R.id.homePostsFuture).setEnabled(active&&!vm.busy&&!auth.isBusy());
-            ((TextView)activity.findViewById(R.id.homePostsFuture)).setTextColor(androidx.core.content.ContextCompat.getColor(activity,R.color.brand_green));
-            text(R.id.homeQueueTitle,activity.getString(R.string.n_queue_title));
-            if(vm.countsLoading)text(R.id.homeQueueCounts,activity.getString(R.string.n_queue_loading));
-            else if(vm.countsMessage!=0)text(R.id.homeQueueCounts,activity.getString(vm.countsMessage));
-            else if(vm.adminCounts!=null){
-                ProfileRepository.AdminCounts counts=vm.adminCounts;
-                String total=String.valueOf(counts.seeker+counts.employer)+((counts.seeker>=50 || counts.employer>=50)?"+":"");
-                text(R.id.homeQueueTitle,activity.getString(R.string.n_queue_total,total));
-                text(R.id.homeQueueCounts,activity.getString(R.string.n_queue_types,capped(counts.seeker),capped(counts.employer)));
-            } else text(R.id.homeQueueCounts,activity.getString(R.string.n_queue_failed));
-            activity.findViewById(R.id.homeReviewProfiles).setEnabled(!vm.busy && active);
-            activity.findViewById(R.id.homeRefreshCounts).setEnabled(!vm.busy && !vm.countsLoading && active);
+            View reloadBtn = activity.findViewById(R.id.homeAdminReload);
+            if (reloadBtn != null) reloadBtn.setEnabled(!vm.busy && !vm.countsLoading);
+
+            View postsCard = activity.findViewById(R.id.homeAdminPostsCard);
+            if (postsCard != null) postsCard.setEnabled(active && !vm.busy && !auth.isBusy());
+
+            View profilesCard = activity.findViewById(R.id.homeAdminProfilesCard);
+            if (profilesCard != null) profilesCard.setEnabled(active && !vm.busy && !auth.isBusy());
+
+            if (vm.countsLoading) {
+                text(R.id.homeAdminPostsCount, "Đang kiểm tra tin chờ duyệt...");
+                text(R.id.homeAdminProfilesCount, "Đang kiểm tra hồ sơ...");
+            } else if (vm.adminCounts != null) {
+                long pendingJobs = vm.adminCounts.pendingJobs;
+                long pendingProfiles = vm.adminCounts.seeker + vm.adminCounts.employer;
+                text(R.id.homeAdminPostsCount, pendingJobs > 0 ? ("Hiện có " + pendingJobs + " tin đang chờ duyệt") : "Hiện không có tin chờ duyệt");
+                text(R.id.homeAdminProfilesCount, pendingProfiles > 0 ? ("Hiện có " + pendingProfiles + " hồ sơ chờ duyệt") : "Hiện không có hồ sơ chờ duyệt");
+            } else if (vm.countsMessage != 0) {
+                text(R.id.homeAdminPostsCount, activity.getString(vm.countsMessage));
+                text(R.id.homeAdminProfilesCount, activity.getString(vm.countsMessage));
+            } else {
+                text(R.id.homeAdminPostsCount, "Chưa cập nhật được số lượng");
+                text(R.id.homeAdminProfilesCount, "Chưa cập nhật được số lượng");
+            }
         }
 
         String name=vm.snapshot.draft.displayName;

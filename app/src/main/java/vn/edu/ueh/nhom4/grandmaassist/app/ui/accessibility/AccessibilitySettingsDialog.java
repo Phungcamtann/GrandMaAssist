@@ -4,11 +4,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
@@ -49,6 +50,13 @@ public final class AccessibilitySettingsDialog {
         RadioButton rbRecommended = v.findViewById(R.id.rbRateRecommended);
         RadioButton rbNormal = v.findViewById(R.id.rbRateNormal);
         AppCompatButton btnTest = v.findViewById(R.id.btnTestVoice);
+
+        RadioGroup rgFontScale = v.findViewById(R.id.rgFontScale);
+        RadioButton rbFontDefault = v.findViewById(R.id.rbFontDefault);
+        RadioButton rbFontLarge = v.findViewById(R.id.rbFontLarge);
+        RadioButton rbFontExtraLarge = v.findViewById(R.id.rbFontExtraLarge);
+        TextView tvFontPreview = v.findViewById(R.id.tvFontPreview);
+
         AppCompatButton btnClose = v.findViewById(R.id.btnCloseAccessibility);
         AppCompatButton btnSave = v.findViewById(R.id.btnSaveAccessibility);
 
@@ -63,6 +71,27 @@ public final class AccessibilitySettingsDialog {
         } else {
             rbRecommended.setChecked(true);
         }
+
+        if ("LARGE".equals(current.fontScaleOption)) {
+            rbFontLarge.setChecked(true);
+            tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * 1.15f);
+        } else if ("EXTRA_LARGE".equals(current.fontScaleOption)) {
+            rbFontExtraLarge.setChecked(true);
+            tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * 1.30f);
+        } else {
+            rbFontDefault.setChecked(true);
+            tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        }
+
+        rgFontScale.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbFontLarge) {
+                tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * 1.15f);
+            } else if (checkedId == R.id.rbFontExtraLarge) {
+                tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * 1.30f);
+            } else {
+                tvFontPreview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+            }
+        });
 
         // Test Voice button
         btnTest.setOnClickListener(view -> {
@@ -100,7 +129,11 @@ public final class AccessibilitySettingsDialog {
             float rate = rbSlow.isChecked() ? AccessibilitySettings.RATE_SLOW :
                     (rbNormal.isChecked() ? AccessibilitySettings.RATE_NORMAL : AccessibilitySettings.RATE_RECOMMENDED);
 
-            AccessibilitySettings saved = new AccessibilitySettings(voice, autoRead, rate, current.fontScaleOption);
+            String selectedScale = "DEFAULT";
+            if (rbFontLarge.isChecked()) selectedScale = "LARGE";
+            else if (rbFontExtraLarge.isChecked()) selectedScale = "EXTRA_LARGE";
+
+            AccessibilitySettings saved = new AccessibilitySettings(voice, autoRead, rate, selectedScale);
             store.saveSettings(saved);
 
             Toast.makeText(context, "Đã lưu cài đặt tiếp cận", Toast.LENGTH_SHORT).show();

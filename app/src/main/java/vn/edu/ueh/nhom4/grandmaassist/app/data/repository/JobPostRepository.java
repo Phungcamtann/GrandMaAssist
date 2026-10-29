@@ -62,9 +62,21 @@ public final class JobPostRepository {
     private Task<String> proof(String uid){FirebaseUser u=FirebaseAuth.getInstance().getCurrentUser();
         if(u==null||!same(uid))return Tasks.forException(new Failure("SESSION"));
         return u.getIdToken(true).continueWith(t->{if(!t.isSuccessful())throw t.getException();if(!same(uid))throw new Failure("SESSION");Object v=t.getResult().getClaims().get("phone_number");return v instanceof String?(String)v:"";});}
-    public Task<Page> list(String uid,boolean admin,DocumentSnapshot cursor){
+    public Task<Page> list(String uid, boolean admin, DocumentSnapshot cursor) {
+        return list(uid, admin, true, cursor);
+    }
+    public Task<Page> list(String uid, boolean admin, boolean pendingOnly, DocumentSnapshot cursor) {
         if(!same(uid))return Tasks.forException(new Failure("SESSION"));
-        Query q=db.collection("jobs");q=admin?q.whereEqualTo("status","PENDING_REVIEW"):q.whereEqualTo("employerId",uid);
+        Query q=db.collection("jobs");
+        if (admin) {
+            if (pendingOnly) {
+                q = q.whereEqualTo("status", "PENDING_REVIEW");
+            } else {
+                q = q.whereIn("status", Arrays.asList("OPEN", "CLOSED", "REJECTED"));
+            }
+        } else {
+            q = q.whereEqualTo("employerId", uid);
+        }
         q=q.orderBy("updatedAt",Query.Direction.DESCENDING).orderBy(FieldPath.documentId(),Query.Direction.DESCENDING).limit(20);
         if(cursor!=null)q=q.startAfter(cursor);
         return bounded(q.get(Source.SERVER).continueWith(t->{if(!t.isSuccessful())throw t.getException();if(!same(uid))throw new Failure("SESSION");return new Page(t.getResult());}));
@@ -113,6 +125,9 @@ public final class JobPostRepository {
                 String name="ORGANIZATION".equals(profile.getString("employerType"))?text(profile,"organizationName"):text(user,"displayName");
                 m.put("employerDisplayName",name);m.put("title",d.title.trim());m.put("categoryId",d.categoryId);m.put("categoryName",text(cat,"name"));
                 m.put("areaCode",d.areaCode);m.put("areaName",text(area,"name"));m.put("workAddress",d.workAddress.trim());m.put("description",d.description.trim());
+                if (d.workplacePhotoUrl != null && !d.workplacePhotoUrl.trim().isEmpty()) {
+                    m.put("workplacePhotoUrl", d.workplacePhotoUrl.trim());
+                }
                 m.put("requirementsText",d.requirements.trim());m.put("requiredSkillTags",d.skills());m.put("workDays",new ArrayList<>(d.days));
                 m.put("workShift",d.shift);m.put("scheduleText",d.schedule.trim());m.put("physicalDemands",new ArrayList<>(d.demands));m.put("demandsDeclared",true);
                 m.put("payAmount",d.payAmount());m.put("payUnit",d.payUnit);m.put("expiresAt",new Timestamp(new Date(d.expiresAt)));

@@ -437,10 +437,11 @@ service cloud.firestore {
     }
     function jobShape(d, id) {
       let keys = d.keys();
-      return keys.size() == 28 && keys.hasOnly(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
+      return keys.size() >= 28 && keys.size() <= 29 && keys.hasOnly(['id','employerId','employerDisplayName','title','categoryId','categoryName','areaCode','areaName',
           'workAddress','description','requirementsText','requiredSkillTags','workDays','workShift','scheduleText',
           'physicalDemands','demandsDeclared','payAmount','payUnit','expiresAt','status','version','lastSubmissionId',
-          'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason'])
+          'createdAt','updatedAt','reviewedBy','reviewedAt','reviewReason','workplacePhotoUrl'])
+        && (!('workplacePhotoUrl' in keys) || (d.workplacePhotoUrl is string && d.workplacePhotoUrl.size() <= 300000))
         && d.id == id && id.matches('[A-Za-z0-9-]{36}')
         && d.employerId.size() <= 128 && d.employerId.matches('(?s).*[^\\s].*') && d.employerDisplayName.size() <= 150 && d.employerDisplayName.matches('(?s).*[^\\s].*')
         && d.title.size() <= 120 && d.title.matches('(?s).*[^\\s].*') && d.categoryId.size() <= 80 && d.categoryId.matches('(?s).*[^\\s].*') && d.categoryName.size() <= 120 && d.categoryName.matches('(?s).*[^\\s].*')

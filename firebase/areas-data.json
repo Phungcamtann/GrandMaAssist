@@ -1,0 +1,16 @@
+{
+  "description": "Danh mục khu vực hành chính thực tế tại Thành phố Hồ Chí Minh",
+  "collection": "areas",
+  "documents": [
+    {"id": "Q1", "fields": {"name": "Quận 1, TP.HCM", "active": true}},
+    {"id": "Q3", "fields": {"name": "Quận 3, TP.HCM", "active": true}},
+    {"id": "Q5", "fields": {"name": "Quận 5, TP.HCM", "active": true}},
+    {"id": "Q7", "fields": {"name": "Quận 7, TP.HCM", "active": true}},
+    {"id": "Q10", "fields": {"name": "Quận 10, TP.HCM", "active": true}},
+    {"id": "Q_TANBINH", "fields": {"name": "Quận Tân Bình, TP.HCM", "active": true}},
+    {"id": "Q_BINHTHANH", "fields": {"name": "Quận Bình Thạnh, TP.HCM", "active": true}},
+    {"id": "Q_PHUNHUAN", "fields": {"name": "Quận Phú Nhuận, TP.HCM", "active": true}},
+    {"id": "Q_GOVAP", "fields": {"name": "Quận Gò Vấp, TP.HCM", "active": true}},
+    {"id": "TP_THUDUC", "fields": {"name": "Thành phố Thủ Đức, TP.HCM", "active": true}}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "description": "Danh mục 8 loại hình công việc phù hợp với sức khỏe và kinh nghiệm của người cao tuổi",
+  "collection": "jobCategories",
+  "documents": [
+    {"id": "KITCHEN_HELP", "fields": {"name": "Phụ bếp & Sơ chế thực phẩm", "iconKey": "kitchen", "active": true}},
+    {"id": "CLEANING_HOME", "fields": {"name": "Dọn dẹp & Sắp xếp nhà cửa", "iconKey": "garden", "active": true}},
+    {"id": "GARDEN_CARE", "fields": {"name": "Chăm sóc sân vườn & Cây cảnh", "iconKey": "garden", "active": true}},
+    {"id": "BABYSITTING", "fields": {"name": "Trông trẻ & Đón bé tan học", "iconKey": "shop", "active": true}},
+    {"id": "SHOP_HELP", "fields": {"name": "Phụ giúp quán ăn & Tạp hóa", "iconKey": "shop", "active": true}},
+    {"id": "PARKING_ASSIST", "fields": {"name": "Trông giữ xe & Hướng dẫn khách", "iconKey": "shop", "active": true}},
+    {"id": "LIBRARY_HELP", "fields": {"name": "Hỗ trợ sắp xếp sách & Thư viện", "iconKey": "library", "active": true}},
+    {"id": "OTHER_HELP", "fields": {"name": "Việc phụ giúp gia đình khác", "iconKey": "garden", "active": true}}
+  ]
+}

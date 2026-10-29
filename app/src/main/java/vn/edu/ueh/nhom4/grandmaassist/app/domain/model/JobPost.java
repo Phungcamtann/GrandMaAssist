@@ -19,7 +19,7 @@ public final class JobPost {
         Object v=data.get("version");if(!(v instanceof Long))throw new IllegalArgumentException("SCHEMA");version=(Long)v;
         content.serverBaseVersion=version;
         content.title=text("title");content.categoryId=text("categoryId");content.areaCode=text("areaCode");
-        content.workAddress=text("workAddress");content.description=text("description");content.requirements=text("requirementsText");
+        content.workAddress=text("workAddress");content.workplacePhotoUrl=text("workplacePhotoUrl");content.description=text("description");content.requirements=text("requirementsText");
         content.skillsInput=String.join(", ",list("requiredSkillTags"));content.shift=text("workShift");content.schedule=text("scheduleText");
         content.payInput=String.valueOf(data.get("payAmount"));content.payUnit=text("payUnit");
         content.days.addAll(list("workDays"));content.demands.addAll(list("physicalDemands"));
@@ -37,6 +37,7 @@ public final class JobPost {
             &&s.workAddress.equals(d.workAddress.trim())&&s.description.equals(d.description.trim())
             &&s.requirements.equals(d.requirements.trim())&&s.skills().equals(d.skills())&&s.days.equals(d.days)
             &&s.shift.equals(d.shift)&&s.schedule.equals(d.schedule.trim())&&s.demands.equals(d.demands)
-            &&Objects.equals(s.payAmount(),d.payAmount())&&s.payUnit.equals(d.payUnit)&&s.expiresAt==d.expiresAt;
+            &&Objects.equals(s.payAmount(),d.payAmount())&&s.payUnit.equals(d.payUnit)&&s.expiresAt==d.expiresAt
+            &&Objects.equals(s.workplacePhotoUrl!=null?s.workplacePhotoUrl:"",d.workplacePhotoUrl!=null?d.workplacePhotoUrl:"");
     }
 }

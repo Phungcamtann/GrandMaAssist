@@ -223,6 +223,7 @@ public final class WorkSessionsActivity extends AppCompatActivity {
                             && s.employerAcceptedVersion.equals(s.agreementVersion) && s.seekerAcceptedVersion.equals(s.agreementVersion));
                 if (bothConfirmed) {
                     activeList.add(s);
+                    vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.scheduleReminders(this, s);
                 }
             }
         }

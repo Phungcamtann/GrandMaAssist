@@ -104,8 +104,49 @@
                 </LinearLayout>
                 <View android:id="@+id/jpDrafts" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
             </LinearLayout>
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/jpProfiles" style="@style/Widget.GrandMa.VerificationSecondary"
-                android:text="Kiểm tra hồ sơ" android:visibility="gone"/>
+            <LinearLayout
+                android:id="@+id/jpAdminFilterTabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone">
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/jpAdminTabPending"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="44dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textAllCaps="false"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_primary"
+                    android:textColor="@color/white"
+                    android:text="Chưa duyệt"
+                    android:layout_marginEnd="4dp" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/jpAdminTabApproved"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="44dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textAllCaps="false"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="@color/brand_green"
+                    android:text="Đã duyệt"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
             <LinearLayout android:id="@+id/jpBody" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
             <LinearLayout android:id="@+id/jpReasonSection" style="@style/Widget.GrandMa.ProfileSection" android:visibility="gone">
                 <TextView android:id="@+id/jpReasonTitle" style="@style/Widget.GrandMa.DraftLabel" android:text="Lý do từ chối" android:labelFor="@id/jpReason"/>

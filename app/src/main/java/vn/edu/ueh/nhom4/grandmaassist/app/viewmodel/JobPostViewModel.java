@@ -15,6 +15,7 @@ public final class JobPostViewModel extends AndroidViewModel {
     public final MutableLiveData<Long> changes=new MutableLiveData<>(0L);
     public final String uid;
     public boolean started,ready,admin,busy,ended,more,reasonVisible;
+    public boolean adminPendingTab = true;
     public String message="",reason="",pendingNotice="";
     public String reasonAction = "REJECT";
     public JobPost selected;
@@ -41,8 +42,13 @@ public final class JobPostViewModel extends AndroidViewModel {
             }else{ready=false;message=t.isSuccessful()?"Tài khoản chưa có quyền xem mục này.":JobPostRepository.error(t.getException());emit();}
         });
     }
+    public void setAdminPendingTab(boolean pending) {
+        if (busy || adminPendingTab == pending) return;
+        adminPendingTab = pending;
+        load(false);
+    }
     public void load(boolean next){if(!ready||busy)return;busy=true;message="Đang tải tin…";long g=++generation;emit();
-        repository.list(uid,admin,next?cursor:null).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
+        repository.list(uid,admin,adminPendingTab,next?cursor:null).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
             if(t.isSuccessful()){
                 LinkedHashMap<String,JobPost> merged=new LinkedHashMap<>();if(next)for(JobPost p:items)merged.put(p.content.id,p);
                 for(JobPost p:t.getResult().items)merged.put(p.content.id,p);items=new ArrayList<>(merged.values());cursor=t.getResult().cursor;more=t.getResult().more;

@@ -212,16 +212,47 @@ public final class VerificationRepository {
             tx.update(user(base.uid),ud); tx.update(profile(base.uid,base.role),pd); return null;
         }));
     }
-    public Task<List<Record>> queue(String uid,String role) {
-        return fresh(uid,()->db.collection(collection(role)).whereEqualTo("status","SUBMITTED")
-                .limit(50).get(Source.SERVER).continueWith(t->{
-                    if(!t.isSuccessful()) throw t.getException();
-                    if(!same(uid)) throw new Problem("SESSION");
-                    List<Record> result=new ArrayList<>();
-                    for(DocumentSnapshot doc:t.getResult()) result.add(new Record(doc));
-                    result.sort(Comparator.comparing(r->String.valueOf(r.identity().get("fullName"))));
-                    return result;
-                }));
+    public Task<List<Record>> queue(String uid, String role) {
+        return queue(uid, role, true);
+    }
+    public Task<List<Record>> queue(String uid, String role, boolean pendingOnly) {
+        List<String> collections = new ArrayList<>();
+        if ("SEEKER".equals(role)) collections.add("retirementRequests");
+        else if ("EMPLOYER".equals(role)) collections.add("identityRequests");
+        else {
+            collections.add("retirementRequests");
+            collections.add("identityRequests");
+        }
+        List<Task<List<Record>>> tasks = new ArrayList<>();
+        for (String col : collections) {
+            Query q = db.collection(col);
+            if (pendingOnly) {
+                q = q.whereEqualTo("status", "SUBMITTED");
+            } else {
+                q = q.whereIn("status", Arrays.asList("APPROVED", "VERIFIED", "REJECTED"));
+            }
+            final Query query = q;
+            Task<List<Record>> t = fresh(uid, () -> query.limit(50).get(Source.SERVER).continueWith(task -> {
+                if (!task.isSuccessful()) throw task.getException();
+                if (!same(uid)) throw new Problem("SESSION");
+                List<Record> result = new ArrayList<>();
+                for (DocumentSnapshot doc : task.getResult()) {
+                    try { result.add(new Record(doc)); } catch (Exception ignored) {}
+                }
+                return result;
+            }));
+            tasks.add(t);
+        }
+        return Tasks.whenAllSuccess(tasks).continueWith(all -> {
+            List<Record> combined = new ArrayList<>();
+            for (Object obj : all.getResult()) {
+                if (obj instanceof List) {
+                    combined.addAll((List<Record>) obj);
+                }
+            }
+            combined.sort(Comparator.comparing(r -> String.valueOf(r.identity().get("fullName"))));
+            return combined;
+        });
     }
     public Task<Record> find(String admin,String role,String key) {
         return fresh(admin,()->db.collection(collection(role)).document(key).get(Source.SERVER).continueWithTask(t->{
