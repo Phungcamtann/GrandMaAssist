@@ -79,6 +79,20 @@
             android:textColor="#2C3332"
             android:textSize="15sp"
             android:text="Google Account"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/accountHubSecurity"
+            style="@style/Widget.GrandMa.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_secondary"
+            android:gravity="center"
+            android:text="🔗  Liên kết Số điện thoại &amp; Google"
+            android:textColor="#1C6758"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <!-- Direct actions below card -->
@@ -105,7 +119,6 @@
     <View android:id="@+id/accountHubProfile" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <View android:id="@+id/accountHubSavedJobs" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <View android:id="@+id/accountHubVerification" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <View android:id="@+id/accountHubSecurity" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <View android:id="@+id/accountHubSettings" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <View android:id="@+id/accountHubHelp" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 </LinearLayout>

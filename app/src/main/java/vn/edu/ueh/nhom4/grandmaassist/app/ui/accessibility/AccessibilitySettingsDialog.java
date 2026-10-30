@@ -121,6 +121,26 @@ public final class AccessibilitySettingsDialog {
             });
         });
 
+        // Test Notification button
+        AppCompatButton btnTestNotification = v.findViewById(R.id.btnTestNotification);
+        if (btnTestNotification != null) {
+            btnTestNotification.setOnClickListener(view -> {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)
+                            != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(context, "Vui lòng cấp quyền Thông báo để nhận nhắc việc!", Toast.LENGTH_LONG).show();
+                        if (context instanceof android.app.Activity) {
+                            androidx.core.app.ActivityCompat.requestPermissions((android.app.Activity) context,
+                                    new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
+                        }
+                        return;
+                    }
+                }
+                vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.sendTestNotification(context);
+                Toast.makeText(context, "Đã gửi thông báo kiểm tra đến thanh trạng thái!", Toast.LENGTH_SHORT).show();
+            });
+        }
+
         // Save
         btnSave.setOnClickListener(view -> {
             tts.stop();

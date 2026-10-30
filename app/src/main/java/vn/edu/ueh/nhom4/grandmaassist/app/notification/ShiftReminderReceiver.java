@@ -53,6 +53,13 @@ public final class ShiftReminderReceiver extends BroadcastReceiver {
             notifId = (sessionId != null ? sessionId.hashCode() : 100) + 120;
         }
 
+        showNotification(context, notifId, title, body, sessionId);
+    }
+
+    public static void showNotification(Context context, int notifId, String title, String body, String sessionId) {
+        if (context == null) return;
+        ensureNotificationChannel(context);
+
         Intent openIntent;
         if (sessionId != null && !sessionId.isEmpty()) {
             openIntent = new Intent(context, ShiftAgreementDetailActivity.class);
@@ -70,14 +77,20 @@ public final class ShiftReminderReceiver extends BroadcastReceiver {
         );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification_bell)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
+
+        try {
+            android.graphics.Bitmap largeIcon = android.graphics.BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+            if (largeIcon != null) builder.setLargeIcon(largeIcon);
+        } catch (Exception ignored) {}
 
         try {
             NotificationManagerCompat.from(context).notify(notifId, builder.build());
@@ -95,6 +108,7 @@ public final class ShiftReminderReceiver extends BroadcastReceiver {
             );
             channel.setDescription("Thông báo nhắc nhở trước ca làm việc (2 tiếng và 30 phút) cho cô chú");
             channel.enableVibration(true);
+            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
             NotificationManager nm = context.getSystemService(NotificationManager.class);
             if (nm != null) {
                 nm.createNotificationChannel(channel);

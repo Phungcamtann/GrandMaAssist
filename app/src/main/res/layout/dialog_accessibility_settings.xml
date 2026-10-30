@@ -275,6 +275,55 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="14dp"
+                android:background="#E0E4E1" />
+
+            <!-- Option 3: Thông báo ca làm việc -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Thông báo nhắc ca làm việc"
+                    android:textColor="#1A1C19"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Hệ thống tự động nhắc nhở trước khi ca làm bắt đầu (trước 2 tiếng và 30 phút)."
+                    android:textColor="#747775"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnTestNotification"
+                    style="@style/Widget.GrandMa.PublicToolbarButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_tts_pill"
+                    android:textColor="#1C6758"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:gravity="center"
+                    android:text="🔔  Thử nhận thông báo ngay" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

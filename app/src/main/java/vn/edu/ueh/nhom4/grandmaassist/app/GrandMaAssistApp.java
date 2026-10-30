@@ -30,5 +30,8 @@ public class GrandMaAssistApp extends Application {
 
         FirebaseFirestore.getInstance()
                 .setFirestoreSettings(settings);
+
+        // Khởi tạo Notification Channel ngay khi ứng dụng khởi chạy
+        vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftReminderReceiver.ensureNotificationChannel(this);
     }
 }

@@ -12,6 +12,7 @@ public final class WalletTransaction {
     public static final String TYPE_WITHDRAW = "WITHDRAW";
     public static final String TYPE_HOLD_ESCROW = "HOLD_ESCROW";
     public static final String TYPE_RECEIVE_PAY = "RECEIVE_PAY";
+    public static final String TYPE_PAYMENT_RECEIVED = "PAYMENT_RECEIVED";
     public static final String TYPE_REFUND = "REFUND";
 
     public final String id;
@@ -34,7 +35,8 @@ public final class WalletTransaction {
     }
 
     public boolean isPositive() {
-        return TYPE_TOPUP.equals(type) || TYPE_RECEIVE_PAY.equals(type) || TYPE_REFUND.equals(type);
+        return TYPE_TOPUP.equals(type) || TYPE_RECEIVE_PAY.equals(type)
+                || TYPE_PAYMENT_RECEIVED.equals(type) || TYPE_REFUND.equals(type);
     }
 
     public String getTypeLabel() {
@@ -46,6 +48,7 @@ public final class WalletTransaction {
             case TYPE_HOLD_ESCROW:
                 return "Tạm giữ cọc ca làm";
             case TYPE_RECEIVE_PAY:
+            case TYPE_PAYMENT_RECEIVED:
                 return "Nhận tiền công ca làm";
             case TYPE_REFUND:
                 return "Hoàn tiền cọc ca làm";

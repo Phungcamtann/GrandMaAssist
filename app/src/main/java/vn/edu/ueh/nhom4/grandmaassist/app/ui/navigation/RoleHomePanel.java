@@ -33,6 +33,10 @@ public final class RoleHomePanel {
         click(R.id.homeAdminPostsCard, reviewPosts);
         click(R.id.homeAdminProfilesCard, verify);
         click(R.id.homeAdminReload, vm::loadCounts);
+        click(R.id.homeAdminCardEmployers, verify);
+        click(R.id.homeAdminCardSeekers, verify);
+        click(R.id.homeAdminCardJobs, reviewPosts);
+        click(R.id.homeAdminCardFee, () -> activity.startActivity(new Intent(activity, vn.edu.ueh.nhom4.grandmaassist.app.ui.admin.AdminStatsActivity.class)));
         click(R.id.homeMainFuture,()->{
             if(vm.snapshot!=null && "EMPLOYER".equals(vm.snapshot.role)) createDraft.run();
             else if(vm.snapshot!=null && "SEEKER".equals(vm.snapshot.role)) {
@@ -85,7 +89,8 @@ public final class RoleHomePanel {
         boolean keyboard=insets!=null && insets.isVisible(WindowInsetsCompat.Type.ime());
         navigation.render(role,selected,known && !keyboard && !auth.isBusy(),!vm.busy);
         if(!known){
-            for(int id:new int[]{R.id.accountHubName,R.id.accountHubRole,R.id.accountHubArea,R.id.homeAdminPostsCount,R.id.homeAdminProfilesCount})text(id,"");return;
+            for(int id:new int[]{R.id.accountHubName,R.id.accountHubRole,R.id.accountHubArea,R.id.homeAdminPostsCount,R.id.homeAdminProfilesCount,
+                    R.id.homeAdminEmployersCount,R.id.homeAdminSeekersCount,R.id.homeAdminJobsCount,R.id.homeAdminFeeCount,R.id.homeAdminUpdatedTime})text(id,"");return;
         }
         boolean admin="ADMIN".equals(role),seeker="SEEKER".equals(role),employer="EMPLOYER".equals(role);
         boolean active="ACTIVE".equals(vm.snapshot.status);
@@ -166,18 +171,48 @@ public final class RoleHomePanel {
             View profilesCard = activity.findViewById(R.id.homeAdminProfilesCard);
             if (profilesCard != null) profilesCard.setEnabled(active && !vm.busy && !auth.isBusy());
 
+            int[] adminCards = new int[]{R.id.homeAdminCardEmployers, R.id.homeAdminCardSeekers,
+                    R.id.homeAdminCardJobs, R.id.homeAdminCardFee};
+            for (int cid : adminCards) {
+                View cv = activity.findViewById(cid);
+                if (cv != null) cv.setEnabled(active && !vm.busy && !auth.isBusy());
+            }
+
             if (vm.countsLoading) {
+                text(R.id.homeAdminUpdatedTime, "Đang tổng hợp số liệu thực tế...");
+                text(R.id.homeAdminEmployersCount, "...");
+                text(R.id.homeAdminSeekersCount, "...");
+                text(R.id.homeAdminJobsCount, "...");
+                text(R.id.homeAdminFeeCount, "...");
                 text(R.id.homeAdminPostsCount, "Đang kiểm tra tin chờ duyệt...");
                 text(R.id.homeAdminProfilesCount, "Đang kiểm tra hồ sơ...");
             } else if (vm.adminCounts != null) {
+                java.text.NumberFormat vnFormat = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                text(R.id.homeAdminEmployersCount, String.valueOf(vm.adminCounts.totalEmployers));
+                text(R.id.homeAdminEmployersVerified, "Đã xác minh: " + vm.adminCounts.verifiedEmployers);
+
+                text(R.id.homeAdminSeekersCount, String.valueOf(vm.adminCounts.totalSeekers));
+                text(R.id.homeAdminSeekersVerified, "Đã duyệt CCCD: " + vm.adminCounts.verifiedSeekers);
+
+                text(R.id.homeAdminJobsCount, String.valueOf(vm.adminCounts.totalJobs));
+                text(R.id.homeAdminJobsOpen, "Đang mở: " + vm.adminCounts.openJobs);
+
+                text(R.id.homeAdminFeeCount, vnFormat.format(vm.adminCounts.totalFee) + " đ");
+                text(R.id.homeAdminFeeCompleted, vm.adminCounts.completedSessions + " ca hoàn tất");
+
                 long pendingJobs = vm.adminCounts.pendingJobs;
                 long pendingProfiles = vm.adminCounts.seeker + vm.adminCounts.employer;
                 text(R.id.homeAdminPostsCount, pendingJobs > 0 ? ("Hiện có " + pendingJobs + " tin đang chờ duyệt") : "Hiện không có tin chờ duyệt");
                 text(R.id.homeAdminProfilesCount, pendingProfiles > 0 ? ("Hiện có " + pendingProfiles + " hồ sơ chờ duyệt") : "Hiện không có hồ sơ chờ duyệt");
+
+                String timeStr = java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(new java.util.Date());
+                text(R.id.homeAdminUpdatedTime, "Cập nhật lúc: " + timeStr + " • Tự động tính theo thời gian thực");
             } else if (vm.countsMessage != 0) {
+                text(R.id.homeAdminUpdatedTime, activity.getString(vm.countsMessage));
                 text(R.id.homeAdminPostsCount, activity.getString(vm.countsMessage));
                 text(R.id.homeAdminProfilesCount, activity.getString(vm.countsMessage));
             } else {
+                text(R.id.homeAdminUpdatedTime, "Chưa cập nhật được số liệu");
                 text(R.id.homeAdminPostsCount, "Chưa cập nhật được số lượng");
                 text(R.id.homeAdminProfilesCount, "Chưa cập nhật được số lượng");
             }
@@ -194,19 +229,27 @@ public final class RoleHomePanel {
 
         String authMethod = "";
         if (auth != null && auth.account != null) {
-            if (auth.account.google && auth.account.googleEmail != null && !auth.account.googleEmail.isEmpty()) {
-                authMethod += "Google: " + auth.account.googleEmail;
-            }
-            if (auth.account.phone && auth.account.phoneNumber != null && !auth.account.phoneNumber.isEmpty()) {
-                if (!authMethod.isEmpty()) authMethod += "\n";
-                authMethod += "Số điện thoại: " + auth.account.phoneNumber;
-            }
-            if (authMethod.isEmpty() && auth.account.email != null && !auth.account.email.isEmpty()) {
-                authMethod = "Email: " + auth.account.email;
-            }
+            String googleText = auth.account.google && auth.account.googleEmail != null && !auth.account.googleEmail.isEmpty()
+                    ? "✓ Google: " + auth.account.googleEmail
+                    : "• Google: Chưa liên kết";
+            String phoneText = auth.account.phone && auth.account.phoneNumber != null && !auth.account.phoneNumber.isEmpty()
+                    ? "✓ Số điện thoại: " + auth.account.phoneNumber
+                    : "• Số điện thoại: Chưa liên kết";
+            authMethod = googleText + "\n" + phoneText;
         }
         if (authMethod.isEmpty()) authMethod = "Đăng nhập an toàn";
         text(R.id.accountHubAuthMethod, authMethod);
+
+        View btnSec = activity.findViewById(R.id.accountHubSecurity);
+        if (btnSec instanceof android.widget.TextView && auth != null && auth.account != null) {
+            if (auth.account.google && auth.account.phone) {
+                ((android.widget.TextView) btnSec).setText("🔗  Quản lý phương thức đăng nhập");
+            } else if (!auth.account.google) {
+                ((android.widget.TextView) btnSec).setText("🔗  Liên kết thêm tài khoản Google");
+            } else if (!auth.account.phone) {
+                ((android.widget.TextView) btnSec).setText("🔗  Liên kết thêm Số điện thoại");
+            }
+        }
 
         show(R.id.accountHubSavedJobs,false);
         show(R.id.accountHubVerification,false);

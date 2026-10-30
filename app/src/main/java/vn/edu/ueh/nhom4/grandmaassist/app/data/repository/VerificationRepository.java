@@ -63,7 +63,6 @@ public final class VerificationRepository {
         if("SEEKER".equals(role)){
             if(!(p.get("skills") instanceof List) || ((List<?>)p.get("skills")).isEmpty())return "Bổ sung kỹ năng trong Hồ sơ rồi bấm Lưu.";
             if(text(p,"experienceSummary").trim().isEmpty())return "Bổ sung kinh nghiệm trong Hồ sơ rồi bấm Lưu.";
-            if(!(p.get("preferredShifts") instanceof List) || ((List<?>)p.get("preferredShifts")).isEmpty())return "Chọn buổi làm phù hợp trong Hồ sơ rồi bấm Lưu.";
         }else if(text(p,"introduction").trim().isEmpty())return "Bổ sung giới thiệu trong Hồ sơ người thuê rồi bấm Lưu.";
         return "";
     }

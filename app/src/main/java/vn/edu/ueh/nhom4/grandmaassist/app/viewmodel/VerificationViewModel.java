@@ -273,7 +273,8 @@ public final class VerificationViewModel extends AndroidViewModel {
         if(busy || externalPending)return;
         String requirement=submissionRequirement(true);
         if(!requirement.isEmpty()){message=requirement;emit();return;}
-        if(requestId==null) { requestId=UUID.randomUUID().toString(); stagedBase=home; }
+        stagedBase = home;
+        if(requestId==null) { requestId=UUID.randomUUID().toString(); }
         long e=++epoch; String id=requestId; VerificationRepository.Home base=stagedBase;
         List<byte[]> images=new ArrayList<>(); images.add(identityImage);
         if("SEEKER".equals(base.role))images.addAll(evidence);
@@ -295,6 +296,9 @@ public final class VerificationViewModel extends AndroidViewModel {
         chain.addOnCompleteListener(t->{
             if(!valid(e))return;
             if(t.isSuccessful()) { busy=sending=false; clearDraft(); load(); return; }
+            if(t.getException() != null) {
+                android.util.Log.e("GrandMaVerification", "Send failed", t.getException());
+            }
             // A lost response may still mean committed. Reconcile before another submission.
             repository.home(uid).addOnCompleteListener(read->{
                 if(!valid(e))return; busy=sending=false;

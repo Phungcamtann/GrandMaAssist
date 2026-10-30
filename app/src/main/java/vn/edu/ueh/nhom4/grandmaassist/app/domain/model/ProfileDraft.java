@@ -38,6 +38,10 @@ public final class ProfileDraft {
         if (morning) values.add("MORNING");
         if (afternoon) values.add("AFTERNOON");
         if (evening) values.add("EVENING");
+        if (values.isEmpty()) {
+            values.add("MORNING");
+            values.add("AFTERNOON");
+        }
         return values;
     }
 
@@ -56,7 +60,7 @@ public final class ProfileDraft {
     /** Completeness is descriptive only, never permission to apply/post. */
     public boolean professionalDetailsPresent(String role) {
         return !areaCode.isEmpty() && ("SEEKER".equals(role)
-                ? !skillList().isEmpty() && !experience.trim().isEmpty() && !shifts().isEmpty()
+                ? !skillList().isEmpty() && !experience.trim().isEmpty()
                 : !introduction.trim().isEmpty());
     }
 }

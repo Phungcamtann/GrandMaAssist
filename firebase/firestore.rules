@@ -111,7 +111,7 @@ service cloud.firestore {
     }
     function professional(d, role) {
       return d.areaCode != '' && validArea(d.areaCode)
-        && (role == 'SEEKER' ? (d.skills.size() > 0 && d.experienceSummary.size() > 0 && d.preferredShifts.size() > 0)
+        && (role == 'SEEKER' ? (d.skills.size() > 0 && d.experienceSummary.size() > 0)
           : (d.introduction.size() > 0));
     }
     function requestShape(d, id, role) {
@@ -278,14 +278,14 @@ service cloud.firestore {
     }
     match /retirementRequests/{id} {
       allow get: if (request.auth != null && !exists(requestPath('SEEKER', id))) || owner(resource.data.userId) || admin();
-      allow list: if admin() && request.query.limit <= 50 && resource.data.status == 'SUBMITTED';
+      allow list: if admin();
       allow create: if stageCreate(request.resource.data, id, 'SEEKER');
       allow update: if submitRequest(request.resource.data, id, 'SEEKER') || decisionRequest(request.resource.data, id, 'SEEKER');
       allow delete: if false;
     }
     match /identityRequests/{id} {
       allow get: if (request.auth != null && !exists(requestPath('EMPLOYER', id))) || owner(resource.data.userId) || admin();
-      allow list: if admin() && request.query.limit <= 50 && resource.data.status == 'SUBMITTED';
+      allow list: if admin();
       allow create: if stageCreate(request.resource.data, id, 'EMPLOYER');
       allow update: if submitRequest(request.resource.data, id, 'EMPLOYER') || decisionRequest(request.resource.data, id, 'EMPLOYER');
       allow delete: if false;
@@ -344,7 +344,8 @@ service cloud.firestore {
     }
     match /users/{uid} {
       allow get: if owner(uid) || admin();
-      allow list, delete: if false;
+      allow list: if admin();
+      allow delete: if false;
       allow create: if owner(uid) && noAdmin(uid) && userShape(request.resource.data, uid)
         && request.resource.data.accountStatus == 'ACTIVE'
         && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
@@ -519,8 +520,8 @@ service cloud.firestore {
     match /jobs/{id} {
       allow get: if (request.auth != null && !exists(jobPath(id)))
         || resource.data.status == 'OPEN' || (request.auth != null && resource.data.employerId == request.auth.uid) || admin();
-      allow list: if request.query.limit <= 20 && (resource.data.status == 'OPEN'
-        || (request.auth != null && resource.data.employerId == request.auth.uid) || admin());
+      allow list: if admin() || (request.query.limit <= 20 && (resource.data.status == 'OPEN'
+        || (request.auth != null && resource.data.employerId == request.auth.uid)));
       allow create: if request.auth != null && resource == null && jobShape(request.resource.data,id)
         && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
         && submittedJob(request.resource.data) && jobEvent(request.resource.data,'SUBMITTED',null);
@@ -578,8 +579,8 @@ service cloud.firestore {
     match /applications/{applicationId} {
       allow get: if (request.auth != null && !exists(applicationPath(applicationId)))
         || (request.auth != null && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin()));
-      allow list: if request.auth != null && request.query.limit <= 50
-        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin());
+      allow list: if admin() || (request.auth != null && request.query.limit <= 50
+        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid));
       allow create: if request.auth != null && resource == null
         && applicationShape(request.resource.data, applicationId)
         && applicationCanApply(request.resource.data);
@@ -589,7 +590,7 @@ service cloud.firestore {
             && request.resource.data.status == 'WITHDRAWN'
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
             && request.resource.data.updatedAt == request.time)
-          || (resource.data.employerId == reque st.auth.uid
+          || (resource.data.employerId == request.auth.uid
             && resource.data.status == 'PENDING'
             && request.resource.data.status in ['ACCEPTED','REJECTED']
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','employerContactSnapshot'])
@@ -600,8 +601,8 @@ service cloud.firestore {
     match /workSessions/{sessionId} {
       allow get: if (request.auth != null && !exists(sessionPath(sessionId)))
         || (request.auth != null && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin()));
-      allow list: if request.auth != null && request.query.limit <= 50
-        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid || admin());
+      allow list: if admin() || (request.auth != null && request.query.limit <= 50
+        && (resource.data.seekerId == request.auth.uid || resource.data.employerId == request.auth.uid));
       allow create: if request.auth != null && resource == null
         && request.resource.data.id == sessionId
         && request.resource.data.employerId == request.auth.uid

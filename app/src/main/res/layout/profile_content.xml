@@ -258,6 +258,23 @@
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences|textMultiLine"
                     android:maxLength="1000"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:labelFor="@id/profileExperience"
+                    android:textAppearance="@style/TextAppearance.GrandMa.Label"
+                    android:text="Kinh nghiệm"/>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:hint="Ví dụ: Đã từng phụ quán ăn 2 năm, nấu ăn gia đình"
+                    android:id="@+id/profileExperience"
+                    style="@style/Widget.GrandMa.ProfileInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="1000"/>
             </LinearLayout>
 
             <!-- Employer Fields (if role is EMPLOYER) -->
@@ -393,7 +410,6 @@
 
         <!-- Hidden legacy views for safe reference compatibility -->
         <LinearLayout android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
-            <androidx.appcompat.widget.AppCompatEditText android:id="@+id/profileExperience" android:layout_width="0dp" android:layout_height="0dp"/>
             <CheckBox android:id="@+id/profile_morning" android:layout_width="0dp" android:layout_height="0dp"/>
             <CheckBox android:id="@+id/profile_afternoon" android:layout_width="0dp" android:layout_height="0dp"/>
             <CheckBox android:id="@+id/profile_evening" android:layout_width="0dp" android:layout_height="0dp"/>

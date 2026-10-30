@@ -11,6 +11,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.firestore.AggregateQuerySnapshot;
 import com.google.firebase.firestore.AggregateSource;
+import com.google.firebase.firestore.QuerySnapshot;
+import java.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,10 +46,31 @@ public final class ProfileRepository {
     }
     public static final class AdminCounts {
         public final long seeker, employer, pendingJobs;
+        public final long totalEmployers, verifiedEmployers;
+        public final long totalSeekers, verifiedSeekers;
+        public final long totalJobs, openJobs;
+        public final long totalFee, completedSessions;
+
         public AdminCounts(long seeker, long employer, long pendingJobs) {
+            this(seeker, employer, pendingJobs, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+
+        public AdminCounts(long seeker, long employer, long pendingJobs,
+                           long totalEmployers, long verifiedEmployers,
+                           long totalSeekers, long verifiedSeekers,
+                           long totalJobs, long openJobs,
+                           long totalFee, long completedSessions) {
             this.seeker = seeker;
             this.employer = employer;
             this.pendingJobs = pendingJobs;
+            this.totalEmployers = totalEmployers;
+            this.verifiedEmployers = verifiedEmployers;
+            this.totalSeekers = totalSeekers;
+            this.verifiedSeekers = verifiedSeekers;
+            this.totalJobs = totalJobs;
+            this.openJobs = openJobs;
+            this.totalFee = totalFee;
+            this.completedSessions = completedSessions;
         }
     }
     private static final class Proof {
@@ -124,18 +147,82 @@ public final class ProfileRepository {
     }
     public Task<AdminCounts> adminCounts(String uid){
         return withProof(uid,proof->{
-            Task<AggregateQuerySnapshot> seeker=db.collection("retirementRequests").whereEqualTo("status","SUBMITTED")
+            Task<AggregateQuerySnapshot> tSeekerPending=db.collection("retirementRequests").whereEqualTo("status","SUBMITTED")
                     .limit(50).count().get(AggregateSource.SERVER);
-            Task<AggregateQuerySnapshot> employer=db.collection("identityRequests").whereEqualTo("status","SUBMITTED")
+            Task<AggregateQuerySnapshot> tEmployerPending=db.collection("identityRequests").whereEqualTo("status","SUBMITTED")
                     .limit(50).count().get(AggregateSource.SERVER);
-            Task<AggregateQuerySnapshot> jobs=db.collection("jobs").whereEqualTo("status","PENDING_REVIEW")
+            Task<AggregateQuerySnapshot> tJobsPending=db.collection("jobs").whereEqualTo("status","PENDING_REVIEW")
                     .limit(50).count().get(AggregateSource.SERVER);
-            return Tasks.whenAll(seeker,employer,jobs).continueWith(done->{
-                if(!done.isSuccessful())throw done.getException();
+
+            Task<AggregateQuerySnapshot> tEmployerTotal=db.collection("users")
+                    .whereEqualTo("role","EMPLOYER").count().get(AggregateSource.SERVER);
+            Task<AggregateQuerySnapshot> tEmployerVerified=db.collection("users")
+                    .whereEqualTo("role","EMPLOYER")
+                    .whereIn("verificationStatus",Arrays.asList("APPROVED","VERIFIED"))
+                    .count().get(AggregateSource.SERVER);
+
+            Task<AggregateQuerySnapshot> tSeekerTotal=db.collection("users")
+                    .whereEqualTo("role","SEEKER").count().get(AggregateSource.SERVER);
+            Task<AggregateQuerySnapshot> tSeekerVerified=db.collection("users")
+                    .whereEqualTo("role","SEEKER")
+                    .whereIn("verificationStatus",Arrays.asList("APPROVED","VERIFIED"))
+                    .count().get(AggregateSource.SERVER);
+
+            Task<AggregateQuerySnapshot> tJobsTotal=db.collection("jobs")
+                    .count().get(AggregateSource.SERVER);
+            Task<AggregateQuerySnapshot> tJobsOpen=db.collection("jobs")
+                    .whereEqualTo("status","OPEN").count().get(AggregateSource.SERVER);
+
+            Task<QuerySnapshot> tSessions=db.collection("workSessions")
+                    .whereEqualTo("status","COMPLETED").get(Source.SERVER);
+
+            return Tasks.whenAllComplete(tSeekerPending, tEmployerPending, tJobsPending,
+                    tEmployerTotal, tEmployerVerified, tSeekerTotal, tSeekerVerified,
+                    tJobsTotal, tJobsOpen, tSessions).continueWith(done->{
                 if(!same(uid))throw new Failure("SESSION");
-                return new AdminCounts(seeker.getResult().getCount(),employer.getResult().getCount(),jobs.getResult().getCount());
+
+                long pendingSeeker = safeCount(tSeekerPending);
+                long pendingEmployer = safeCount(tEmployerPending);
+                long pendingJobs = safeCount(tJobsPending);
+
+                long totalEmployers = safeCount(tEmployerTotal);
+                long verifiedEmployers = safeCount(tEmployerVerified);
+                long totalSeekers = safeCount(tSeekerTotal);
+                long verifiedSeekers = safeCount(tSeekerVerified);
+                long totalJobs = safeCount(tJobsTotal);
+                long openJobs = safeCount(tJobsOpen);
+
+                long totalFee = 0L;
+                long completedSessions = 0L;
+                if (tSessions.isSuccessful() && tSessions.getResult() != null) {
+                    completedSessions = tSessions.getResult().size();
+                    for (DocumentSnapshot doc : tSessions.getResult()) {
+                        Long fee = doc.getLong("agreement.serviceFee");
+                        if (fee != null && fee > 0) {
+                            totalFee += fee;
+                        } else {
+                            Long labor = doc.getLong("agreement.laborAmount");
+                            if (labor != null && labor > 0) {
+                                totalFee += Math.round(labor * 0.10);
+                            }
+                        }
+                    }
+                }
+
+                return new AdminCounts(pendingSeeker, pendingEmployer, pendingJobs,
+                        totalEmployers, verifiedEmployers,
+                        totalSeekers, verifiedSeekers,
+                        totalJobs, openJobs,
+                        totalFee, completedSessions);
             });
         });
+    }
+
+    private static long safeCount(Task<AggregateQuerySnapshot> task) {
+        if (task != null && task.isSuccessful() && task.getResult() != null) {
+            return task.getResult().getCount();
+        }
+        return 0L;
     }
     public Task<List<Area>> areas() {
         return db.collection("areas").whereEqualTo("active", true).get(Source.SERVER).continueWith(task -> {

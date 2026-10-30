@@ -602,6 +602,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     btnEmployerConfirmComplete.setEnabled(false);
                     vm.confirmCompletionAndSettle(vm.currentSession.id, () -> {
                         Toast.makeText(this, "Đã hoàn tất ca và quyết toán tiền công thành công!", Toast.LENGTH_LONG).show();
+                        vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.notifySessionMilestone(
+                                this,
+                                vm.currentSession.id,
+                                "✅ Ca làm đã hoàn tất & quyết toán",
+                                "Ca làm việc đã kết thúc tốt đẹp. Tiền công đã được quyết toán chuyển về ví người làm!"
+                        );
                         reload();
                     }, err -> {
                         btnEmployerConfirmComplete.setEnabled(true);
@@ -620,6 +626,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.session_btn_accept, (d, w) -> {
                     vm.seekerAccept(vm.currentSession.id, vm.currentSession.agreementVersion, () -> {
                         Toast.makeText(this, "Đã đồng ý nhận ca làm thành công!", Toast.LENGTH_SHORT).show();
+                        vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.notifySessionMilestone(
+                                this,
+                                vm.currentSession.id,
+                                "🤝 Đã đồng ý nhận ca làm",
+                                "Cô/chú đã đồng ý nhận ca làm việc này. Đang chờ Người thuê ký quỹ cọc bảo đảm."
+                        );
                     }, err -> {
                         Toast.makeText(this, err, Toast.LENGTH_LONG).show();
                     });
@@ -696,6 +708,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                         btnEmployerFund.setEnabled(false);
                         vm.fundSession(vm.currentSession.id, () -> {
                             Toast.makeText(this, "Cấp tiền ca làm thành công! Ca làm đã sẵn sàng.", Toast.LENGTH_LONG).show();
+                            vn.edu.ueh.nhom4.grandmaassist.app.notification.ShiftAlarmScheduler.notifySessionMilestone(
+                                    this,
+                                    vm.currentSession.id,
+                                    "🎉 Ca làm việc đã được ký quỹ!",
+                                    "Ca làm việc đã được bảo đảm ký quỹ an toàn. Hệ thống sẽ tự động nhắc nhở trước giờ làm."
+                            );
                             reload();
                         }, err -> {
                             btnEmployerFund.setEnabled(true);

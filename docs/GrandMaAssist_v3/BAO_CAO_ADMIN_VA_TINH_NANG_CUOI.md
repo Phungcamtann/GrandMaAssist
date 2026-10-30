@@ -65,9 +65,15 @@ Tất cả đã được lưu tại thư mục `firebase/`:
 ## 3. TỐI ƯU HÓA TOÀN DIỆN PHÍA QUẢN TRỊ ADMIN
 
 ### 3.1. Trang chủ Admin (`role_home_content.xml` & `RoleHomePanel.java`)
-- **Tiêu đề & Nút tải lại**: Rút gọn tiêu đề thành **"Tổng quan"**, bố trí nút icon tải lại (`ic_reload`) ở góc phải trên cùng ngang hàng với tiêu đề.
-- **Khối "Tin cần duyệt"**: Hiển thị bộ đếm động theo thời gian thực (ví dụ: *"Hiện có 5 tin đang chờ duyệt"*). Ấn vào khối sẽ chuyển thẳng đến trang duyệt tin.
-- **Khối "Hồ sơ chờ duyệt"**: Hiển thị bộ đếm hồ sơ CCCD đang chờ (ví dụ: *"Hiện có 3 hồ sơ chờ duyệt"*). Ấn vào khối sẽ chuyển thẳng đến trang duyệt hồ sơ.
+- **Tiêu đề & Nút tải lại**: Tiêu đề **"Tổng quan"**, bố trí nút icon tải lại (`ic_reload`) ở góc phải trên cùng ngang hàng với tiêu đề để làm mới toàn bộ số liệu thời gian thực.
+- **4 Khối Thống kê Dashboard (Hiển thị ngay khi vào trang chủ)**:
+  1. **Khối Người thuê**: Tổng số người thuê & số lượng đã xác minh (`Đã xác minh: X`). Bấm vào mở trực tiếp màn hình duyệt/quản lý hồ sơ.
+  2. **Khối Người tìm việc**: Tổng số người tìm việc & số lượng đã duyệt CCCD (`Đã duyệt CCCD: Y`). Bấm vào mở trực tiếp màn hình duyệt hồ sơ.
+  3. **Khối Tin tuyển dụng**: Tổng số tin đăng & số lượng tin đang mở (`Đang mở: Z`). Bấm vào mở trực tiếp màn hình duyệt tin tuyển dụng.
+  4. **Khối Phí dịch vụ thu**: Tổng doanh thu phí 10% thu được từ tất cả các ca hoàn tất (`COMPLETED`, ví dụ: `450.000 đ`) & số ca làm việc đã hoàn thành. Bấm vào mở chi tiết bảng phân tích thống kê.
+- **2 Khối Hàng đợi Xử lý (Nằm ngay bên dưới 4 khối thống kê)**:
+  - **Khối "Tin cần duyệt"**: Hiển thị bộ đếm động theo thời gian thực (ví dụ: *"Hiện có 5 tin đang chờ duyệt"*). Bấm vào chuyển thẳng đến trang duyệt tin.
+  - **Khối "Hồ sơ chờ duyệt"**: Hiển thị bộ đếm hồ sơ CCCD đang chờ (ví dụ: *"Hiện có 3 hồ sơ chờ duyệt"*). Bấm vào chuyển thẳng đến trang duyệt hồ sơ.
 - **Dọn dẹp các nút thừa**: Loại bỏ hoàn toàn các nút Báo cáo vi phạm, Tranh chấp, Ca quá hạn khỏi màn hình chính.
 
 ### 3.2. Trang Duyệt Hồ sơ (`activity_verification.xml` & `VerificationActivity.java`)

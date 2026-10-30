@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-10-27T12:28:38.165897500Z">
+        <option name="selectionMode" value="DIALOG" />
+        <DropdownSelection timestamp="2026-10-30T02:43:31.449380200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=7L8XDIFU75JBMJBI" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\CYBORG\.android\avd\Test_Phone_Px7.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,12 +15,17 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=7L8XDIFU75JBMJBI" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\CYBORG\.android\avd\Test_Phone_Px7.avd" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\CYBORG\.android\avd\Test_Phone_Px7.avd" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\CYBORG\.android\avd\Pixel_Tablet.avd" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=7L8XDIFU75JBMJBI" />
               </handle>
             </Target>
           </targets>

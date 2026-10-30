@@ -44,7 +44,33 @@ public final class ShiftAlarmScheduler {
         long thirtyMinsBefore = startMillis - (30 * 60 * 1000L);
         if (thirtyMinsBefore > now) {
             scheduleAlarm(context, session.id, "30M", thirtyMinsBefore, tasks, address, timeText);
+        } else if (startMillis > now) {
+            // Ca làm bắt đầu trong vòng 30 phút tới (rất hay gặp khi test kịch bản) -> Báo ngay sau 3 giây!
+            scheduleAlarm(context, session.id, "30M", now + 3000L, tasks, address, timeText);
         }
+    }
+
+    /**
+     * Gửi ngay thông báo kiểm tra (Test Notification) để người dùng xác nhận thiết bị nhận thông báo bình thường.
+     */
+    public static void sendTestNotification(Context context) {
+        if (context == null) return;
+        ShiftReminderReceiver.showNotification(
+                context,
+                9999,
+                "🔔 Kiểm tra thông báo GrandMaAssist",
+                "Hệ thống thông báo ca làm việc đang hoạt động bình thường trên thiết bị này. Chúc cô/chú một ngày vui vẻ!",
+                null
+        );
+    }
+
+    /**
+     * Phát thông báo tức thời khi trạng thái ca làm việc thay đổi quan trọng (VD: Đã ký quỹ / Đã hoàn tất).
+     */
+    public static void notifySessionMilestone(Context context, String sessionId, String title, String body) {
+        if (context == null || sessionId == null) return;
+        int notifId = (sessionId.hashCode() & 0x7FFFFFFF) + 500;
+        ShiftReminderReceiver.showNotification(context, notifId, title, body, sessionId);
     }
 
     private static void scheduleAlarm(Context context, String sessionId, String type, long triggerAtMillis,
