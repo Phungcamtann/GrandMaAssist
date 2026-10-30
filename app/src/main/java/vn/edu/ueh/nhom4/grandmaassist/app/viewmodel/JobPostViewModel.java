@@ -53,14 +53,58 @@ public final class JobPostViewModel extends AndroidViewModel {
                 LinkedHashMap<String,JobPost> merged=new LinkedHashMap<>();if(next)for(JobPost p:items)merged.put(p.content.id,p);
                 for(JobPost p:t.getResult().items)merged.put(p.content.id,p);items=new ArrayList<>(merged.values());cursor=t.getResult().cursor;more=t.getResult().more;
                 selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Chưa có tin trong danh sách.":"";++pageEvent;
-                if(!admin&&!uid.isEmpty()){sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{jobSessions.clear();for(WorkSession s:sessions)if(s.jobId!=null&&!s.jobId.isEmpty())jobSessions.put(s.jobId,s);emit();});}
+                if(!admin&&!uid.isEmpty()){
+                    sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{
+                        jobSessions.clear();
+                        for(WorkSession s:sessions) {
+                            if(s.jobId!=null&&!s.jobId.isEmpty()) {
+                                jobSessions.put(s.jobId,s);
+                                if (s.isCompleted()) {
+                                    repository.closeJobById(uid, s.jobId);
+                                    vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(getApplication()).remove(s.jobId);
+                                    for (JobPost p : items) {
+                                        if (p.content.id.equals(s.jobId) && "OPEN".equals(p.status)) {
+                                            repository.close(uid, p).addOnSuccessListener(closedJob -> {
+                                                int idx = items.indexOf(p);
+                                                if (idx >= 0) items.set(idx, closedJob);
+                                                emit();
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        emit();
+                    });
+                }
             }else message=JobPostRepository.error(t.getException());emit();
         });
     }
     public void open(String id){if(!ready||busy)return;busy=true;message="Đang tải tin…";long g=++generation;emit();
         repository.get(uid,id).addOnCompleteListener(t->{if(!valid(g))return;busy=false;
             if(t.isSuccessful()){selected=t.getResult();reasonVisible=false;reason="";reasonAction="REJECT";message=pendingNotice;pendingNotice="";++pageEvent;
-                if(!admin&&!uid.isEmpty()){sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{jobSessions.clear();for(WorkSession s:sessions)if(s.jobId!=null&&!s.jobId.isEmpty())jobSessions.put(s.jobId,s);emit();});}}
+                if(!admin&&!uid.isEmpty()){
+                    sessionRepository.getSessionsForUser(uid,"EMPLOYER").addOnSuccessListener(sessions->{
+                        jobSessions.clear();
+                        for(WorkSession s:sessions) {
+                            if(s.jobId!=null&&!s.jobId.isEmpty()) {
+                                jobSessions.put(s.jobId,s);
+                                if (s.isCompleted()) {
+                                    for (JobPost p : items) {
+                                        if (p.content.id.equals(s.jobId) && "OPEN".equals(p.status)) {
+                                            repository.close(uid, p).addOnSuccessListener(closedJob -> {
+                                                int idx = items.indexOf(p);
+                                                if (idx >= 0) items.set(idx, closedJob);
+                                                emit();
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        emit();
+                    });
+                }}
             else message=JobPostRepository.error(t.getException());emit();});
     }
     public void backToList(){if(busy)return;selected=null;reasonVisible=false;reason="";reasonAction="REJECT";message=items.isEmpty()?"Bấm Tải lại để xem danh sách tin.":"";++pageEvent;emit();}

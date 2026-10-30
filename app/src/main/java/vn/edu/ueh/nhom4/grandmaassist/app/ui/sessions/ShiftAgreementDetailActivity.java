@@ -544,6 +544,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     btnSeekerCheckIn.setEnabled(false);
                     vm.confirmCheckIn(vm.currentSession.id, "SEEKER", () -> {
                         Toast.makeText(this, "Điểm danh thành công!", Toast.LENGTH_SHORT).show();
+                        String jId = (vm.currentSession != null) ? vm.currentSession.jobId : null;
+                        if (jId != null && !jId.isEmpty()) {
+                            try {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(jId);
+                            } catch (Exception ignored) {}
+                        }
                         reload();
                     }, err -> {
                         btnSeekerCheckIn.setEnabled(true);
@@ -563,6 +569,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     btnEmployerCheckIn.setEnabled(false);
                     vm.confirmCheckIn(vm.currentSession.id, "EMPLOYER", () -> {
                         Toast.makeText(this, "Đã xác nhận người làm đến nơi!", Toast.LENGTH_SHORT).show();
+                        String jId = (vm.currentSession != null) ? vm.currentSession.jobId : null;
+                        if (jId != null && !jId.isEmpty()) {
+                            try {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(jId);
+                            } catch (Exception ignored) {}
+                        }
                         reload();
                     }, err -> {
                         btnEmployerCheckIn.setEnabled(true);
@@ -582,6 +594,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                     btnSeekerReportComplete.setEnabled(false);
                     vm.reportCompletion(vm.currentSession.id, () -> {
                         Toast.makeText(this, "Đã gửi báo hoàn thành! Đang chờ Người thuê xác nhận.", Toast.LENGTH_LONG).show();
+                        String jId = (vm.currentSession != null) ? vm.currentSession.jobId : null;
+                        if (jId != null && !jId.isEmpty()) {
+                            try {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(jId);
+                            } catch (Exception ignored) {}
+                        }
                         reload();
                     }, err -> {
                         btnSeekerReportComplete.setEnabled(true);
@@ -608,6 +626,12 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                                 "✅ Ca làm đã hoàn tất & quyết toán",
                                 "Ca làm việc đã kết thúc tốt đẹp. Tiền công đã được quyết toán chuyển về ví người làm!"
                         );
+                        String jId = (vm.currentSession != null) ? vm.currentSession.jobId : null;
+                        if (jId != null && !jId.isEmpty()) {
+                            try {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(jId);
+                            } catch (Exception ignored) {}
+                        }
                         reload();
                     }, err -> {
                         btnEmployerConfirmComplete.setEnabled(true);
@@ -714,7 +738,13 @@ public final class ShiftAgreementDetailActivity extends AppCompatActivity {
                                     "🎉 Ca làm việc đã được ký quỹ!",
                                     "Ca làm việc đã được bảo đảm ký quỹ an toàn. Hệ thống sẽ tự động nhắc nhở trước giờ làm."
                             );
-                            reload();
+                            String jId = (vm.currentSession != null) ? vm.currentSession.jobId : null;
+                        if (jId != null && !jId.isEmpty()) {
+                            try {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(jId);
+                            } catch (Exception ignored) {}
+                        }
+                        reload();
                         }, err -> {
                             btnEmployerFund.setEnabled(true);
                             Toast.makeText(this, err, Toast.LENGTH_LONG).show();

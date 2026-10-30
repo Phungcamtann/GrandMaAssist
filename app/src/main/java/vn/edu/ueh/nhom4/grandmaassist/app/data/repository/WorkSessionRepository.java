@@ -705,6 +705,10 @@ public final class WorkSessionRepository {
                 throw new Failure("CANNOT_SETTLE");
             }
 
+            String jobId = session.getString("jobId");
+            DocumentReference jobRef = (jobId != null && !jobId.trim().isEmpty()) ? db.collection("jobs").document(jobId) : null;
+            DocumentSnapshot jobSnap = (jobRef != null) ? tx.get(jobRef) : null;
+
             String seekerId = session.getString("seekerId");
             Object agObj = session.get("agreement");
             long laborAmount = 0L;
@@ -726,6 +730,29 @@ public final class WorkSessionRepository {
             updates.put("updatedAt", FieldValue.serverTimestamp());
 
             tx.update(sessionRef, updates);
+
+            // Đóng bài đăng tuyển dụng (CLOSED) khi hoàn tất ca để không còn xuất hiện trên trang xem việc
+            if (jobRef != null && jobSnap != null && jobSnap.exists()
+                    && "OPEN".equals(jobSnap.getString("status")) && uid.equals(jobSnap.getString("employerId"))) {
+                Long v = jobSnap.getLong("version");
+                long nextVersion = (v != null ? v : 1L) + 1;
+                Map<String, Object> jobData = new HashMap<>(Objects.requireNonNull(jobSnap.getData()));
+                jobData.put("version", nextVersion);
+                jobData.put("status", "CLOSED");
+                jobData.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(jobRef, jobData);
+
+                Map<String, Object> e = new HashMap<>();
+                e.put("jobId", jobId);
+                e.put("version", nextVersion);
+                e.put("actorId", uid);
+                e.put("action", "CLOSED");
+                e.put("createdAt", FieldValue.serverTimestamp());
+                e.put("before", jobSnap.getData());
+                e.put("after", new HashMap<>(jobData));
+                tx.set(jobRef.collection("history").document(String.valueOf(nextVersion)), e);
+            }
+
             return null;
         }).continueWithTask(t -> {
             if (!t.isSuccessful()) throw t.getException();
@@ -733,8 +760,13 @@ public final class WorkSessionRepository {
         }).continueWith(t -> {
             if (!t.isSuccessful()) throw t.getException();
             WorkSession s = t.getResult();
-            if (s != null && s.seekerId != null) {
-                tryCreditSeekerWallet(s);
+            if (s != null) {
+                if (s.seekerId != null) {
+                    tryCreditSeekerWallet(s);
+                }
+                if (s.jobId != null && !s.jobId.isEmpty()) {
+                    new JobPostRepository().closeJobById(uid, s.jobId);
+                }
             }
             return s;
         }));

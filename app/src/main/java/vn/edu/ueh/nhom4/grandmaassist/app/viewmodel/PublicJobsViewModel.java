@@ -12,6 +12,8 @@ import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.ApplicationRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.PublicJobRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.SavedJobRepository;
 import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.PublicJob;
+import vn.edu.ueh.nhom4.grandmaassist.app.domain.model.WorkSession;
+import vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobPostRepository;
 
 /** Public browsing has no role/profile gate. An Auth change invalidates this screen's callbacks. */
 public final class PublicJobsViewModel extends AndroidViewModel {
@@ -54,6 +56,7 @@ public final class PublicJobsViewModel extends AndroidViewModel {
         if(started)return;started=true;
         this.role=sessionUid.isEmpty()?"":Arrays.asList("SEEKER","EMPLOYER","ADMIN").contains(role)?role:"";
         this.category=category;this.area=area;draftCategory=category;draftArea=area;
+        reconcileCompletedSessions();
         loadCatalog();if(id.isEmpty())load(false,false);else open(id,false);
     }
     public void loadCatalog(){
@@ -88,6 +91,7 @@ public final class PublicJobsViewModel extends AndroidViewModel {
             if(!valid(g))return;
             if(t.isSuccessful()){
                 PublicJobRepository.Page p=t.getResult();merge(p.jobs,next);cursor=p.cursor;cached=false;more=p.more;busy=false;
+                reconcileCompletedSessions();
                 message=items.isEmpty()?s(p.more?R.string.pb_empty_page:R.string.pb_empty):"";
                 if(!p.cacheSaved)message=s(R.string.pb_cache_write_error);
                 if(!next)++scrollEvent;emit();
@@ -108,10 +112,54 @@ public final class PublicJobsViewModel extends AndroidViewModel {
             emit();
         });
     }
+    private final Set<String> completedJobIds = new HashSet<>();
+
+    private void reconcileCompletedSessions() {
+        if (sessionUid.isEmpty()) return;
+        vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository sessionRepo =
+                new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.WorkSessionRepository();
+        sessionRepo.getSessionsForUser(sessionUid, "SEEKER").addOnSuccessListener(this::filterCompletedSessions);
+        sessionRepo.getSessionsForUser(sessionUid, "EMPLOYER").addOnSuccessListener(sessions -> {
+            if (sessions != null) {
+                for (WorkSession s : sessions) {
+                    if (s.isCompleted() && s.jobId != null && !s.jobId.isEmpty()) {
+                        new JobPostRepository().closeJobById(sessionUid, s.jobId);
+                    }
+                }
+                filterCompletedSessions(sessions);
+            }
+        });
+    }
+
+    private void filterCompletedSessions(List<WorkSession> sessions) {
+        if (sessions == null || ended) return;
+        boolean changed = false;
+        for (WorkSession s : sessions) {
+            if (s.isCompleted() && s.jobId != null && !s.jobId.isEmpty()) {
+                completedJobIds.add(s.jobId);
+                PublicJobStore.get(getApplication()).remove(s.jobId);
+            }
+        }
+        if (!completedJobIds.isEmpty() && items != null) {
+            List<PublicJob> remaining = new ArrayList<>();
+            for (PublicJob j : items) {
+                if (!completedJobIds.contains(j.id)) {
+                    remaining.add(j);
+                } else {
+                    changed = true;
+                }
+            }
+            if (changed) {
+                items = remaining;
+                emit();
+            }
+        }
+    }
+
     private void merge(List<PublicJob> incoming,boolean next){
         Map<String,PublicJob> merged=new LinkedHashMap<>();long now=System.currentTimeMillis();
-        if(next)for(PublicJob j:items)if(j.expiresAt>now)merged.put(j.id,j);
-        for(PublicJob j:incoming)if(j.expiresAt>now)merged.put(j.id,j);
+        if(next)for(PublicJob j:items)if(j.expiresAt>now && !completedJobIds.contains(j.id))merged.put(j.id,j);
+        for(PublicJob j:incoming)if(j.expiresAt>now && !completedJobIds.contains(j.id))merged.put(j.id,j);
         items=new ArrayList<>(merged.values());
         items.sort(Comparator.comparingLong((PublicJob j)->j.expiresAt).thenComparing(j->j.id));
     }

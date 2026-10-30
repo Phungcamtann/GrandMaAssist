@@ -196,6 +196,30 @@ public final class JobPostRepository {
         }));
     }
 
+    public Task<Void> closeJobById(String uid, String jobId) {
+        if (jobId == null || jobId.trim().isEmpty() || !same(uid)) return Tasks.forResult(null);
+        return bounded(proof(uid).continueWithTask(p -> {
+            if (!p.isSuccessful()) return Tasks.forResult(null);
+            return db.runTransaction(tx -> {
+                if (!same(uid)) return null;
+                DocumentReference ref = db.collection("jobs").document(jobId);
+                DocumentSnapshot old = tx.get(ref);
+                if (!old.exists() || !uid.equals(old.getString("employerId")) || !"OPEN".equals(old.getString("status"))) {
+                    return null;
+                }
+                Long curVersion = old.getLong("version");
+                long nextVersion = (curVersion != null ? curVersion : 1L) + 1;
+                Map<String, Object> m = new HashMap<>(Objects.requireNonNull(old.getData()));
+                m.put("version", nextVersion);
+                m.put("status", "CLOSED");
+                m.put("updatedAt", FieldValue.serverTimestamp());
+                tx.set(ref, m);
+                tx.set(ref.collection("history").document(String.valueOf(nextVersion)), event(m, old, uid, "CLOSED"));
+                return null;
+            });
+        }));
+    }
+
     public Task<JobPost> hide(String uid, JobPost expected, String reason) {
         String note = reason == null ? "" : reason.trim();
         if (note.isEmpty() || note.length() > 1000) return Tasks.forException(new Failure("REASON"));

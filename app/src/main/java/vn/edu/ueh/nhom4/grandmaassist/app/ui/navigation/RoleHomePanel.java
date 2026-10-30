@@ -275,6 +275,12 @@ public final class RoleHomePanel {
                         int count = 0;
                         if (sessions != null) {
                             for (WorkSession s : sessions) {
+                                if (s.isCompleted() && s.jobId != null && !s.jobId.isEmpty()) {
+                                    if (employer) {
+                                        new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobPostRepository().closeJobById(auth.account.uid, s.jobId);
+                                    }
+                                    vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(activity).remove(s.jobId);
+                                }
                                 if (!s.isCompleted() && !s.isCancelled() && !WorkSession.STATUS_DISPUTED.equals(s.status)) {
                                     boolean bothConfirmed = s.isReady() || s.isInProgress() || s.isCompletionPending()
                                             || (s.employerAcceptedVersion != null && s.seekerAcceptedVersion != null

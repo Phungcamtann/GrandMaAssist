@@ -191,10 +191,17 @@ public final class WorkSessionsActivity extends AppCompatActivity {
                     for (WorkSession s : allSessions) {
                         if (s.isCompleted()) {
                             repository.syncSettlementToWallet(currentUid, s);
+                            if (s.jobId != null && !s.jobId.isEmpty()) {
+                                vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(s.jobId);
+                            }
                         }
                     }
                 } else if ("EMPLOYER".equals(role)) {
                     for (WorkSession s : allSessions) {
+                        if (s.isCompleted() && s.jobId != null && !s.jobId.isEmpty()) {
+                            new vn.edu.ueh.nhom4.grandmaassist.app.data.repository.JobPostRepository().closeJobById(currentUid, s.jobId);
+                            vn.edu.ueh.nhom4.grandmaassist.app.data.local.PublicJobStore.get(this).remove(s.jobId);
+                        }
                         if (s.isCancelled() && s.totalFunded > 0) {
                             repository.syncRefundToEmployerWallet(currentUid, s);
                         }
