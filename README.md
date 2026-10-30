@@ -1,6 +1,6 @@
 # GrandMaAssist 👵💼
 
-> **Nền tảng hỗ trợ tìm kiếm việc làm bán thời gian phù hợp cho người cao tuổi & người nghỉ hưu**  
+> **Ứng dụng hỗ trợ tìm việc làm bán thời gian cho người nghỉ hưu**  
 > *Đồ án môn Lập trình Thiết bị Di động — Nhóm 4 — Đại học Kinh tế TP.HCM (UEH)*
 
 ---
@@ -14,6 +14,8 @@
 - **Trợ lý giọng đọc (Text-To-Speech - TTS):** Tích hợp công nghệ chuyển văn bản thành giọng nói, hỗ trợ đọc to các bước hướng dẫn và chi tiết tin tuyển dụng.
 - **Quét mã CCCD tự động (ML Kit):** Trích xuất thông tin cơ bản từ mã QR trên Thẻ Căn cước công dân gắn chip, giúp tiết kiệm thời gian và hạn chế sai sót khi khai báo hồ sơ.
 - **Minh bạch & An toàn:** Cơ chế duyệt hồ sơ nghỉ hưu, duyệt tin tuyển dụng trước khi công khai, thỏa thuận ca làm việc rõ ràng và mô hình ký quỹ an toàn (*Escrow Payment*).
+
+**Link WorkSpace (các file tài liệu và bảng phân công)**: https://drive.google.com/drive/folders/1Fyllm0N7OLmtrqUBB3nlmCySBslA_rB5?usp=sharing 
 
 ---
 
